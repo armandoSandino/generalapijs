@@ -1002,7 +1002,6 @@ objectId=function(id){
       }
   };
 }());
-
 general.webwork=(function(){
 	//Submodulo WebWorkers
 	objectId=function(id){

@@ -1,8 +1,8 @@
 # general.js
 
-A JS Framework to make your web better...
+A **JS Framework** to make your web better...
  
-It has a lot of features to develop your project faster and better
+It has a lot of *features* to develop your project faster and better
 
 To know how to use it, Use the Source...
 

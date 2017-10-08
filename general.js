@@ -28,25 +28,25 @@ general=(function(){
     //function aPrivateMethod(){
     //programa
     //}
-    objectId=function(id){
+    getdisctId=function(id){
           var cadena;
           var idreal;
-          var filareal;
+          var objeto;
           cadena=id;
           if(cadena.search("#")==0){
               idreal=id.replace("#","");
               idreal=idreal.replace(".","");
-              filareal=document.getElementById(idreal);
+              objeto=document.getElementById(idreal);
           }
           else if(cadena.search(".")==0){
               idreal=id.replace("#","");
               idreal=idreal.replace(".","");
-              filareal = document.getElementsByClassName(idreal);
+              objeto = document.getElementsByClassName(idreal);
           }
           else{
               return -1;
           }
-          return  filareal;
+          return  objeto;
     }
 	return{
             rhex: function(num){
@@ -382,7 +382,7 @@ general=(function(){
 
 general.objeto=(function(){
   //Submodulo Objeto
-objectId=function(id){
+getdisctId=function(id){
           var cadena;
           var idreal;
           var filareal;
@@ -408,7 +408,7 @@ objectId=function(id){
           if(!document.getElementById){
               return false;
           }
-          fila=general.objectId(id);
+          fila=general.getdisctId(id);
           fila.style.display="block"; 
       },
       mostrar_estilo:function(id,estilo){
@@ -419,7 +419,7 @@ objectId=function(id){
           if(estilo==''){
               return false;
           }
-          fila=general.objectId(id);
+          fila=general.getdisctId(id);
           fila.style.display=estilo;
       },
       ocultar:function(id){
@@ -427,7 +427,7 @@ objectId=function(id){
           if(!document.getElementById){
               return false;
           }
-          fila=general.objectId(id);
+          fila=general.getdisctId(id);
           fila.style.display="none";
       },
       cambiarDisplay: function(id){
@@ -435,7 +435,7 @@ objectId=function(id){
             if (!document.getElementById){
                 return false;
             }
-            fila=general.objectId(id);
+            fila=general.getdisctId(id);
             if(fila.style.display != "none"){
               fila.style.display = "none";
             }
@@ -445,7 +445,7 @@ objectId=function(id){
         },
         resetText: function(textbox){
           var textcontent;
-          textcontent=general.objectId(textbox);
+          textcontent=general.getdisctId(textbox);
           textcontent.value='';
         },
         getSelectVal: function(id){
@@ -478,7 +478,7 @@ objectId=function(id){
         },
         val: function(idelement){
           var element;
-          element=general.objectId(id);
+          element=general.getdisctId(id);
           return element.value;
         },
         intval: function(number){
@@ -509,7 +509,7 @@ general.efectos=(function(){
     var step;
     oncompletefi='';
     oncompletefo='';
-objectId=function(id){
+getdisctId=function(id){
           var cadena;
           var idreal;
           var filareal;
@@ -537,7 +537,7 @@ objectId=function(id){
           if(!document.getElementById){
               return false;
           }
-          fila=general.objectId(id);
+          fila=general.getdisctId(id);
             //programamos cada navegador por separado (lo mismo de antes pero
             obj = fila;
             //con el nuevo valor de la transparencia
@@ -593,7 +593,7 @@ objectId=function(id){
           if(!document.getElementById){
               return false;
           }
-          fila=general.objectId(id);
+          fila=general.getdisctId(id);
           //programamos cada navegador por separado (lo mismo de antes pero
           obj = fila;
           //con el nuevo valor de la transparencia
@@ -659,7 +659,7 @@ objectId=function(id){
       fila.style.opacity = '1';
     },
     slideUp: function(elem) {
-      fila=general.objectId(elem);
+      fila=general.getdisctId(elem);
       fila.style.maxHeight = '0';
       this.once(1,function(){
         fila.style.opacity = '0';
@@ -667,39 +667,39 @@ objectId=function(id){
     },
     toTop:function(id){
         var fila;
-        fila=general.objectId(id);
+        fila=general.getdisctId(id);
         fila.scrollTop = 0
     },
     scrollDivDown: function(id){
         var fila;
-        fila=general.objectId(id);
+        fila=general.getdisctId(id);
         fila.scrollTop += step;
         timerDown = setTimeout("scrollDivDown('" + id + "')", 10);
     },
     scrollDivUp: function(id){
         var fila;
-        fila=general.objectId(id);
+        fila=general.getdisctId(id);
         fila.scrollTop -= step;
         timerUp = setTimeout("scrollDivUp('" + id + "')", 10);
     },
     toBottom: function(id) {
         var fila;
-        fila=general.objectId(id);
+        fila=general.getdisctId(id);
         fila.scrollTop=fila.scrollHeight
     },
     toPoint: function(id,point_var){
         var fila;
-        fila=general.objectId(id);
+        fila=general.getdisctId(id);
         fila.scrollTop = point_var;
     },
     scroll: function(id){
         var fila;
-        fila=general.objectId(id);
+        fila=general.getdisctId(id);
         fila.scrollTop = fila.offsetTop
     },
     blink: function(id){
         var fila;
-        fila=general.objectId(id);
+        fila=general.getdisctId(id);
         fila.className="blink_div";
     },
   };
@@ -708,7 +708,7 @@ objectId=function(id){
 
 general.ajax=(function(){
   //Submodulo Ajax
-objectId=function(id){
+getdisctId=function(id){
           var cadena;
           var idreal;
           var filareal;
@@ -1004,7 +1004,7 @@ objectId=function(id){
 }());
 general.webwork=(function(){
 	//Submodulo WebWorkers
-	objectId=function(id){
+	getdisctId=function(id){
           var cadena;
           var idreal;
           var filareal;
@@ -1079,7 +1079,7 @@ general.webwork=(function(){
 
 general.watch=(function(){
 	//Submodulo WebWorkers
-	objectId=function(id){
+	getdisctId=function(id){
           var cadena;
           var idreal;
           var filareal;
@@ -1134,7 +1134,7 @@ general.watch=(function(){
 
 general.unwatch=(function(){
 	//Submodulo WebWorkers
-	objectId=function(id){
+	getdisctId=function(id){
           var cadena;
           var idreal;
           var filareal;
@@ -1172,7 +1172,7 @@ general.unwatch=(function(){
 
 general.ui=(function(){
 	//Submodulo WebWorkers
-	objectId=function(id){
+	getdisctId=function(id){
           var cadena;
           var idreal;
           var filareal;

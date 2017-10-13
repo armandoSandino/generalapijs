@@ -46,19 +46,7 @@ general=(function(){
 		else{
 			return -1;
 		}
-		return {
-			ocultar: function(e){
-                if(confirm(e)){
-					location.replace("index.php?" + variable + "=true");
-                }
-            },
-            mostrar: function(e){
-                if(confirm(e)){
-					location.replace("index.php?" + variable + "=true");
-                }
-            },
-		}
-    }
+	};
 	return{
             salirSistema: function(e,variable){
                 if(confirm(e)){
@@ -67,12 +55,12 @@ general=(function(){
             },
 
             limpiarInput: function(mod){
-                texto=fila=general.getdisctId(mod);
+                texto=fila=getdisctId(mod);
                 texto.value='';
             },
             aviso: function(titul,content,contentdiv){
-                general.getdisctId(id).innerHTML = content;
-                general.getdisctId(id).innerHTML = titul;
+                getdisctId(id).innerHTML = content;
+                getdisctId(id).innerHTML = titul;
                 mostrar('alertpers');
             },
             confirmar: function(titul,content){
@@ -242,164 +230,6 @@ general=(function(){
 
               return tmp_arr.join('');
             },
-			/*
-			 * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
-			 * Digest Algorithm, as defined in RFC 1321.
-			 * Copyright (C) Paul Johnston 1999 - 2000.
-			 * Updated by Greg Holt 2000 - 2001.
-			 * See http://pajhome.org.uk/site/legal.html for details.
-			 */
-			
-			/*
-			 * Convert a 32-bit number to a hex string with ls-byte first
-			 */
-			function rhex(num){
-				str = "";
-				for(j = 0; j <= 3; j++){
-					str += hex_chr.charAt((num >> (j * 8 + 4)) & 0x0F) + hex_chr.charAt((num >> (j * 8)) & 0x0F);
-			  	}
-				return str;
-			},
-			/*
-			 * Convert a string to a sequence of 16-word blocks, stored as an array.
-			 * Append padding bits and the length, as described in the MD5 standard.
-			 */
-			function str2blks_MD5(str){
-			  nblk = ((str.length + 8) >> 6) + 1;
-			  blks = new Array(nblk * 16);
-			  for(i = 0; i < nblk * 16; i++) blks[i] = 0;
-			  for(i = 0; i < str.length; i++)
-			    blks[i >> 2] |= str.charCodeAt(i) << ((i % 4) * 8);
-			  blks[i >> 2] |= 0x80 << ((i % 4) * 8);
-			  blks[nblk * 16 - 2] = str.length * 8;
-			  return blks;
-			},
-			/*
-			 * Add integers, wrapping at 2^32. This uses 16-bit operations internally 
-			 * to work around bugs in some JS interpreters.
-			 */
-			function add(x, y){
-			  var lsw = (x & 0xFFFF) + (y & 0xFFFF);
-			  var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
-			  return (msw << 16) | (lsw & 0xFFFF);
-			},
-			/*
-			 * Bitwise rotate a 32-bit number to the left
-			 */
-			function rol(num, cnt){
-			  return (num << cnt) | (num >>> (32 - cnt));
-			},
-			/*
-			 * These functions implement the basic operation for each round of the
-			 * algorithm.
-			 */
-			function cmn(q, a, b, x, s, t){
-			  return add(rol(add(add(a, q), add(x, t)), s), b);
-			},
-			function ff(a, b, c, d, x, s, t){
-			  return cmn((b & c) | ((~b) & d), a, b, x, s, t);
-			},
-			function gg(a, b, c, d, x, s, t){
-			  return cmn((b & d) | (c & (~d)), a, b, x, s, t);
-			},
-			function hh(a, b, c, d, x, s, t){
-			  return cmn(b ^ c ^ d, a, b, x, s, t);
-			},
-			function ii(a, b, c, d, x, s, t){
-			  return cmn(c ^ (b | (~d)), a, b, x, s, t);
-			},
-			
-			/*
-			 * Take a string and return the hex representation of its MD5.
-			 */
-			function calcMD5(str){
-			  x = str2blks_MD5(str);
-			  a =  1732584193;
-			  b = -271733879;
-			  c = -1732584194;
-			  d =  271733878;
-			
-			  for(i = 0; i < x.length; i += 16){
-			    olda = a;
-			    oldb = b;
-			    oldc = c;
-			    oldd = d;
-			
-			    a = ff(a, b, c, d, x[i+ 0], 7 , -680876936);
-			    d = ff(d, a, b, c, x[i+ 1], 12, -389564586);
-			    c = ff(c, d, a, b, x[i+ 2], 17,  606105819);
-			    b = ff(b, c, d, a, x[i+ 3], 22, -1044525330);
-			    a = ff(a, b, c, d, x[i+ 4], 7 , -176418897);
-			    d = ff(d, a, b, c, x[i+ 5], 12,  1200080426);
-			    c = ff(c, d, a, b, x[i+ 6], 17, -1473231341);
-			    b = ff(b, c, d, a, x[i+ 7], 22, -45705983);
-			    a = ff(a, b, c, d, x[i+ 8], 7 ,  1770035416);
-			    d = ff(d, a, b, c, x[i+ 9], 12, -1958414417);
-			    c = ff(c, d, a, b, x[i+10], 17, -42063);
-			    b = ff(b, c, d, a, x[i+11], 22, -1990404162);
-			    a = ff(a, b, c, d, x[i+12], 7 ,  1804603682);
-			    d = ff(d, a, b, c, x[i+13], 12, -40341101);
-			    c = ff(c, d, a, b, x[i+14], 17, -1502002290);
-			    b = ff(b, c, d, a, x[i+15], 22,  1236535329);    
-			
-			    a = gg(a, b, c, d, x[i+ 1], 5 , -165796510);
-			    d = gg(d, a, b, c, x[i+ 6], 9 , -1069501632);
-			    c = gg(c, d, a, b, x[i+11], 14,  643717713);
-			    b = gg(b, c, d, a, x[i+ 0], 20, -373897302);
-			    a = gg(a, b, c, d, x[i+ 5], 5 , -701558691);
-			    d = gg(d, a, b, c, x[i+10], 9 ,  38016083);
-			    c = gg(c, d, a, b, x[i+15], 14, -660478335);
-			    b = gg(b, c, d, a, x[i+ 4], 20, -405537848);
-			    a = gg(a, b, c, d, x[i+ 9], 5 ,  568446438);
-			    d = gg(d, a, b, c, x[i+14], 9 , -1019803690);
-			    c = gg(c, d, a, b, x[i+ 3], 14, -187363961);
-			    b = gg(b, c, d, a, x[i+ 8], 20,  1163531501);
-			    a = gg(a, b, c, d, x[i+13], 5 , -1444681467);
-			    d = gg(d, a, b, c, x[i+ 2], 9 , -51403784);
-			    c = gg(c, d, a, b, x[i+ 7], 14,  1735328473);
-			    b = gg(b, c, d, a, x[i+12], 20, -1926607734);
-			    
-			    a = hh(a, b, c, d, x[i+ 5], 4 , -378558);
-			    d = hh(d, a, b, c, x[i+ 8], 11, -2022574463);
-			    c = hh(c, d, a, b, x[i+11], 16,  1839030562);
-			    b = hh(b, c, d, a, x[i+14], 23, -35309556);
-			    a = hh(a, b, c, d, x[i+ 1], 4 , -1530992060);
-			    d = hh(d, a, b, c, x[i+ 4], 11,  1272893353);
-			    c = hh(c, d, a, b, x[i+ 7], 16, -155497632);
-			    b = hh(b, c, d, a, x[i+10], 23, -1094730640);
-			    a = hh(a, b, c, d, x[i+13], 4 ,  681279174);
-			    d = hh(d, a, b, c, x[i+ 0], 11, -358537222);
-			    c = hh(c, d, a, b, x[i+ 3], 16, -722521979);
-			    b = hh(b, c, d, a, x[i+ 6], 23,  76029189);
-			    a = hh(a, b, c, d, x[i+ 9], 4 , -640364487);
-			    d = hh(d, a, b, c, x[i+12], 11, -421815835);
-			    c = hh(c, d, a, b, x[i+15], 16,  530742520);
-			    b = hh(b, c, d, a, x[i+ 2], 23, -995338651);
-			
-			    a = ii(a, b, c, d, x[i+ 0], 6 , -198630844);
-			    d = ii(d, a, b, c, x[i+ 7], 10,  1126891415);
-			    c = ii(c, d, a, b, x[i+14], 15, -1416354905);
-			    b = ii(b, c, d, a, x[i+ 5], 21, -57434055);
-			    a = ii(a, b, c, d, x[i+12], 6 ,  1700485571);
-			    d = ii(d, a, b, c, x[i+ 3], 10, -1894986606);
-			    c = ii(c, d, a, b, x[i+10], 15, -1051523);
-			    b = ii(b, c, d, a, x[i+ 1], 21, -2054922799);
-			    a = ii(a, b, c, d, x[i+ 8], 6 ,  1873313359);
-			    d = ii(d, a, b, c, x[i+15], 10, -30611744);
-			    c = ii(c, d, a, b, x[i+ 6], 15, -1560198380);
-			    b = ii(b, c, d, a, x[i+13], 21,  1309151649);
-			    a = ii(a, b, c, d, x[i+ 4], 6 , -145523070);
-			    d = ii(d, a, b, c, x[i+11], 10, -1120210379);
-			    c = ii(c, d, a, b, x[i+ 2], 15,  718787259);
-			    b = ii(b, c, d, a, x[i+ 9], 21, -343485551);
-			
-			    a = add(a, olda);
-			    b = add(b, oldb);
-			    c = add(c, oldc);
-			    d = add(d, oldd);
-			  }
-			  return rhex(a) + rhex(b) + rhex(c) + rhex(d);
-			},
             getURLComplete: function(){
                 return window.location.href;
             },
@@ -425,7 +255,7 @@ general=(function(){
 
 general.objeto=(function(){
   //Submodulo Objeto
-getdisctId=function(id){
+	getdisctId=function(id){
           var cadena;
           var idreal;
           var objeto;
@@ -451,7 +281,7 @@ getdisctId=function(id){
           if(!document.getElementById){
               return false;
           }
-          fila=general.getdisctId(id);
+          fila=getdisctId(id);
           fila.style.display="block"; 
       },
       mostrar_estilo:function(id,estilo){
@@ -462,23 +292,23 @@ getdisctId=function(id){
           if(estilo==''){
               return false;
           }
-          fila=general.getdisctId(id);
+          fila=getdisctId(id);
           fila.style.display=estilo;
       },
       ocultar:function(id){
         var fila;
-          if(!document.getElementById){
-              return false;
-          }
-          fila=general.getdisctId(id);
-          fila.style.display="none";
+		if(!document.getElementById){
+			return false;
+		}
+		fila=getdisctId(id);
+		fila.style.display="none";
       },
       cambiarDisplay: function(id){
         var fila;
             if (!document.getElementById){
                 return false;
             }
-            fila=general.getdisctId(id);
+            fila=getdisctId(id);
             if(fila.style.display != "none"){
               fila.style.display = "none";
             }
@@ -488,13 +318,13 @@ getdisctId=function(id){
         },
         resetText: function(textbox){
           var textcontent;
-          textcontent=general.getdisctId(textbox);
+          textcontent=getdisctId(textbox);
           textcontent.value='';
         },
         getSelectVal: function(id){
           var e;
           var valorselect;
-          e ==general.distId(id);
+          e ==distId(id);
           valorselect = e.options[e.selectedIndex].value;
           return valorselect; 
         },
@@ -521,7 +351,7 @@ getdisctId=function(id){
         },
         val: function(idelement){
           var element;
-          element=general.getdisctId(id);
+          element=getdisctId(id);
           return element.value;
         },
         intval: function(number){
@@ -580,7 +410,7 @@ general.efectos=(function(){
           if(!document.getElementById){
               return false;
           }
-          fila=general.getdisctId(id);
+          fila=getdisctId(id);
             //programamos cada navegador por separado (lo mismo de antes pero
             obj = fila;
             //con el nuevo valor de la transparencia
@@ -636,7 +466,7 @@ general.efectos=(function(){
           if(!document.getElementById){
               return false;
           }
-          fila=general.getdisctId(id);
+          fila=getdisctId(id);
           //programamos cada navegador por separado (lo mismo de antes pero
           obj = fila;
           //con el nuevo valor de la transparencia
@@ -702,7 +532,7 @@ general.efectos=(function(){
       fila.style.opacity = '1';
     },
     slideUp: function(elem) {
-      fila=general.getdisctId(elem);
+      fila=getdisctId(elem);
       fila.style.maxHeight = '0';
       this.once(1,function(){
         fila.style.opacity = '0';
@@ -710,39 +540,39 @@ general.efectos=(function(){
     },
     toTop:function(id){
         var fila;
-        fila=general.getdisctId(id);
+        fila=getdisctId(id);
         fila.scrollTop = 0
     },
     scrollDivDown: function(id){
         var fila;
-        fila=general.getdisctId(id);
+        fila=getdisctId(id);
         fila.scrollTop += step;
         timerDown = setTimeout("scrollDivDown('" + id + "')", 10);
     },
     scrollDivUp: function(id){
         var fila;
-        fila=general.getdisctId(id);
+        fila=getdisctId(id);
         fila.scrollTop -= step;
         timerUp = setTimeout("scrollDivUp('" + id + "')", 10);
     },
     toBottom: function(id) {
         var fila;
-        fila=general.getdisctId(id);
+        fila=getdisctId(id);
         fila.scrollTop=fila.scrollHeight
     },
     toPoint: function(id,point_var){
         var fila;
-        fila=general.getdisctId(id);
+        fila=getdisctId(id);
         fila.scrollTop = point_var;
     },
     scroll: function(id){
         var fila;
-        fila=general.getdisctId(id);
+        fila=getdisctId(id);
         fila.scrollTop = fila.offsetTop
     },
     blink: function(id){
         var fila;
-        fila=general.getdisctId(id);
+        fila=getdisctId(id);
         fila.className="blink_div";
     },
   };
@@ -1100,7 +930,7 @@ general.webwork=(function(){
             }
             return  filareal;
       },
-      getWebWork: function(archivo){  
+      getWebWork: function(archivo){
         var workerSck;
         var workerName;
         if(archivo!=''){
@@ -1143,7 +973,8 @@ general.watch=(function(){
           return  filareal;
     }
   return{
-		if (!Object.prototype.watch) {
+	  obj: function(archivo){
+		if(!Object.prototype.watch) {
 			Object.defineProperty(Object.prototype, "watch", {
 				  enumerable: false
 				, configurable: true
@@ -1172,6 +1003,7 @@ general.watch=(function(){
 				}
 			});
 		}
+	}
   };
 }());
 
@@ -1196,20 +1028,22 @@ general.unwatch=(function(){
               return -1;
           }
           return  filareal;
-    }
+   };
   return{
-	if (!Object.prototype.unwatch) {
-		Object.defineProperty(Object.prototype, "unwatch", {
-			  enumerable: false
-			, configurable: true
-			, writable: false
-			, value: function (prop) {
-				var val = this[prop];
-				delete this[prop]; // remove accessors
-				this[prop] = val;
-			}
-		});
-	}
+  	obj: function(){
+		if(!Object.prototype.unwatch) {
+			Object.defineProperty(Object.prototype, "unwatch", {
+				  enumerable: false
+				, configurable: true
+				, writable: false
+				, value: function (prop) {
+					var val = this[prop];
+					delete this[prop]; // remove accessors
+					this[prop] = val;
+				}
+			});
+		}
+  	}
   };
 }());
 

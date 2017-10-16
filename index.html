@@ -1,0 +1,30 @@
+<html>
+	<head>
+		<title>Prueba general.js</title>
+	</head>
+	<body>
+		<a href="#adiosp">Ir a AdiosP</a>
+		<div id="holap" style="height: 1000px;">
+			HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+		</div>
+		<div id="adiosp" style="height: 500px;">
+			ADIOOOOOOSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+		</div>
+		aqui va a cargar el módulo en cuestion
+		<div id="cargadiv" style="height: 500px;">
+			
+		</div>
+		<script src="dist/dist/bundle.js"></script>
+		<script>
+			window.onload = function() {
+				var cadenamd5;
+				cadenamd5='';
+				cadenamd5=general.md5.calc("Arat5uro");
+				console.log("CLAVE MD5: " + cadenamd5);
+				console.log("Path JS Version: " + general.path.getVersion());
+				general.path.load("#cargadiv","README.md");
+				general.path.listen();
+			};
+		</script>
+	</body>
+</html>

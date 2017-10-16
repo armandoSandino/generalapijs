@@ -815,31 +815,6 @@ general=(function(){
 					e.stopPropagation();
 				}
             },
-            salirSistema: function(e,variable){
-                if(confirm(e)){
-					location.replace("?" + variable + "=true");
-                }
-            },
-
-            limpiarInput: function(mod){
-                texto=getdisctId(mod);
-                texto.value='';
-            },
-            aviso: function(titul,content,contentdiv){
-                getdisctId(id).innerHTML = content;
-                getdisctId(id).innerHTML = titul;
-                mostrar('alertpers');
-            },
-            confirmar: function(titul,content){
-                document.getElementById('mensajeconfirm').innerHTML = content;
-                document.getElementById('menusup2').innerHTML = titul;
-                mostrar('confirmpers');
-            },
-            formu: function(titul,content){
-                document.getElementById('mensajeprompt').innerHTML = content;
-                document.getElementById('menusup3').innerHTML = titul;
-                mostrar('promptpers');
-            },
             getVal: function(id){
                 var valor;
                 var obj;
@@ -854,10 +829,10 @@ general=(function(){
                 strUser = e.options[e.selectedIndex].value;
                 return strUser;
             },
-            redirReplace: function(direccion,variable,valor){
+            rReplace: function(direccion,variable,valor){
                 location.replace([direccion]+"?"+[variable]+"="+[valor]);
             },
-            redirHref: function(direccion,variable,valor){
+            rHref: function(direccion,variable,valor){
                 location.href([direccion]+"?"+[variable]+"="+[valor]);
             },
             base64_encode: function(cadena){
@@ -878,7 +853,7 @@ general=(function(){
                         return results[1];
                     }
             },
-            utf8_encode: function(argString) {
+            utf8_encode: function(argString){
               //  discuss at: http://phpjs.org/functions/utf8_encode/
               // original by: Webtoolkit.info (http://www.webtoolkit.info/)
               // improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
@@ -894,7 +869,7 @@ general=(function(){
               //   example 1: utf8_encode('Kevin van Zonneveld');
               //   returns 1: 'Kevin van Zonneveld'
 
-              if (argString === null || typeof argString === 'undefined') {
+              if (argString === null || typeof argString === 'undefined'){
                 return '';
               }
 
@@ -904,26 +879,26 @@ general=(function(){
 
               start = end = 0;
               stringl = string.length;
-              for (var n = 0; n < stringl; n++) {
+              for (var n = 0; n < stringl; n++){
                 var c1 = string.charCodeAt(n);
                 var enc = null;
 
-                if (c1 < 128) {
+                if (c1 < 128){
                   end++;
-                } else if (c1 > 127 && c1 < 2048) {
+                } else if (c1 > 127 && c1 < 2048){
                   enc = String.fromCharCode(
                     (c1 >> 6) | 192, (c1 & 63) | 128
                   );
-                } else if ((c1 & 0xF800) != 0xD800) {
+                } else if ((c1 & 0xF800) != 0xD800){
                   enc = String.fromCharCode(
                     (c1 >> 12) | 224, ((c1 >> 6) & 63) | 128, (c1 & 63) | 128
                   );
                 } else { // surrogate pairs
-                  if ((c1 & 0xFC00) != 0xD800) {
+                  if ((c1 & 0xFC00) != 0xD800){
                     throw new RangeError('Unmatched trail surrogate at ' + n);
                   }
                   var c2 = string.charCodeAt(++n);
-                  if ((c2 & 0xFC00) != 0xDC00) {
+                  if ((c2 & 0xFC00) != 0xDC00){
                     throw new RangeError('Unmatched lead surrogate at ' + (n - 1));
                   }
                   c1 = ((c1 & 0x3FF) << 10) + (c2 & 0x3FF) + 0x10000;
@@ -931,8 +906,8 @@ general=(function(){
                     (c1 >> 18) | 240, ((c1 >> 12) & 63) | 128, ((c1 >> 6) & 63) | 128, (c1 & 63) | 128
                   );
                 }
-                if (enc !== null) {
-                  if (end > start) {
+                if (enc !== null){
+                  if (end > start){
                     utftext += string.slice(start, end);
                   }
                   utftext += enc;
@@ -940,13 +915,13 @@ general=(function(){
                 }
               }
 
-              if (end > start) {
+              if (end > start){
                 utftext += string.slice(start, stringl);
               }
 
               return utftext;
             },
-            utf8_decode: function(str_data) {
+            utf8_decode: function(str_data){
               //  discuss at: http://phpjs.org/functions/utf8_decode/
               // original by: Webtoolkit.info (http://www.webtoolkit.info/)
               //    input by: Aman Gupta
@@ -970,16 +945,16 @@ general=(function(){
 
               str_data += '';
 
-              while (i < str_data.length) {
+              while (i < str_data.length){
                 c1 = str_data.charCodeAt(i);
-                if (c1 <= 191) {
+                if (c1 <= 191){
                   tmp_arr[ac++] = String.fromCharCode(c1);
                   i++;
-                } else if (c1 <= 223) {
+                } else if (c1 <= 223){
                   c2 = str_data.charCodeAt(i + 1);
                   tmp_arr[ac++] = String.fromCharCode(((c1 & 31) << 6) | (c2 & 63));
                   i += 2;
-                } else if (c1 <= 239) {
+                } else if (c1 <= 239){
                   // http://en.wikipedia.org/wiki/UTF-8#Codepage_layout
                   c2 = str_data.charCodeAt(i + 1);
                   c3 = str_data.charCodeAt(i + 2);
@@ -1014,10 +989,31 @@ general=(function(){
               var arraystr;
               return variab.split(delimiter);
             },
-            goToURL: function(valselect){
-              var URL = "http://";
-              var web = document.getElementById(valselect).value;
-              location.href=web;
+            gotolocal: function(valselect){
+              var URL;
+              URL=valselect;
+              location.href=URL;
+            },
+            gotoremote: function(valselect){
+              var URL;
+              URL="http://"+valselect;
+              location.href=URL;
+            },
+            ajax: function(){
+				sock=general.ajax.getxhr();
+				return sock;
+            },
+            show: function(iddiv){
+				general.objeto.show(iddiv);
+				return 0;
+            },
+            hide: function(iddiv){
+				general.objeto.hide(iddiv);
+				return 0;
+            },
+            css: function(styleline){
+				general.objeto.setStyle(styleline);
+				return 0;
             }
     };
 }());
@@ -1045,7 +1041,7 @@ general.objeto=(function(){
           return  objeto;
     }
   return{
-      mostrar:function(id){
+      show:function(id){
         var fila;
           if(!document.getElementById){
               return false;
@@ -1053,7 +1049,7 @@ general.objeto=(function(){
           fila=getdisctId(id);
           fila.style.display="block"; 
       },
-      mostrar_estilo:function(id,estilo){
+      setStyle:function(id,estilo){
         var fila;
           if(!document.getElementById){
               return false;
@@ -1064,7 +1060,7 @@ general.objeto=(function(){
           fila=getdisctId(id);
           fila.style.display=estilo;
       },
-      ocultar:function(id){
+      hide:function(id){
         var fila;
 		if(!document.getElementById){
 			return false;
@@ -1072,7 +1068,7 @@ general.objeto=(function(){
 		fila=getdisctId(id);
 		fila.style.display="none";
       },
-      cambiarDisplay: function(id){
+      toggleDisplay: function(id){
         var fila;
             if (!document.getElementById){
                 return false;
@@ -1097,22 +1093,22 @@ general.objeto=(function(){
           valorselect = e.options[e.selectedIndex].value;
           return valorselect; 
         },
-        getTecla: function(e){
+        getKey: function(e){
           if(window.event)keyCode=window.event.keyCode;
           else if(e) keyCode=e.which;
           return keyCode;
         },
-        blockToNumber: function(e){
+        blockNumber: function(e){
           //bloquear teclado a solo numeros
-          teclap=this.getTecla(e);
+          teclap=general.objeto.getTecla(e);
           teclan=chr(teclap);
           if(IsNumeric(teclan)==false){
             return "Solo está peritido escribir numeros";
           }
         },
-        blockToChar: function(e){
+        blockChar: function(e){
           //bloquear teclado a solo letras
-          teclap=this.getTecla(e);
+          teclap=general.objeto.getTecla(e);
           teclan=chr(teclap);
           if(IsNumeric(teclan)==true){
             return "Solo está peritido escribir letras";
@@ -1130,12 +1126,102 @@ general.objeto=(function(){
           return parseFloat(number);
         },
         bloqNum: function(e){
-          teclap=this.getTecla(e);
+          teclap=general.objeto.getTecla(e);
           teclan=chr(teclap);
           if(IsNumeric(teclan)==false){
             return "Solo esta permitido escribir numeros";
           }
-        }
+        },
+        submit:function(idcontrol,callbackfunc){
+        	var control;
+        	control=getdisctId(idcontrol);
+	        control.onsubmit=function(){
+	        	callbackfunc();
+	        }
+      	},
+        click:function(idcontrol,callbackfunc){
+        	var control;
+        	control=getdisctId(idcontrol);
+	        control.onclick=function(){
+	        	callbackfunc();
+	        }
+      	},
+      	change:function(idcontrol,callbackfunc){
+	        var control;
+        	control=getdisctId(idcontrol);
+	        control.onchange=function(){
+	        	callbackfunc();
+	        }
+      	},
+      	blur:function(idcontrol,callbackfunc){
+	        var control;
+        	control=getdisctId(idcontrol);
+	        control.onblur=function(){
+	        	callbackfunc();
+	        }
+      	},
+        on:function(){
+			var control;
+			var idcontrol;
+			var event;
+			var callback;
+			idcontrol=arguments[0];
+			event=arguments[1];
+			callback=arguments[2];;
+			control=getdisctId(idcontrol);
+        	switch(event){
+        		case 'error':
+					control.onerror=function(){
+			        	callback();
+			        }
+        			break;
+        		case 'load':
+					control.onload=function(){
+			        	callback();
+			        }
+        			break;
+        		case 'submit':
+					control.onsubmit=function(){
+			        	callback();
+			        }
+        			break;
+        		case 'click':
+					control.onclick=function(){
+			        	callback();
+			        }
+        			break;
+        		case 'blur':
+					control.onblur=function(){
+			        	callback();
+			        }
+        			break;
+        		case 'change':
+					control.onchange=function(){
+			        	callback();
+			        }
+			        break;
+				case 'resize':
+					control.onresize=function(){
+			        	callback();
+			        }
+        			break;
+				case 'unload':
+					control.onunload=function(){
+			        	callback();
+			        }
+        			break;
+				case 'pageshow':
+					control.onpageshow=function(){
+			        	callback();
+			        }
+        			break;
+				case 'popstate':
+					control.onpopstate=function(){
+			        	callback();
+			        }
+        			break;
+        	}
+      	},
   };
 }());
 
@@ -1283,7 +1369,7 @@ general.efectos=(function(){
               }
             }
           },
-    once: function(seconds, callback) {
+    once: function(seconds, callback){
       var counter = 0;
       var time=setInterval(function(){
         counter++;
@@ -1298,7 +1384,7 @@ general.efectos=(function(){
         objeto=getdisctId(id);
         objeto.scrollIntoView();
     },
-	smooth: function(target, options) {
+	smooth: function(target, options){
 	    var start = window.pageYOffset,
 	        opt = {
 	            duration: options.duration,
@@ -1313,8 +1399,8 @@ general.efectos=(function(){
 	            ? opt.duration(distance)
 	            : opt.duration,
 	        timeStart, timeElapsed;
-	    requestAnimationFrame(function(time) { timeStart = time; loop(time); });
-	    function loop(time) {
+	    requestAnimationFrame(function(time){ timeStart = time; loop(time); });
+	    function loop(time){
 	        timeElapsed = time - timeStart;
 	
 	        window.scrollTo(0, opt.easing(timeElapsed, start, distance, duration));
@@ -1325,7 +1411,7 @@ general.efectos=(function(){
 	            end();
 	    }
 	
-	    function end() {
+	    function end(){
 	        window.scrollTo(0, start + distance);
 	
 	        if (typeof opt.callback === 'function')
@@ -1340,10 +1426,19 @@ general.efectos=(function(){
 	        return -c / 2 * (t * (t - 2) - 1) + b
 	    }
 	},
-    blink: function(id){
+    blink: function(id,status){
         var fila;
-        fila=getdisctId(id);
-        fila.className="blink_div";
+        switch(status){
+        	case 'on':
+	        	fila=getdisctId(id);
+	        	fila.className="blink_div";
+	        	break;
+	        case 'off':
+	        	fila=getdisctId(id);
+	        	fila.className="";
+	        	break;
+        	
+        }
     },
   };
 }());
@@ -1372,19 +1467,7 @@ general.ajax=(function(){
           return  objeto;
     }
   return{
-      getURLPar: function(name){
-        var regexS = "[\\?&]"+name+"=([^&#]*)";
-        var regex = new RegExp ( regexS );
-        var tmpURL = window.location.href;
-        var results = regex.exec( tmpURL );
-        if(results==null){
-                return"";   
-        }
-        else{
-            return results[1];
-        }
-      },
-      ajaxSck:function(){
+      getxhr:function(){
         var xmlhttp=false;
         try{
           xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
@@ -1405,25 +1488,25 @@ general.ajax=(function(){
       getTrim: function(cadena){
         return cadena.replace(/^\s+/g,'').replace(/\s+$/g,'');
       },
-      valSaveLocal: function(varname,valor){
+      setLocal: function(varname,valor){
         //localstorage programming
-        if (typeof(Storage) !== "undefined") {
+        if (typeof(Storage) !== "undefined"){
             // Code for localStorage/sessionStorage
             localStorage.setItem(varname,valor);
         }
       },
-      valGetLocal: function(varname){
-        if (typeof(Storage) !== "undefined") {
+      getLocal: function(varname){
+        if (typeof(Storage) !== "undefined"){
             localStorage.getItem(varname); 
         }
       },
-      valSaveObj: function(varname){
+      getValObj: function(varname){
         //escribir el salvar el valor
         //activar en HTMl con onkeyup-->value u onchange-->select*
         var txtcedula;
         txtcedula=document.getElementById(varname).value;
         //localstorage programming
-        if (typeof(Storage) !== "undefined") {
+        if(typeof(Storage)!=="undefined"){
             // Code for localStorage/sessionStorage.
             localStorage.setItem(varname,txtcedula);
         }
@@ -1466,12 +1549,12 @@ general.ajax=(function(){
             // 2 VARURL
             // 3 VARANDOM
             //obtener los Flags con los cuales trabajar
-            formfinal=this.distIdAjax(arrayajax[4]);
+            formfinal=getdisctId(arrayajax[4]);
             formid=formfinal.id;
-            //contenedorw=distIdAjax(arrayajax[3]);
+            //contenedorw=getdisctId(arrayajax[3]);
             formobj=formfinal;
             //obtener el id del form al que pertenece el boton
-            sock=this.ajaxSck();
+            sock=general.ajax.getxhr();
             //el argumento 0 contiene todos los datos necesarios en una cadena de argumentos
             //desglosar la cadena en array de argumentos llamado arrayajax
             flags=arrayajax[5];
@@ -1486,13 +1569,9 @@ general.ajax=(function(){
             ajxSocket='';
             ///////////////////////////////////////////////////////
             ajxProtocol=arrayajax[0].toUpperCase();
-            //alert(ajxProtocol);
             ajxFileS=arrayajax[1];
-            //alert(ajxFileS); Variable de Control
             cadenaArgs=arrayajax[2] + "=true";      
-            //alert(cadenaArgs);
-            contenedorw=this.distIdAjax(arrayajax[3]);
-            //alert(contenedorw.id);
+            contenedorw=getdisctId(arrayajax[3]);
             if(flags=="NORMAL" || flags==""){
               //para procesar formularios completos arg1=valor1...&argN=valorN
               for(i=0;i<elementos.length;i++){
@@ -1521,12 +1600,11 @@ general.ajax=(function(){
                   }
                 } 
               }
-              //alert(cadenaArgs);
             }
             if(flags=="VARURL"){
               //para cuando los argumentos son variables pasadas por url
               for(i=6;i<arrayajax.length; i++){
-                cadenaArgs=cadenaArgs + "&" + arrayajax[i] + "=" + this.getURLPar(arrayajax[i]);
+                cadenaArgs=cadenaArgs + "&" + arrayajax[i] + "=" + general.getParam(arrayajax[i]);
               }
             }
             if(flags=="VARANDOM"){
@@ -1543,7 +1621,7 @@ general.ajax=(function(){
             cadenaArgs=this.getTrim(cadenaArgs);
             if(HTML5enable==true){
               if(ajxProtocol=="POST"){
-                ajxSocket=new XMLHttpRequest();
+                ajxSocket=general.ajax.getxhr();
                 ajxSocket.open(ajxProtocol,ajxFileS,true);
                 ajxSocket.onreadystatechange=function(){
                     if(ajxSocket.readyState==4){
@@ -1557,7 +1635,7 @@ general.ajax=(function(){
                 ajxSocket.send(cadenaArgs);
               }
               else if(ajxProtocol=="GET"){
-                ajxSocket=new XMLHttpRequest();
+                ajxSocket=general.ajax.getxhr();
                 ajxSocket.open(ajxProtocol,ajxFileS,true);
                 ajxSocket.onreadystatechange=function(){
                     if(ajxSocket.readyState==4){
@@ -1572,7 +1650,7 @@ general.ajax=(function(){
             }
             else{
               if(ajxProtocol=="POST"){
-                ajxSocket=this.ajaxSck();
+                ajxSocket=general.ajax.getxhr();
                 ajxSocket.open(ajxProtocol,ajxFileS,true);
                 ajxSocket.onreadystatechange=function(){
                     if(ajxSocket.readyState==4){
@@ -1586,7 +1664,7 @@ general.ajax=(function(){
                 ajxSocket.send(cadenaArgs);
               }
               else{
-                ajxSocket=this.ajaxSck();
+                ajxSocket=general.ajax.getxhr();
                 ajxSocket.open(ajxProtocol,ajxFileS,true);
                 ajxSocket.onreadystatechange=function(){
                   if (ajxSocket.readyState==4){
@@ -1665,7 +1743,7 @@ general.webwork=(function(){
         var workerSck;
         var workerName;
         if(archivo!=''){
-          workerName=this.distIdWebWork(archivo);
+          workerName=getdisctId(archivo);
           if(typeof(Worker)!=="undefined"){
             // Some code.....
             workerSck = new Worker(workerName.id);
@@ -1705,25 +1783,25 @@ general.watch=(function(){
     }
   return{
 	  obj: function(archivo){
-		if(!Object.prototype.watch) {
+		if(!Object.prototype.watch){
 			Object.defineProperty(Object.prototype, "watch", {
 				  enumerable: false
 				, configurable: true
 				, writable: false
-				, value: function (prop, handler) {
+				, value: function (prop, handler){
 					var
 					  oldval = this[prop]
 					, newval = oldval
-					, getter = function () {
+					, getter = function (){
 						return newval;
 					}
-					, setter = function (val) {
+					, setter = function (val){
 						oldval = newval;
 						return newval = handler.call(this, prop, oldval, val);
 					}
 					;
 					
-					if (delete this[prop]) { // can't watch constants
+					if (delete this[prop]){ // can't watch constants
 						Object.defineProperty(this, prop, {
 							  get: getter
 							, set: setter
@@ -1762,12 +1840,12 @@ general.unwatch=(function(){
    };
   return{
   	obj: function(){
-		if(!Object.prototype.unwatch) {
+		if(!Object.prototype.unwatch){
 			Object.defineProperty(Object.prototype, "unwatch", {
 				  enumerable: false
 				, configurable: true
 				, writable: false
-				, value: function (prop) {
+				, value: function (prop){
 					var val = this[prop];
 					delete this[prop]; // remove accessors
 					this[prop] = val;
@@ -1809,7 +1887,7 @@ general.slideshow=(function(){
 	//Submodulo Slideshow
 	return{
 		//Write code below..
-		cycle:function(cadena){
+		cycle:function(div){
 			
 		}
 	};
@@ -1852,7 +1930,7 @@ general.path=(function(){
 	        var n;
 	        var allScripts;
 	        contentdiv=getdisctId(div);
-	        xmlhttp=general.ajax.ajaxSck();
+	        xmlhttp=general.ajax.getxhr();
 		    xmlhttp.onreadystatechange = function(){
 		        if(xmlhttp.readyState==XMLHttpRequest.DONE){
 		           if(xmlhttp.status == 200){
@@ -1873,17 +1951,17 @@ general.path=(function(){
 		    xmlhttp.send();
 	    },
 	    map:function(path){
-	        if(general.path.routes.defined.hasOwnProperty(path)) {
+	        if(general.path.routes.defined.hasOwnProperty(path)){
 	            return general.path.routes.defined[path];
 	        }
 	        else{
 				return new general.path.core.route(path);
 	        }
 	    },
-	    root: function (path) {
+	    root: function (path){
 	        general.path.routes.root = path;
 	    },
-	    rescue: function (fn) {
+	    rescue: function (fn){
 	        general.path.routes.rescue = fn;
 	    },
 	    history: {
@@ -1926,25 +2004,25 @@ general.path=(function(){
 	            }
 	        }
 	    },
-	    match:function (path, parameterize) {
+	    match:function (path, parameterize){
 	        var params = {}, route = null, possible_routes, slice, i, j, compare;
-	        for (route in general.path.routes.defined) {
-	            if (route !== null && route !== undefined) {
+	        for (route in general.path.routes.defined){
+	            if (route !== null && route !== undefined){
 	                route = general.path.routes.defined[route];
 	                possible_routes = route.partition();
-	                for (j = 0; j < possible_routes.length; j++) {
+	                for (j = 0; j < possible_routes.length; j++){
 	                    slice = possible_routes[j];
 	                    compare = path;
-	                    if (slice.search(/:/) > 0) {
-	                        for (i = 0; i < slice.split("/").length; i++) {
-	                            if ((i < compare.split("/").length) && (slice.split("/")[i].charAt(0) === ":")) {
+	                    if (slice.search(/:/) > 0){
+	                        for (i = 0; i < slice.split("/").length; i++){
+	                            if ((i < compare.split("/").length) && (slice.split("/")[i].charAt(0) === ":")){
 	                                params[slice.split('/')[i].replace(/:/, '')] = compare.split("/")[i];
 	                                compare = compare.replace(compare.split("/")[i], slice.split("/")[i]);
 	                            }
 	                        }
 	                    }
-	                    if (slice === compare) {
-	                        if (parameterize) {
+	                    if (slice === compare){
+	                        if (parameterize){
 	                            route.params = params;
 	                        }
 	                        return route;
@@ -1954,53 +2032,53 @@ general.path=(function(){
 	        }
 	        return null;
 	    },
-	    dispatch:function (passed_route) {
+	    dispatch:function (passed_route){
 	        var previous_route, matched_route;
-	        if (general.path.routes.current !== passed_route) {
+	        if (general.path.routes.current !== passed_route){
 	            general.path.routes.previous = general.path.routes.current;
 	            general.path.routes.current = passed_route;
 	            matched_route = general.path.match(passed_route, true);
 	
-	            if (general.path.routes.previous) {
+	            if (general.path.routes.previous){
 	                previous_route = general.path.match(general.path.routes.previous);
-	                if (previous_route !== null && previous_route.do_exit !== null) {
+	                if (previous_route !== null && previous_route.do_exit !== null){
 	                    previous_route.do_exit();
 	                }
 	            }
 	
-	            if (matched_route !== null) {
+	            if (matched_route !== null){
 	                matched_route.run();
 	                return true;
 	            } else {
-	                if (general.path.routes.rescue !== null) {
+	                if (general.path.routes.rescue !== null){
 	                    general.path.routes.rescue();
 	                }
 	            }
 	        }
 	    },
-	    listen:function () {
+	    listen:function (){
 	        var fn = function(){ general.path.dispatch(location.hash); }
 	
-	        if (location.hash === "") {
-	            if (general.path.routes.root !== null) {
+	        if (location.hash === ""){
+	            if (general.path.routes.root !== null){
 	                location.hash = general.path.routes.root;
 	            }
 	        }
 	
 	        // The 'document.documentMode' checks below ensure that PathJS fires the right events
 	        // even in IE "Quirks Mode".
-	        if ("onhashchange" in window && (!document.documentMode || document.documentMode >= 8)) {
+	        if ("onhashchange" in window && (!document.documentMode || document.documentMode >= 8)){
 	            window.onhashchange = fn;
 	        } else {
 	            setInterval(fn, 50);
 	        }
 	
-	        if(location.hash !== "") {
+	        if(location.hash !== ""){
 	            general.path.dispatch(location.hash);
 	        }
 	    },
 	    core:{
-	        route:function (path) {
+	        route:function (path){
 	            this.path = path;
 	            this.action = null;
 	            this.do_enter = [];
@@ -2019,48 +2097,48 @@ general.path=(function(){
 	};
 }());
 general.path.core.route.prototype = {
-    'to': function (fn) {
+    'to': function (fn){
         this.action = fn;
         return this;
     },
-    enter: function (fns) {
-        if (fns instanceof Array) {
+    enter: function (fns){
+        if (fns instanceof Array){
             this.do_enter = this.do_enter.concat(fns);
         } else {
             this.do_enter.push(fns);
         }
         return this;
     },
-    exit: function (fn) {
+    exit: function (fn){
         this.do_exit = fn;
         return this;
     },
-    partition: function () {
+    partition: function (){
         var parts = [], options = [], re = /\(([^}]+?)\)/g, text, i;
-        while (text = re.exec(this.path)) {
+        while (text = re.exec(this.path)){
             parts.push(text[1]);
         }
         options.push(this.path.split("(")[0]);
-        for (i = 0; i < parts.length; i++) {
+        for (i = 0; i < parts.length; i++){
             options.push(options[options.length - 1] + parts[i]);
         }
         return options;
     },
-    run: function () {
+    run: function (){
         var halt_execution = false, i, result, previous;
 
-        if (general.path.routes.defined[this.path].hasOwnProperty("do_enter")) {
-            if (general.path.routes.defined[this.path].do_enter.length > 0) {
-                for (i = 0; i < general.path.routes.defined[this.path].do_enter.length; i++) {
+        if (general.path.routes.defined[this.path].hasOwnProperty("do_enter")){
+            if (general.path.routes.defined[this.path].do_enter.length > 0){
+                for (i = 0; i < general.path.routes.defined[this.path].do_enter.length; i++){
                     result = general.path.routes.defined[this.path].do_enter[i].apply(this, null);
-                    if (result === false) {
+                    if (result === false){
                         halt_execution = true;
                         break;
                     }
                 }
             }
         }
-        if (!halt_execution) {
+        if (!halt_execution){
             general.path.routes.defined[this.path].action();
         }
     }
@@ -2089,22 +2167,22 @@ general.md5=(function(){
           return  objeto;
    };
 
-   function RotateLeft(lValue, iShiftBits) {
+   function RotateLeft(lValue, iShiftBits){
            return (lValue<<iShiftBits) | (lValue>>>(32-iShiftBits));
    }
 
-   function AddUnsigned(lX,lY) {
+   function AddUnsigned(lX,lY){
            var lX4,lY4,lX8,lY8,lResult;
            lX8 = (lX & 0x80000000);
            lY8 = (lY & 0x80000000);
            lX4 = (lX & 0x40000000);
            lY4 = (lY & 0x40000000);
            lResult = (lX & 0x3FFFFFFF)+(lY & 0x3FFFFFFF);
-           if (lX4 & lY4) {
+           if (lX4 & lY4){
                    return (lResult ^ 0x80000000 ^ lX8 ^ lY8);
            }
-           if (lX4 | lY4) {
-                   if (lResult & 0x40000000) {
+           if (lX4 | lY4){
+                   if (lResult & 0x40000000){
                            return (lResult ^ 0xC0000000 ^ lX8 ^ lY8);
                    } else {
                            return (lResult ^ 0x40000000 ^ lX8 ^ lY8);
@@ -2114,32 +2192,32 @@ general.md5=(function(){
            }
    }
 
-   function F(x,y,z) { return (x & y) | ((~x) & z); }
-   function G(x,y,z) { return (x & z) | (y & (~z)); }
-   function H(x,y,z) { return (x ^ y ^ z); }
-   function I(x,y,z) { return (y ^ (x | (~z))); }
+   function F(x,y,z){ return (x & y) | ((~x) & z); }
+   function G(x,y,z){ return (x & z) | (y & (~z)); }
+   function H(x,y,z){ return (x ^ y ^ z); }
+   function I(x,y,z){ return (y ^ (x | (~z))); }
 
-   function FF(a,b,c,d,x,s,ac) {
+   function FF(a,b,c,d,x,s,ac){
            a = AddUnsigned(a, AddUnsigned(AddUnsigned(F(b, c, d), x), ac));
            return AddUnsigned(RotateLeft(a, s), b);
    };
 
-   function GG(a,b,c,d,x,s,ac) {
+   function GG(a,b,c,d,x,s,ac){
            a = AddUnsigned(a, AddUnsigned(AddUnsigned(G(b, c, d), x), ac));
            return AddUnsigned(RotateLeft(a, s), b);
    };
 
-   function HH(a,b,c,d,x,s,ac) {
+   function HH(a,b,c,d,x,s,ac){
            a = AddUnsigned(a, AddUnsigned(AddUnsigned(H(b, c, d), x), ac));
            return AddUnsigned(RotateLeft(a, s), b);
    };
 
-   function II(a,b,c,d,x,s,ac) {
+   function II(a,b,c,d,x,s,ac){
            a = AddUnsigned(a, AddUnsigned(AddUnsigned(I(b, c, d), x), ac));
            return AddUnsigned(RotateLeft(a, s), b);
    };
 
-   function ConvertToWordArray(string) {
+   function ConvertToWordArray(string){
            var lWordCount;
            var lMessageLength = string.length;
            var lNumberOfWords_temp1=lMessageLength + 8;
@@ -2148,7 +2226,7 @@ general.md5=(function(){
            var lWordArray=Array(lNumberOfWords-1);
            var lBytePosition = 0;
            var lByteCount = 0;
-           while ( lByteCount < lMessageLength ) {
+           while ( lByteCount < lMessageLength ){
                    lWordCount = (lByteCount-(lByteCount % 4))/4;
                    lBytePosition = (lByteCount % 4)*8;
                    lWordArray[lWordCount] = (lWordArray[lWordCount] | (string.charCodeAt(lByteCount)<<lBytePosition));
@@ -2162,9 +2240,9 @@ general.md5=(function(){
            return lWordArray;
    };
 
-   function WordToHex(lValue) {
+   function WordToHex(lValue){
            var WordToHexValue="",WordToHexValue_temp="",lByte,lCount;
-           for (lCount = 0;lCount<=3;lCount++) {
+           for (lCount = 0;lCount<=3;lCount++){
                    lByte = (lValue>>>(lCount*8)) & 255;
                    WordToHexValue_temp = "0" + lByte.toString(16);
                    WordToHexValue = WordToHexValue + WordToHexValue_temp.substr(WordToHexValue_temp.length-2,2);
@@ -2172,18 +2250,18 @@ general.md5=(function(){
            return WordToHexValue;
    };
 
-   function Utf8Encode(string) {
+   function Utf8Encode(string){
            string = string.replace(/\r\n/g,"\n");
            var utftext = "";
 
-           for (var n = 0; n < string.length; n++) {
+           for (var n = 0; n < string.length; n++){
 
                    var c = string.charCodeAt(n);
 
-                   if (c < 128) {
+                   if (c < 128){
                            utftext += String.fromCharCode(c);
                    }
-                   else if((c > 127) && (c < 2048)) {
+                   else if((c > 127) && (c < 2048)){
                            utftext += String.fromCharCode((c >> 6) | 192);
                            utftext += String.fromCharCode((c & 63) | 128);
                    }
@@ -2209,7 +2287,7 @@ general.md5=(function(){
 		   string = Utf8Encode(cadena);
 		   x = ConvertToWordArray(string);
 		   a = 0x67452301; b = 0xEFCDAB89; c = 0x98BADCFE; d = 0x10325476;
-		   for (k=0;k<x.length;k+=16) {
+		   for (k=0;k<x.length;k+=16){
 		           AA=a; BB=b; CC=c; DD=d;
 		           a=FF(a,b,c,d,x[k+0], S11,0xD76AA478);
 		           d=FF(d,a,b,c,x[k+1], S12,0xE8C7B756);

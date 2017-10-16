@@ -754,7 +754,7 @@ general.ajax=(function(){
             localStorage.setItem(varname,txtcedula);
         }
       },
-      processForm: function(){
+      process: function(){
         var arrayajax;
         var IDClass;
         var cadenaArgs;
@@ -779,7 +779,7 @@ general.ajax=(function(){
         if((arrayajax.length)>4){
             //Protocolo 0
             //SocketDir 1
-            //VariableControl (variable de control para saber que accionar al momento de programar el PHP) 2
+            //VariableMetodo (variable de control para saber que accionar al momento de programar el PHP) 2
             //Contenedor 3
             //formID 4 ID del form
             //Flags 5
@@ -813,7 +813,7 @@ general.ajax=(function(){
             ///////////////////////////////////////////////////////
             ajxProtocol=arrayajax[0].toUpperCase();
             ajxFileS=arrayajax[1];
-            cadenaArgs=arrayajax[2] + "=true";      
+            cadenaArgs="method=" + arrayajax[2];      
             contenedorw=getdisctId(arrayajax[3]);
             if(flags=="NORMAL" || flags==""){
               //para procesar formularios completos arg1=valor1...&argN=valorN

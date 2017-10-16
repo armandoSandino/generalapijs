@@ -21,6 +21,11 @@
 				cadenamd5='';
 				cadenamd5=general.md5.calc("Arat5uro");
 				console.log("CLAVE MD5: " + cadenamd5);
+				general.ajax.process(
+					'POST',
+					'socket.php',
+					
+				);
 				console.log("Path JS Version: " + general.path.getVersion());
 				general.path.load("#cargadiv","README.md");
 				general.path.listen();

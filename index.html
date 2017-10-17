@@ -3,6 +3,8 @@
 		<title>Prueba g.js</title>
 	</head>
 	<body>
+		<input type="file" name="holaf" id="holaf" />
+		<input type="button" name="btnfile" id="btnfile" value="CARGAR" />
 		<a href="#adiosp">Ir a AdiosP</a>
 		<div id="holap" style="height: 1000px;opacity:0;">
 			HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
@@ -45,7 +47,12 @@
 					}
 				});
 			});
-			
+			g.dom("#btnfile").click(function(){
+				var archivo;
+				archivo=g.ajax.upload("#holaf");
+				g.log("RESULT UPLOAD");
+				g.log(archivo);
+			});
 			g.ajax.post(
 				{
 					variabu:"arturo",

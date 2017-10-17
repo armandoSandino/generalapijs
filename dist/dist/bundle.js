@@ -794,7 +794,6 @@ g=(function(){
 			//Describir funciones públicas
 			getdisctId: function(id){
 				var cadena;
-				console.log(id);
 				if(typeof id==='string'){
 					cadena=id;
 			      	if(cadena.search("#")==0){
@@ -1060,11 +1059,16 @@ g=(function(){
 			                var valor;
 			                var obj;
 			                obj=g.getdisctId(domel);
-			                if(obj.type!='select-one'){
-								valor=obj.value;	
+			                if(obj.type!='select-one' && obj.type!="file"){
+								valor=obj.value;
 			                }
 			                else{
-				                valor=obj.options[obj.selectedIndex].value;
+			                	if(obj.type=="file"){
+			                		valor=obj.files[0];
+			                	}
+			                	else{
+			                		valor=obj.options[obj.selectedIndex].value;
+			                	}
 			                }
 			                return valor;
 			            },
@@ -1381,22 +1385,126 @@ g.ajax=(function(){
 	        }
 	      },
 	      getLocal: function(varname){
-	        if (typeof(Storage) !== "undefined"){
+	        if (typeof(Storage)!=="undefined"){
 	            localStorage.getItem(varname); 
 	        }
 	      },
-	      getValObj: function(varname){
-	        //escribir el salvar el valor
-	        //activar en HTMl con onkeyup-->value u onchange-->select*
-	        var txtcedula;
-	        txtcedula=document.getElementById(varname).value;
-	        //localstorage programming
-	        if(typeof(Storage)!=="undefined"){
-	            // Code for localStorage/sessionStorage.
-	            localStorage.setItem(varname,txtcedula);
-	        }
+	      upload: function(fileid){
+	      	var filectrl;
+	      	var file;
+	      	var reader;
+	      	var finalfile;
+	      	var fileapi;
+	      	var formData;
+	      	//Validación si hay los elementos para realizar la carga asíncrona de archivos
+	      	if(window.File && window.FileList && window.Blob && window.FileReader && window.FormData){
+			    reader=new FileReader();
+				filectrl=g.getdisctId(fileid); //Files[0] = 1st file
+				file=filectrl.files[0];
+				reader.readAsText(file,'UTF-8');
+				reader.onload=function(event) {
+				    var result=event.target.result;
+				    var fileName=filectrl.files[0].name;
+				    g.ajax.post(
+						{ 
+							data: result,
+							name: fileName
+						},
+						"upload.php",
+						function(data){
+							g.log("data devuelta: ");
+							g.log(data);
+							return data;
+						}
+					);
+				};
+				reader.onerror=function(event){
+					g.log("Hubo un error de lectura de disco.");
+				}
+			}
+			else{
+			    // browser doesn't supports File API
+			    g.log("browser doesn't supports File API");
+			}
 	      },
 	      post: function(){
+	      	/*
+	      	 * Parámetros:
+	      	 * 0 objvariables
+	      	 * 1 dirsocket
+	      	 * 2 [callback] optional
+	      	 * 3 [header] optional
+	      	 */
+	      	var i;
+	        var arrayvar;
+	        var ajxProtocol;
+	        var dirsocket;
+	        var variablesobj;
+	        var variablesaux;
+	        var sock;
+	        var callback;
+	        var data;
+	        var responset;
+	        var contenedor;
+	        var headers;
+	        arrayvar=new Array();
+	        variablesobj={};
+	        variablesaux={};
+	        //almacenar argumentos en el array 'arrayvar'
+	        for(i=0;i<arguments.length;i++){ 
+	          arrayvar[i]=arguments[i];
+	        }
+			if(arguments.length<2){
+	      		g.log("Faltan Argumentos " + arguments.length);
+	      	}
+	      	else{
+	      		// Obtener objeto AJAX;
+	      		sock=g.ajax.getxhr();
+	      		// Obtener objeto de variables;
+	      		variablesaux=JSON.stringify(arrayvar[0]);
+	      		variablesobj=JSON.parse(variablesaux);
+	      		g.log(variablesobj);
+	      		// Obtener string de protocolo
+	      		ajxProtocol="POST";
+	      		// Obtener string de dir archivo socket
+	      		dirsocket=arrayvar[1];
+	      		// Obtener string de enctype
+	      		headers="application/x-www-form-urlencoded";
+	      		// VALIDACIONES
+	      		if(arguments[2]!=undefined){
+		      		if(typeof arguments[2]==="function"){
+						callback=arguments[2];
+					}
+					else{
+						g.log("El argumento Callback debe ser de tipo función");
+					}
+	      		}
+	      		////////////////////////////////////////////////////
+	      		// EJECUTAR FUNCION Y CALLBACK//////////////////////
+		        sock.open(ajxProtocol,dirsocket,true);
+				sock.onreadystatechange=function() {
+					if(sock.readyState==4 && sock.status==200){
+		                data=sock.responseText;
+		                g.log("STATUS: " + sock.readyState + " " + sock.status + " " + sock.statusText);
+		                if(callback!=undefined){
+		                	if(typeof callback==="function"){
+								callback(data);
+							}
+							else{
+								g.log("El parámetro Callback no es función o no existe!");
+							}
+		                }
+		                else{
+							g.log("El parámetro Callback no existe!");
+						}
+				 	}
+				}
+	      		sock.setRequestHeader("Content-Type",headers);
+				sock.send(JSON.stringify(variablesobj));
+		        //////////////////////////////////////////////////// 
+			}
+	      },
+		  get: function(){
 	      	/*
 	      	 * Parámetros:
 	      	 * 0 objvariables
@@ -1428,16 +1536,10 @@ g.ajax=(function(){
 	      	else{
 	      		// Obtener objeto AJAX;
 	      		sock=g.ajax.getxhr();
-	      		// Obtener objeto de variables;
-	      		variablesaux=JSON.stringify(arrayvar[0]);
-	      		variablesobj=JSON.parse(variablesaux);
-	      		g.log(variablesobj);
 	      		// Obtener string de protocolo
-	      		ajxProtocol="POST";
+	      		ajxProtocol="GET";
 	      		// Obtener string de dir archivo socket
 	      		dirsocket=arrayvar[1];
-	      		// Obtener string de enctype
-	      		enctype="application/x-www-form-urlencoded";
 	      		// VALIDACIONES
 	      		if(arguments[2]!=undefined){
 		      		if(typeof arguments[2]==="function"){
@@ -1467,8 +1569,7 @@ g.ajax=(function(){
 						}
 				 	}
 				}
-				sock.setRequestHeader("Content-Type","application/json; charset=utf-8");
-				sock.send(JSON.stringify(variablesobj));
+				sock.send(null);
 		        //////////////////////////////////////////////////// 
 			}
 	      },

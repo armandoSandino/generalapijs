@@ -519,7 +519,6 @@ __webpack_require__(4);
 __webpack_require__(7);
 __webpack_require__(9);
 __webpack_require__(11);
-__webpack_require__(12);
 
 /***/ }),
 /* 4 */
@@ -771,40 +770,52 @@ exports.push([module.i, "html {\n\tscroll-behavior: smooth;\n}\n\nbody {\n\tmarg
   Garantías implícitas, incluyendo, sin limitación, los implicados
   GARANTÍAS DE COMERCIALIZACIÓN Y APTITUD PARA UN PROPÓSITO PARTICULAR.
 */
-
 var hex_chr;
 var IDClass;
 var objGlobal;
+var cadena;
+var idreal;
+var objeto;
 hex_chr="0123456789abcdef";
 IDClass=0;
-general=(function(){
+g=(function(){
     //aqui se escriben las funciones privadas
     // Private variables / properties
-   // var p1,p2;
-
-    // Private methods
-    //function aPrivateMethod(){
-    //programa
-	//}
-	getdisctId=function(id){
-      	var cadena;
-      	var idreal;
-      	var objeto;
-      	if(cadena.search("#")==0){
-          	idreal=id.replace("#","");
-          	idreal=idreal.replace(".","");
-        	objeto=document.getElementById(idreal);
-      	}
-      	else if(cadena.search(".")==0){
-          	idreal=id.replace("#","");
-			idreal=idreal.replace(".","");
-			objeto=document.getElementsByClassName(idreal);
-		}
-		else{
-			return -1;
-		}
+	// var p1,p2;
+	// Private methods
+	//Write code below...
+	function easeInOutQuad(t, b, c, d){
+	  t /= d / 2;
+	  if (t < 1) return c / 2 * t * t + b;
+	  t--;
+	  return -c / 2 * (t * (t - 2) - 1) + b;
 	};
 	return{
+			//Describir funciones públicas
+			getdisctId: function(id){
+				var cadena;
+				console.log(id);
+				if(typeof id==='string'){
+					cadena=id;
+			      	if(cadena.search("#")==0){
+			          	idreal=id.replace("#","");
+			          	idreal=idreal.replace(".","");
+			        	objeto=document.getElementById(idreal); 
+			      	}
+			      	else if(cadena.search(".")==0){
+			          	idreal=id.replace("#","");
+						idreal=idreal.replace(".","");
+						objeto=document.getElementsByClassName(idreal);
+					}
+					else{
+						return -1;
+					}
+					return objeto;
+				}
+			},
+			log: function(msg){
+				console.log(msg);
+            },
             preventDefault: function(e){
 				if(e.preventDefault){
 					e.preventDefault();
@@ -818,16 +829,14 @@ general=(function(){
             getVal: function(id){
                 var valor;
                 var obj;
-                obj=getdisctId(id);
-                valor=obj.value;
+                obj=g.getdisctId(id);
+                if(obj.type!='select-one'){
+					valor=obj.value;	
+                }
+                else{
+	                valor=obj.options[obj.selectedIndex].value;
+                }
                 return valor;
-            },
-            getList: function(id){
-                var e;
-                var strUser;
-                e = getdisctId(id);
-                strUser = e.options[e.selectedIndex].value;
-                return strUser;
             },
             rReplace: function(direccion,variable,valor){
                 location.replace([direccion]+"?"+[variable]+"="+[valor]);
@@ -1000,99 +1009,312 @@ general=(function(){
               location.href=URL;
             },
             ajax: function(){
-				sock=general.ajax.getxhr();
+            	var sock;
+				sock=g.ajax.getxhr();
 				return sock;
             },
-            show: function(iddiv){
-				general.objeto.show(iddiv);
-				return 0;
+            dom: function(domel){
+				return{
+					hide: function(){
+						var fila;
+						if(!document.getElementById){
+							return false;
+						}
+						fila=g.getdisctId(domel);
+						fila.style.display="none";
+					},
+					show:function(){
+				        var fila;
+				          if(!document.getElementById){
+				              return false;
+				          }
+				          fila=g.getdisctId(domel);
+				          fila.style.display="block"; 
+				      },
+				      setStyle:function(estilo){
+				        var fila;
+				          if(!document.getElementById){
+				              return false;
+				          }
+				          if(estilo==''){
+				              return false;
+				          }
+				          fila=g.getdisctId(domel);
+				          fila.style.display=estilo;
+				      },
+				      hide:function(){
+				        var fila;
+						if(!document.getElementById){
+							return false;
+						}
+						fila=g.getdisctId(domel);
+						fila.style.display="none";
+				      },
+				      toggleDisplay: function(){
+				        var fila;
+				            if (!document.getElementById){
+				                return false;
+				            }
+				            fila=g.getdisctId(domel);
+				            if(fila.style.display != "none"){
+				              fila.style.display = "none";
+				            }
+				            else{
+				              fila.style.display = "";
+				            }
+				        },
+				        resetText: function(){
+				          var textcontent;
+				          textcontent=g.getdisctId(domel);
+				          textcontent.value='';
+				        },
+				        getSelectVal: function(){
+				          var e;
+				          var valorselect;
+				          e=g.getdisctId(domel);
+				          valorselect = e.options[e.selectedIndex].value;
+				          return valorselect; 
+				        },
+						fadeIn:function(tiempo){
+						    var op = 0.1;  // initial opacity
+						    var intervalo=tiempo/80;
+						    var element;
+						    element=g.getdisctId(domel);
+						    element.style.display = 'block';
+						    var timer = setInterval(function () {
+						        if (op >= 1){
+						            clearInterval(timer);
+						        }
+						        element.style.opacity = op;
+						        element.style.filter = 'alpha(opacity=' + op * 100 + ")";
+						        op += op * 0.1;
+						    }, intervalo);
+				      },
+				      fadeOut:function(tiempo){
+					    var op = 1;  // initial opacity
+					    var intervalo=tiempo/80;
+					    var element;
+					    element=g.getdisctId(domel);
+					    var timer = setInterval(function () {
+					        if (op <= 0.1){
+					            clearInterval(timer);
+					            element.style.display = 'none';
+					        }
+					        element.style.opacity = op;
+					        element.style.filter = 'alpha(opacity=' + op * 100 + ")";
+					        op -= op * 0.1;
+					    }, intervalo);
+				      },
+				    once: function(seconds, callback){
+				      var counter = 0;
+				      var time=setInterval(function(){
+				        counter++;
+				        if(counter>=seconds){
+				          callback();
+				          clearInterval(time);
+				        }
+				      },400);
+				    },
+				    gotodiv: function(){
+				        var objeto;
+				        objeto=g.getdisctId(domel);
+				        objeto.scrollIntoView();
+				    },
+					smooth: function(target, options){
+					    var start = window.pageYOffset,
+					        opt = {
+					            duration: options.duration,
+					            offset: options.offset || 0,
+					            callback: options.callback,
+					            easing: easeInOutQuad
+					        },
+					        distance = typeof target === 'string'
+					            ? opt.offset + document.querySelector(target).getBoundingClientRect().top
+					            : target,
+					        duration = typeof opt.duration === 'function'
+					            ? opt.duration(distance)
+					            : opt.duration,
+					        timeStart, timeElapsed;
+					    requestAnimationFrame(function(time){ timeStart = time; loop(time); });
+					    function loop(time){
+					        timeElapsed = time - timeStart;
+					        window.scrollTo(0, opt.easing(timeElapsed, start, distance, duration));
+					        if (timeElapsed < duration){
+					        	requestAnimationFrame(loop)
+					        }
+					        else{
+					        	end();
+					        }
+					    }
+					
+					    function end(){
+					        window.scrollTo(0, start + distance);
+					
+					        if (typeof opt.callback==='function'){
+					        	opt.callback();
+					        }
+					    }
+					    // Robert Penner's easeInOutQuad - http://robertpenner.com/easing/
+					    function easeInOutQuad(t, b, c, d)  {
+					        t /= d / 2
+					        if(t < 1) return c / 2 * t * t + b
+					        t--
+					        return -c / 2 * (t * (t - 2) - 1) + b
+					    }
+					},
+				    blink: function(status){
+				        var fila;
+				        switch(status){
+				        	case 'on':
+					        	fila=g.getdisctId(domel);
+					        	fila.className="blink_div";
+					        	break;
+					        case 'off':
+					        	fila=g.getdisctId(domel);
+					        	fila.className="";
+					        	break;
+				        	
+				        }
+				    },
+					submit:function(callbackfunc){
+			        	var control;
+			        	control=g.getdisctId(domel);
+				        control.onsubmit=function(){
+				        	callbackfunc();
+				        }
+			      	},
+				        click:function(callbackfunc){
+				        	var control;
+				        	control=g.getdisctId(domel);
+					        control.onclick=function(){
+					        	callbackfunc();
+					        }
+				      	},
+				      	change:function(callbackfunc){
+					        var control;
+				        	control=g.getdisctId(domel);
+					        control.onchange=function(){
+					        	callbackfunc();
+					        }
+				      	},
+				      	blur:function(callbackfunc){
+					        var control;
+				        	control=g.getdisctId(domel);
+					        control.onblur=function(){
+					        	callbackfunc();
+					        }
+				      	},
+				        on:function(){
+							var control;
+							var idcontrol;
+							var event;
+							var callback;
+							idcontrol=domel;
+							event=arguments[1];
+							callback=arguments[2];;
+							control=g.getdisctId(idcontrol);
+							g.log(control);
+				        	switch(event){
+				        		case 'error':
+									control.onerror=function(){
+							        	callback();
+							        }
+				        			break;
+				        		case 'load':
+									control.onload=function(){
+							        	callback();
+							        }
+				        			break;
+				        		case 'submit':
+									control.onsubmit=function(){
+							        	callback();
+							        }
+				        			break;
+				        		case 'click':
+									control.onclick=function(){
+							        	callback();
+							        }
+				        			break;
+				        		case 'blur':
+									control.onblur=function(){
+							        	callback();
+							        }
+				        			break;
+				        		case 'change':
+									control.onchange=function(){
+							        	callback();
+							        }
+							        break;
+								case 'resize':
+									control.onresize=function(){
+							        	callback();
+							        }
+				        			break;
+								case 'unload':
+									control.onunload=function(){
+							        	callback();
+							        }
+				        			break;
+								case 'pageshow':
+									control.onpageshow=function(){
+							        	callback();
+							        }
+				        			break;
+								case 'popstate':
+									control.onpopstate=function(){
+							        	callback();
+							        }
+				        			break;
+				        	}
+				      	},
+					load:function(modulourl){
+				        var xmlhttp=false;
+				        var filecont;
+				        var contentdiv;
+				        var n;
+				        var allScripts;
+				        var callback;
+				        callback=arguments[1];
+				        contentdiv=g.getdisctId(domel);
+				        xmlhttp=g.ajax.getxhr();
+				        if (typeof callback==='function'){
+							callback();
+				        }
+					    xmlhttp.onreadystatechange = function(){
+					        if(xmlhttp.readyState==XMLHttpRequest.DONE){
+					           if(xmlhttp.status == 200){
+					               contentdiv.innerHTML = xmlhttp.responseText;
+					               allScripts=contentdiv.getElementsByTagName('script');
+					               for (n=0;n<allScripts.length;n++){
+										//run script inside rendered div
+										eval(allScripts[n].innerHTML);
+					               }
+					               if(callback!=undefined){
+								        if(typeof callback==='function'){
+											callback();
+								        }
+								        else{
+								        	g.log("No se puede ejecutar la llamada, no es tipo funcion");
+								        }
+					               }
+					           }
+					           else {
+					               g.log('Error');
+					           }
+					        }
+					    }
+			
+					    xmlhttp.open("GET", modulourl, true);
+					    xmlhttp.send();
+				    },
+				}
             },
-            hide: function(iddiv){
-				general.objeto.hide(iddiv);
-				return 0;
-            },
-            css: function(styleline){
-				general.objeto.setStyle(styleline);
-				return 0;
-            }
     };
 }());
 
-general.objeto=(function(){
+g.objeto=(function(){
   //Submodulo Objeto
-	getdisctId=function(id){
-          var cadena;
-          var idreal;
-          var objeto;
-          cadena=id;
-          if(cadena.search("#")==0){
-              idreal=id.replace("#","");
-              idreal=idreal.replace(".","");
-              objeto=document.getElementById(idreal);
-          }
-          else if(cadena.search(".")==0){
-              idreal=id.replace("#","");
-              idreal=idreal.replace(".","");
-              objeto = document.getElementsByClassName(idreal);
-          }
-          else{
-              return -1;
-          }
-          return  objeto;
-    }
   return{
-      show:function(id){
-        var fila;
-          if(!document.getElementById){
-              return false;
-          }
-          fila=getdisctId(id);
-          fila.style.display="block"; 
-      },
-      setStyle:function(id,estilo){
-        var fila;
-          if(!document.getElementById){
-              return false;
-          }
-          if(estilo==''){
-              return false;
-          }
-          fila=getdisctId(id);
-          fila.style.display=estilo;
-      },
-      hide:function(id){
-        var fila;
-		if(!document.getElementById){
-			return false;
-		}
-		fila=getdisctId(id);
-		fila.style.display="none";
-      },
-      toggleDisplay: function(id){
-        var fila;
-            if (!document.getElementById){
-                return false;
-            }
-            fila=getdisctId(id);
-            if(fila.style.display != "none"){
-              fila.style.display = "none";
-            }
-            else{
-              fila.style.display = "";
-            }
-        },
-        resetText: function(textbox){
-          var textcontent;
-          textcontent=getdisctId(textbox);
-          textcontent.value='';
-        },
-        getSelectVal: function(id){
-          var e;
-          var valorselect;
-          e ==distId(id);
-          valorselect = e.options[e.selectedIndex].value;
-          return valorselect; 
-        },
         getKey: function(e){
           if(window.event)keyCode=window.event.keyCode;
           else if(e) keyCode=e.which;
@@ -1100,7 +1322,7 @@ general.objeto=(function(){
         },
         blockNumber: function(e){
           //bloquear teclado a solo numeros
-          teclap=general.objeto.getTecla(e);
+          teclap=g.objeto.getTecla(e);
           teclan=chr(teclap);
           if(IsNumeric(teclan)==false){
             return "Solo está peritido escribir numeros";
@@ -1108,7 +1330,7 @@ general.objeto=(function(){
         },
         blockChar: function(e){
           //bloquear teclado a solo letras
-          teclap=general.objeto.getTecla(e);
+          teclap=g.objeto.getTecla(e);
           teclan=chr(teclap);
           if(IsNumeric(teclan)==true){
             return "Solo está peritido escribir letras";
@@ -1116,7 +1338,7 @@ general.objeto=(function(){
         },
         val: function(idelement){
           var element;
-          element=getdisctId(id);
+          element=g.getdisctId(id);
           return element.value;
         },
         intval: function(number){
@@ -1126,624 +1348,106 @@ general.objeto=(function(){
           return parseFloat(number);
         },
         bloqNum: function(e){
-          teclap=general.objeto.getTecla(e);
+          teclap=g.objeto.getTecla(e);
           teclan=chr(teclap);
           if(IsNumeric(teclan)==false){
             return "Solo esta permitido escribir numeros";
           }
         },
-        submit:function(idcontrol,callbackfunc){
-        	var control;
-        	control=getdisctId(idcontrol);
-	        control.onsubmit=function(){
-	        	callbackfunc();
-	        }
-      	},
-        click:function(idcontrol,callbackfunc){
-        	var control;
-        	control=getdisctId(idcontrol);
-	        control.onclick=function(){
-	        	callbackfunc();
-	        }
-      	},
-      	change:function(idcontrol,callbackfunc){
-	        var control;
-        	control=getdisctId(idcontrol);
-	        control.onchange=function(){
-	        	callbackfunc();
-	        }
-      	},
-      	blur:function(idcontrol,callbackfunc){
-	        var control;
-        	control=getdisctId(idcontrol);
-	        control.onblur=function(){
-	        	callbackfunc();
-	        }
-      	},
-        on:function(){
-			var control;
-			var idcontrol;
-			var event;
-			var callback;
-			idcontrol=arguments[0];
-			event=arguments[1];
-			callback=arguments[2];;
-			control=getdisctId(idcontrol);
-        	switch(event){
-        		case 'error':
-					control.onerror=function(){
-			        	callback();
-			        }
-        			break;
-        		case 'load':
-					control.onload=function(){
-			        	callback();
-			        }
-        			break;
-        		case 'submit':
-					control.onsubmit=function(){
-			        	callback();
-			        }
-        			break;
-        		case 'click':
-					control.onclick=function(){
-			        	callback();
-			        }
-        			break;
-        		case 'blur':
-					control.onblur=function(){
-			        	callback();
-			        }
-        			break;
-        		case 'change':
-					control.onchange=function(){
-			        	callback();
-			        }
-			        break;
-				case 'resize':
-					control.onresize=function(){
-			        	callback();
-			        }
-        			break;
-				case 'unload':
-					control.onunload=function(){
-			        	callback();
-			        }
-        			break;
-				case 'pageshow':
-					control.onpageshow=function(){
-			        	callback();
-			        }
-        			break;
-				case 'popstate':
-					control.onpopstate=function(){
-			        	callback();
-			        }
-        			break;
-        	}
-      	},
   };
 }());
-
-general.efectos=(function(){
-  //Submodulo efectos
-    var opacity=0;
-    var opacityneg=100;
-    var Cambiopa=0;
-    var CambiopaNeg=0;
-    var oncompletefi;
-    var oncompletefo;
-    var defaultStep = 1;
-    var step;
-    oncompletefi='';
-    oncompletefo='';
-	getdisctId=function(id){
-          var cadena;
-          var idreal;
-          var objeto;
-          cadena=id;
-          if(cadena.search("#")==0){
-              idreal=id.replace("#","");
-              idreal=idreal.replace(".","");
-              objeto=document.getElementById(idreal);
-          }
-          else if(cadena.search(".")==0){
-              idreal=id.replace("#","");
-              idreal=idreal.replace(".","");
-              objeto = document.getElementsByClassName(idreal);
-          }
-          else{
-              return -1;
-          }
-          return  objeto;
-    }
-  return{
-      fadeIn:function(id,tiempo){
-        var intervalo;
-        intervalo=tiempo/80;
-        oncompletefi=arguments[2];
-          if(!document.getElementById){
-              return false;
-          }
-          fila=getdisctId(id);
-            //programamos cada navegador por separado (lo mismo de antes pero
-            obj = fila;
-            //con el nuevo valor de la transparencia
-            if (document.all){
-            //esto es para IE, como siempre hay q programarlo a parte
-            obj.style.filter = 'alpha(opacity='+opacity+')';
-            }
-            else{
-            // Safari 1.2, posterior Firefox y Mozilla, CSS3
-            obj.style.opacity = opacity /100;
-            // anteriores Mozilla y Firefox
-            obj.style.MozOpacity = opacity /100;
-            // Safari anterior a 1.2, Konqueror
-            obj.style.KHTMLOpacity = opacity /100;
-            }
-            obj.style.display = "block";
-          Cambiopa=setInterval(this.cambiaropacity,intervalo);
-      },
-        cambiaropacity: function(){
-            //incrementamos el valor
-            opacity += 1;
-            console.log(opacity);
-            //seteamos al div como objeto para poder usarlo con su ID
-            obj = fila;
-            console.log(fila.id);
-            //programamos cada navegador por separado (lo mismo de antes pero
-            //con el nuevo valor de la transparencia
-            if (document.all){
-                //esto es para IE, como siempre hay q programarlo a parte
-                obj.style.filter = 'alpha(opacity='+opacity+')';
-            }
-            else{
-            // Safari 1.2, posterior Firefox y Mozilla, CSS3
-            obj.style.opacity = opacity /100;
-            // anteriores Mozilla y Firefox
-            obj.style.MozOpacity = opacity /100;
-            // Safari anterior a 1.2, Konqueror
-            obj.style.KHTMLOpacity = opacity /100;
-            }
-            //si termino la trnsicion borramos el intervalo
-            if(opacity==100){
-                clearInterval(Cambiopa);
-                if(oncompletefi!=''){
-                  oncompletefi='';
-                }
-            }
-          },
-      fadeOut:function(id,tiempo){
-        var intervalo;
-        intervalo=tiempo/80;
-        oncompletefo=arguments[2];
-          if(!document.getElementById){
-              return false;
-          }
-          fila=getdisctId(id);
-          //programamos cada navegador por separado (lo mismo de antes pero
-          obj = fila;
-          //con el nuevo valor de la transparencia
-          if (document.all){
-            //esto es para IE, como siempre hay q programarlo a parte
-            obj.style.filter = 'alpha(opacity='+opacityneg+')';
-          }
-          else{
-            // Safari 1.2, posterior Firefox y Mozilla, CSS3
-            obj.style.opacity = opacityneg /100;
-            // anteriores Mozilla y Firefox
-            obj.style.MozOpacity = opacityneg /100;
-            // Safari anterior a 1.2, Konqueror
-            obj.style.KHTMLOpacity = opacityneg /100;
-          }
-          obj.style.display = "block";
-          CambiopaNeg=setInterval(this.cambiaropacityneg,intervalo);
-      },
-        cambiaropacityneg: function(){
-            //incrementamos el valor
-            opacityneg -= 1;
-            console.log(opacityneg);
-            //seteamos al div como objeto para poder usarlo con su ID
-            obj = fila;
-            console.log(fila.id);
-            //programamos cada navegador por separado (lo mismo de antes pero
-            //con el nuevo valor de la transparencia
-            if (document.all){
-              //esto es para IE, como siempre hay q programarlo a parte
-              obj.style.filter = 'alpha(opacity='+opacityneg+')';
-            }
-            else{
-              // Safari 1.2, posterior Firefox y Mozilla, CSS3
-              obj.style.opacity = opacityneg /100;
-              // anteriores Mozilla y Firefox
-              obj.style.MozOpacity = opacityneg /100;
-              // Safari anterior a 1.2, Konqueror
-              obj.style.KHTMLOpacity = opacityneg /100;
-            }
-            //si termino la trnsicion borramos el intervalo
-            if(opacityneg==0){
-              clearInterval(CambiopaNeg);
-              if(oncompletefo!=''){
-                oncompletefo();
-                oncompletefo='';
-              }
-            }
-          },
-    once: function(seconds, callback){
-      var counter = 0;
-      var time=setInterval(function(){
-        counter++;
-        if(counter>=seconds){
-          callback();
-          clearInterval(time);
-        }
-      },400);
-    },
-    gotodiv: function(id){
-        var objeto;
-        objeto=getdisctId(id);
-        objeto.scrollIntoView();
-    },
-	smooth: function(target, options){
-	    var start = window.pageYOffset,
-	        opt = {
-	            duration: options.duration,
-	            offset: options.offset || 0,
-	            callback: options.callback,
-	            easing: options.easing || easeInOutQuad
-	        },
-	        distance = typeof target === 'string'
-	            ? opt.offset + document.querySelector(target).getBoundingClientRect().top
-	            : target,
-	        duration = typeof opt.duration === 'function'
-	            ? opt.duration(distance)
-	            : opt.duration,
-	        timeStart, timeElapsed;
-	    requestAnimationFrame(function(time){ timeStart = time; loop(time); });
-	    function loop(time){
-	        timeElapsed = time - timeStart;
-	
-	        window.scrollTo(0, opt.easing(timeElapsed, start, distance, duration));
-	
-	        if (timeElapsed < duration)
-	            requestAnimationFrame(loop)
-	        else
-	            end();
-	    }
-	
-	    function end(){
-	        window.scrollTo(0, start + distance);
-	
-	        if (typeof opt.callback === 'function')
-	            opt.callback();
-	    }
-	    
-	    // Robert Penner's easeInOutQuad - http://robertpenner.com/easing/
-	    function easeInOutQuad(t, b, c, d)  {
-	        t /= d / 2
-	        if(t < 1) return c / 2 * t * t + b
-	        t--
-	        return -c / 2 * (t * (t - 2) - 1) + b
-	    }
-	},
-    blink: function(id,status){
-        var fila;
-        switch(status){
-        	case 'on':
-	        	fila=getdisctId(id);
-	        	fila.className="blink_div";
-	        	break;
-	        case 'off':
-	        	fila=getdisctId(id);
-	        	fila.className="";
-	        	break;
-        	
-        }
-    },
-  };
-}());
-
-
-general.ajax=(function(){
+g.ajax=(function(){
   //Submodulo Ajax
-	getdisctId=function(id){
-          var cadena;
-          var idreal;
-          var objeto;
-          cadena=id;
-          if(cadena.search("#")==0){
-              idreal=id.replace("#","");
-              idreal=idreal.replace(".","");
-              objeto=document.getElementById(idreal);
-          }
-          else if(cadena.search(".")==0){
-              idreal=id.replace("#","");
-              idreal=idreal.replace(".","");
-              objeto = document.getElementsByClassName(idreal);
-          }
-          else{
-              return -1;
-          }
-          return  objeto;
-    }
   return{
-      getxhr:function(){
-        var xmlhttp=false;
-        try{
-          xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
-        }
-        catch (e){
-            try{
-              xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-            }
-            catch (E){
-              xmlhttp = false;
-            }
-         }
-        if (!xmlhttp && typeof XMLHttpRequest!='undefined'){
-          xmlhttp = new XMLHttpRequest();
-        }
-        return xmlhttp;
-      },
-      getTrim: function(cadena){
-        return cadena.replace(/^\s+/g,'').replace(/\s+$/g,'');
-      },
-      setLocal: function(varname,valor){
-        //localstorage programming
-        if (typeof(Storage) !== "undefined"){
-            // Code for localStorage/sessionStorage
-            localStorage.setItem(varname,valor);
-        }
-      },
-      getLocal: function(varname){
-        if (typeof(Storage) !== "undefined"){
-            localStorage.getItem(varname); 
-        }
-      },
-      getValObj: function(varname){
-        //escribir el salvar el valor
-        //activar en HTMl con onkeyup-->value u onchange-->select*
-        var txtcedula;
-        txtcedula=document.getElementById(varname).value;
-        //localstorage programming
-        if(typeof(Storage)!=="undefined"){
-            // Code for localStorage/sessionStorage.
-            localStorage.setItem(varname,txtcedula);
-        }
-      },
-      processForm: function(){
-        var arrayajax;
-        var IDClass;
-        var cadenaArgs;
-        var ajxProtocol;
-        var ajxFileS;
-        var elementos;
-        var formobj;
-        var indice;
-        var valor;
-        var flags;
-        var formfinal;
-        var sock;
-        var enableHTML5;
-        enableHTML5=0;
-        IDClass=0;
-        arrayajax=new Array();
-        //almacenar valores en el array 'arrayajax'
-        for(var i=0;i<arguments.length;i++){ 
-          arrayajax[i]=arguments[i];
-        }
-        //validar si el numero de argumentos sea mayor a 4
-        if((arrayajax.length)>4){
-            //Protocolo 0
-            //SocketDir 1
-            //VariableControl (variable de control para saber que accionar al momento de programar el PHP) 2
-            //Contenedor 3
-            //formID 4 ID del form
-            //Flags 5
-            //HTML5enable 6
-            //FLAGS de control: si actua dependiendo del enter o no, al estar estado 4 o no, alert o no
-            //recoger argumentos con arrayajax[i]
-            //Inicializacion de variables
-            //FLAGS A MANEJAR
-            // 1 NULL
-            // 2 VARURL
-            // 3 VARANDOM
-            //obtener los Flags con los cuales trabajar
-            formfinal=getdisctId(arrayajax[4]);
-            formid=formfinal.id;
-            //contenedorw=getdisctId(arrayajax[3]);
-            formobj=formfinal;
-            //obtener el id del form al que pertenece el boton
-            sock=general.ajax.getxhr();
-            //el argumento 0 contiene todos los datos necesarios en una cadena de argumentos
-            //desglosar la cadena en array de argumentos llamado arrayajax
-            flags=arrayajax[5];
-            HTML5enable=arrayajax[6];
-            if(formid==''){
-              alert("El formulario debe tener ID!");
-            }
-            //Obtener la lista de controles del form
-            elementos=formobj.elements;
-            /////////////////INICIALIZACION DE VARIABLES///////////
-            cadenaArgs='';
-            ajxSocket='';
-            ///////////////////////////////////////////////////////
-            ajxProtocol=arrayajax[0].toUpperCase();
-            ajxFileS=arrayajax[1];
-            cadenaArgs=arrayajax[2] + "=true";      
-            contenedorw=getdisctId(arrayajax[3]);
-            if(flags=="NORMAL" || flags==""){
-              //para procesar formularios completos arg1=valor1...&argN=valorN
-              for(i=0;i<elementos.length;i++){
-                if(elementos[i].type!="submit"){
-                  if(elementos.type!="button"){
-                    if(elementos[i].type!="select-one"){
-                      if(elementos[i].type=="file"){
-                        if(elementos[i].files.length>0){
-                          if(window.File && window.FileList && window.FileReader){
-                            var reader;
-                            var data;
-                            data=elementos[i].files[0].name;
-                            cadenaArgs=cadenaArgs + "&" + elementos[i].id + "=" + elementos[i].files[0].name + "&" + elementos[i].id + "_content=" + data;
-                          }
-                        }
-                      }
-                      else{
-                        cadenaArgs=cadenaArgs + "&" + elementos[i].id + "=" + elementos[i].value;
-                      }
-                    }
-                    else{
-                        indice = elementos[i].selectedIndex;
-                        valor = elementos[i].options[indice].value
-                        cadenaArgs=cadenaArgs + "&" + elementos[i].id + "=" + valor;
-                    } 
-                  }
-                } 
-              }
-            }
-            if(flags=="VARURL"){
-              //para cuando los argumentos son variables pasadas por url
-              for(i=6;i<arrayajax.length; i++){
-                cadenaArgs=cadenaArgs + "&" + arrayajax[i] + "=" + general.getParam(arrayajax[i]);
-              }
-            }
-            if(flags=="VARANDOM"){
-              //para cuando los argumentos estan escritos de esta forma: 'arg1=valor1','arg2=valor2'
-              for(i=6;i<arrayajax.length; i++){
-                variable=arrayajax[i];
-                svar=Array();
-                svar=variable.split("=");
-                arg1=svar[0];
-                arg2=svar[1];
-                cadenaArgs=cadenaArgs + "&" + arg1 + "=" + arg2;
-              }
-            }
-            cadenaArgs=this.getTrim(cadenaArgs);
-            if(HTML5enable==true){
-              if(ajxProtocol=="POST"){
-                ajxSocket=general.ajax.getxhr();
-                ajxSocket.open(ajxProtocol,ajxFileS,true);
-                ajxSocket.onreadystatechange=function(){
-                    if(ajxSocket.readyState==4){
-                      contenedorw.innerHTML=ajxSocket.responseText;
-                    }
-                    else{
-                      contenedorw.innerHTML="ESPERE...";
-                    }
-                  }
-                ajxSocket.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                ajxSocket.send(cadenaArgs);
-              }
-              else if(ajxProtocol=="GET"){
-                ajxSocket=general.ajax.getxhr();
-                ajxSocket.open(ajxProtocol,ajxFileS,true);
-                ajxSocket.onreadystatechange=function(){
-                    if(ajxSocket.readyState==4){
-                      contenedorw.innerHTML=ajxSocket.responseText;
-                    }
-                    else{
-                      contenedorw.innerHTML="ESPERE...";
-                    }
-                  }
-                ajxSocket.send(null);
-              }
-            }
-            else{
-              if(ajxProtocol=="POST"){
-                ajxSocket=general.ajax.getxhr();
-                ajxSocket.open(ajxProtocol,ajxFileS,true);
-                ajxSocket.onreadystatechange=function(){
-                    if(ajxSocket.readyState==4){
-                      contenedorw.innerHTML=ajxSocket.responseText;
-                    }
-                    else{
-                      contenedorw.innerHTML="ESPERE...";
-                    }
-                  }
-                ajxSocket.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                ajxSocket.send(cadenaArgs);
-              }
-              else{
-                ajxSocket=general.ajax.getxhr();
-                ajxSocket.open(ajxProtocol,ajxFileS,true);
-                ajxSocket.onreadystatechange=function(){
-                  if (ajxSocket.readyState==4){
-                    contenedorw.innerHTML = ajxSocket.responseText;
-                  }
-                  else{
-                    contenedorw.innerHTML="wait...";
-                  }
-                }
-                ajxSocket.send(null);
-              }
-            }
-          }
-          else{
-            alert("Error: Faltan argumentos!");
-          }
-      }
-  };
+	      getxhr:function(){
+	        var xmlhttp=false;
+	        try{
+	          xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+	        }
+	        catch (e){
+	            try{
+	              xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+	            }
+	            catch (E){
+	              xmlhttp = false;
+	            }
+	         }
+	        if (!xmlhttp && typeof XMLHttpRequest!='undefined'){
+	          xmlhttp = new XMLHttpRequest();
+	        }
+	        return xmlhttp;
+	      },
+	      getTrim: function(cadena){
+	        return cadena.replace(/^\s+/g,'').replace(/\s+$/g,'');
+	      },
+	      setLocal: function(varname,valor){
+	        //localstorage programming
+	        if (typeof(Storage) !== "undefined"){
+	            // Code for localStorage/sessionStorage
+	            localStorage.setItem(varname,valor);
+	        }
+	      },
+	      getLocal: function(varname){
+	        if (typeof(Storage) !== "undefined"){
+	            localStorage.getItem(varname); 
+	        }
+	      },
+	      getValObj: function(varname){
+	        //escribir el salvar el valor
+	        //activar en HTMl con onkeyup-->value u onchange-->select*
+	        var txtcedula;
+	        txtcedula=document.getElementById(varname).value;
+	        //localstorage programming
+	        if(typeof(Storage)!=="undefined"){
+	            // Code for localStorage/sessionStorage.
+	            localStorage.setItem(varname,txtcedula);
+	        }
+	      },
+	      post: function(){
+	      	/*
+	      	 * Parámetros:
+	      	 * 0 objvariables
+	      	 * 1 dirsocket
+	      	 * 2 enctype
+	      	 * 3 responsetype
+	      	 * 4 [callback] optional
+	      	 */
+	        var arrayajax;
+	        var cadenaArgs;
+	        var ajxProtocol;
+	        var valor;
+	        var sock;
+	        var callback;
+	        var data;
+	        var responset;
+	        var enctype;
+	        arrayajax=new Array();
+	        //almacenar argumentos en el array 'arrayajax'
+	        for(var i=0;i<arguments.length;i++){ 
+	          arrayajax[i]=arguments[i];
+	        }
+	      	if(arguments.length<4){
+	      		g.log("Faltan Argumentos");
+	      	}
+	      	else{
+	      		if(arguments[4]!=undefined){
+		      		if(typeof arguments[4]!=="function"){
+						g.log("El argumento Calback debe ser de tipo función");
+					}
+	      		}
+	      		
+	      	}
+	      },
+	};
 }());
-general.webwork=(function(){
+g.webwork=(function(){
 	//Submodulo WebWorkers
-	getdisctId=function(id){
-          var cadena;
-          var idreal;
-          var objeto;
-          cadena=id;
-          if(cadena.search("#")==0){
-              idreal=id.replace("#","");
-              idreal=idreal.replace(".","");
-              objeto=document.getElementById(idreal);
-          }
-          else if(cadena.search(".")==0){
-              idreal=id.replace("#","");
-              idreal=idreal.replace(".","");
-              objeto = document.getElementsByClassName(idreal);
-          }
-          else{
-              return -1;
-          }
-          return  objeto;
-    }
   return{
-      distIdWebWork: function(id){
-            var cadena;
-            var idreal;
-            var filareal;
-            var tiporeal;
-            cadena=id;
-            tipo='';
-            if(cadena.search("#")==0){
-                idreal=id.replace("#","");
-                idreal=idreal.replace(".","");
-                tiporeal="ID";
-                var filareal={
-                  eto: document.getElementById(idreal),
-                  tipo: tiporeal,
-                  id: idreal
-                };
-            }
-            else if(cadena.search(".")==0){
-                idreal=id.replace("#","");
-                idreal=idreal.replace(".","");
-                tiporeal="CLASS";
-                var filareal={
-                  eto: document.getElementById(idreal),
-                  tipo: tiporeal,
-                  id: idreal
-                };
-            }
-            else{
-                return -1;
-            }
-            return  filareal;
-      },
       getWebWork: function(archivo){
         var workerSck;
         var workerName;
         if(archivo!=''){
-          workerName=getdisctId(archivo);
+          workerName=g.getdisctId(archivo);
           if(typeof(Worker)!=="undefined"){
             // Some code.....
             workerSck = new Worker(workerName.id);
@@ -1759,28 +1463,8 @@ general.webwork=(function(){
 }());
 
 
-general.watch=(function(){
+g.watch=(function(){
 	//Submodulo WebWorkers
-	getdisctId=function(id){
-          var cadena;
-          var idreal;
-          var filareal;
-          cadena=id;
-          if(cadena.search("#")==0){
-              idreal=id.replace("#","");
-              idreal=idreal.replace(".","");
-              filareal=document.getElementById(idreal);
-          }
-          else if(cadena.search(".")==0){
-              idreal=id.replace("#","");
-              idreal=idreal.replace(".","");
-              filareal = document.getElementsByClassName(idreal);
-          }
-          else{
-              return -1;
-          }
-          return  filareal;
-    }
   return{
 	  obj: function(archivo){
 		if(!Object.prototype.watch){
@@ -1816,28 +1500,8 @@ general.watch=(function(){
   };
 }());
 
-general.unwatch=(function(){
+g.unwatch=(function(){
 	//Submodulo WebWorkers
-	getdisctId=function(id){
-          var cadena;
-          var idreal;
-          var filareal;
-          cadena=id;
-          if(cadena.search("#")==0){
-              idreal=id.replace("#","");
-              idreal=idreal.replace(".","");
-              filareal=document.getElementById(idreal);
-          }
-          else if(cadena.search(".")==0){
-              idreal=id.replace("#","");
-              idreal=idreal.replace(".","");
-              filareal = document.getElementsByClassName(idreal);
-          }
-          else{
-              return -1;
-          }
-          return  filareal;
-   };
   return{
   	obj: function(){
 		if(!Object.prototype.unwatch){
@@ -1855,160 +1519,76 @@ general.unwatch=(function(){
   	}
   };
 }());
-
-general.ui=(function(){
-	//Submodulo WebWorkers
-	getdisctId=function(id){
-          var cadena;
-          var idreal;
-          var objeto;
-          cadena=id;
-          if(cadena.search("#")==0){
-              idreal=id.replace("#","");
-              idreal=idreal.replace(".","");
-              objeto=document.getElementById(idreal);
-          }
-          else if(cadena.search(".")==0){
-              idreal=id.replace("#","");
-              idreal=idreal.replace(".","");
-              objeto = document.getElementsByClassName(idreal);
-          }
-          else{
-              return -1;
-          }
-          return  objeto;
-    }
-	return{
-		//Write code below..
-	};
-}());
-
-general.slideshow=(function(){
-	//Submodulo Slideshow
-	return{
-		//Write code below..
-		cycle:function(div){
-			
-		}
-	};
-}());
 //Rutas personalizadas con argumentos PHP como slash y hashes para los nombres de las páginas a visitar
-general.path=(function(){
+g.path=(function(){
 	//Submodulo Path / Rewrite PathJS
 	function version(){
 		return "0.8.4"; 
 	};
-	getdisctId=function(id){
-          var cadena;
-          var idreal;
-          var objeto;
-          cadena=id;
-          if(cadena.search("#")==0){
-              idreal=id.replace("#","");
-              idreal=idreal.replace(".","");
-              objeto=document.getElementById(idreal);
-          }
-          else if(cadena.search(".")==0){
-              idreal=id.replace("#","");
-              idreal=idreal.replace(".","");
-              objeto = document.getElementsByClassName(idreal);
-          }
-          else{
-              return -1;
-          }
-          return  objeto;
-   };
 	return{
 		//Write code below..
 		getVersion:function(){
 	        return version();
 	    },
-	    load:function(div,modulourl){
-	        var xmlhttp=false;
-	        var filecont;
-	        var contentdiv;
-	        var n;
-	        var allScripts;
-	        contentdiv=getdisctId(div);
-	        xmlhttp=general.ajax.getxhr();
-		    xmlhttp.onreadystatechange = function(){
-		        if(xmlhttp.readyState==XMLHttpRequest.DONE){
-		           if(xmlhttp.status == 200){
-		               contentdiv.innerHTML = xmlhttp.responseText;
-		               allScripts=contentdiv.getElementsByTagName('script');
-		               for (n=0;n<allScripts.length;n++){
-							//run script inside rendered div
-							eval(allScripts[n].innerHTML);
-		               }
-		           }
-		           else {
-		               alert('Error');
-		           }
-		        }
-		    }
-
-		    xmlhttp.open("GET", modulourl, true);
-		    xmlhttp.send();
-	    },
 	    map:function(path){
-	        if(general.path.routes.defined.hasOwnProperty(path)){
-	            return general.path.routes.defined[path];
+	        if(g.path.routes.defined.hasOwnProperty(path)){
+	            return g.path.routes.defined[path];
 	        }
 	        else{
-				return new general.path.core.route(path);
+				return new g.path.core.route(path);
 	        }
 	    },
 	    root: function (path){
-	        general.path.routes.root = path;
+	        g.path.routes.root = path;
 	    },
 	    rescue: function (fn){
-	        general.path.routes.rescue = fn;
+	        g.path.routes.rescue = fn;
 	    },
 	    history: {
 	        initial:{}, // Empty container for "Initial Popstate" checking variables.
 	        pushState: function(state, title, path){
-	            if(general.path.history.supported){
-	                if(general.path.dispatch(path)){
+	            if(g.path.history.supported){
+	                if(g.path.dispatch(path)){
 	                    history.pushState(state, title, path);
 	                }
 	            } else {
-	                if(general.path.history.fallback){
+	                if(g.path.history.fallback){
 	                    window.location.hash = "#" + path;
 	                }
 	            }
 	        },
 	        popState: function(event){
-	            var initialPop = !general.path.history.initial.popped && location.href == general.path.history.initial.URL;
-	            general.path.history.initial.popped = true;
+	            var initialPop = !g.path.history.initial.popped && location.href == g.path.history.initial.URL;
+	            g.path.history.initial.popped = true;
 	            if(initialPop) return;
-	            general.path.dispatch(document.location.pathname);
+	            g.path.dispatch(document.location.pathname);
 	        },
 	        listen: function(fallback){
-	            general.path.history.supported = !!(window.history && window.history.pushState);
-	            general.path.history.fallback  = fallback;
+	            g.path.history.supported = !!(window.history && window.history.pushState);
+	            g.path.history.fallback  = fallback;
 	
-	            if(general.path.history.supported){
-	                general.path.history.initial.popped = ('state' in window.history), general.path.history.initial.URL = location.href;
-	                window.onpopstate = general.path.history.popState;
+	            if(g.path.history.supported){
+	                g.path.history.initial.popped = ('state' in window.history), g.path.history.initial.URL = location.href;
+	                window.onpopstate = g.path.history.popState;
 	            }
 	            else{
-	                if(general.path.history.fallback){
-	                    for(route in general.path.routes.defined){
+	                if(g.path.history.fallback){
+	                    for(route in g.path.routes.defined){
 	                        if(route.charAt(0) != "#"){
-	                          general.path.routes.defined["#"+route] = general.path.routes.defined[route];
-	                          general.path.routes.defined["#"+route].path = "#"+route;
+	                          g.path.routes.defined["#"+route] = g.path.routes.defined[route];
+	                          g.path.routes.defined["#"+route].path = "#"+route;
 	                        }
 	                    }
-	                    general.path.listen();
+	                    g.path.listen();
 	                }
 	            }
 	        }
 	    },
 	    match:function (path, parameterize){
 	        var params = {}, route = null, possible_routes, slice, i, j, compare;
-	        for (route in general.path.routes.defined){
+	        for (route in g.path.routes.defined){
 	            if (route !== null && route !== undefined){
-	                route = general.path.routes.defined[route];
+	                route = g.path.routes.defined[route];
 	                possible_routes = route.partition();
 	                for (j = 0; j < possible_routes.length; j++){
 	                    slice = possible_routes[j];
@@ -2034,13 +1614,13 @@ general.path=(function(){
 	    },
 	    dispatch:function (passed_route){
 	        var previous_route, matched_route;
-	        if (general.path.routes.current !== passed_route){
-	            general.path.routes.previous = general.path.routes.current;
-	            general.path.routes.current = passed_route;
-	            matched_route = general.path.match(passed_route, true);
+	        if (g.path.routes.current !== passed_route){
+	            g.path.routes.previous = g.path.routes.current;
+	            g.path.routes.current = passed_route;
+	            matched_route = g.path.match(passed_route, true);
 	
-	            if (general.path.routes.previous){
-	                previous_route = general.path.match(general.path.routes.previous);
+	            if (g.path.routes.previous){
+	                previous_route = g.path.match(g.path.routes.previous);
 	                if (previous_route !== null && previous_route.do_exit !== null){
 	                    previous_route.do_exit();
 	                }
@@ -2050,18 +1630,18 @@ general.path=(function(){
 	                matched_route.run();
 	                return true;
 	            } else {
-	                if (general.path.routes.rescue !== null){
-	                    general.path.routes.rescue();
+	                if (g.path.routes.rescue !== null){
+	                    g.path.routes.rescue();
 	                }
 	            }
 	        }
 	    },
 	    listen:function (){
-	        var fn = function(){ general.path.dispatch(location.hash); }
+	        var fn = function(){ g.path.dispatch(location.hash); }
 	
 	        if (location.hash === ""){
-	            if (general.path.routes.root !== null){
-	                location.hash = general.path.routes.root;
+	            if (g.path.routes.root !== null){
+	                location.hash = g.path.routes.root;
 	            }
 	        }
 	
@@ -2074,7 +1654,7 @@ general.path=(function(){
 	        }
 	
 	        if(location.hash !== ""){
-	            general.path.dispatch(location.hash);
+	            g.path.dispatch(location.hash);
 	        }
 	    },
 	    core:{
@@ -2084,7 +1664,7 @@ general.path=(function(){
 	            this.do_enter = [];
 	            this.do_exit = null;
 	            this.params = {};
-	            general.path.routes.defined[path] = this;
+	            g.path.routes.defined[path] = this;
 	        }
 	    },
 	    routes:{
@@ -2096,7 +1676,7 @@ general.path=(function(){
 	    }
 	};
 }());
-general.path.core.route.prototype = {
+g.path.core.route.prototype = {
     'to': function (fn){
         this.action = fn;
         return this;
@@ -2127,10 +1707,10 @@ general.path.core.route.prototype = {
     run: function (){
         var halt_execution = false, i, result, previous;
 
-        if (general.path.routes.defined[this.path].hasOwnProperty("do_enter")){
-            if (general.path.routes.defined[this.path].do_enter.length > 0){
-                for (i = 0; i < general.path.routes.defined[this.path].do_enter.length; i++){
-                    result = general.path.routes.defined[this.path].do_enter[i].apply(this, null);
+        if (g.path.routes.defined[this.path].hasOwnProperty("do_enter")){
+            if (g.path.routes.defined[this.path].do_enter.length > 0){
+                for (i = 0; i < g.path.routes.defined[this.path].do_enter.length; i++){
+                    result = g.path.routes.defined[this.path].do_enter[i].apply(this, null);
                     if (result === false){
                         halt_execution = true;
                         break;
@@ -2139,34 +1719,13 @@ general.path.core.route.prototype = {
             }
         }
         if (!halt_execution){
-            general.path.routes.defined[this.path].action();
+            g.path.routes.defined[this.path].action();
         }
     }
 };
 
-general.md5=(function(){
+g.md5=(function(){
 	//Submodulo WebWorkers
-	getdisctId=function(id){
-          var cadena;
-          var idreal;
-          var objeto;
-          cadena=id;
-          if(cadena.search("#")==0){
-              idreal=id.replace("#","");
-              idreal=idreal.replace(".","");
-              objeto=document.getElementById(idreal);
-          }
-          else if(cadena.search(".")==0){
-              idreal=id.replace("#","");
-              idreal=idreal.replace(".","");
-              objeto = document.getElementsByClassName(idreal);
-          }
-          else{
-              return -1;
-          }
-          return  objeto;
-   };
-
    function RotateLeft(lValue, iShiftBits){
            return (lValue<<iShiftBits) | (lValue>>>(32-iShiftBits));
    }
@@ -2206,17 +1765,14 @@ general.md5=(function(){
            a = AddUnsigned(a, AddUnsigned(AddUnsigned(G(b, c, d), x), ac));
            return AddUnsigned(RotateLeft(a, s), b);
    };
-
    function HH(a,b,c,d,x,s,ac){
            a = AddUnsigned(a, AddUnsigned(AddUnsigned(H(b, c, d), x), ac));
            return AddUnsigned(RotateLeft(a, s), b);
    };
-
    function II(a,b,c,d,x,s,ac){
            a = AddUnsigned(a, AddUnsigned(AddUnsigned(I(b, c, d), x), ac));
            return AddUnsigned(RotateLeft(a, s), b);
    };
-
    function ConvertToWordArray(string){
            var lWordCount;
            var lMessageLength = string.length;
@@ -2239,7 +1795,6 @@ general.md5=(function(){
            lWordArray[lNumberOfWords-1] = lMessageLength>>>29;
            return lWordArray;
    };
-
    function WordToHex(lValue){
            var WordToHexValue="",WordToHexValue_temp="",lByte,lCount;
            for (lCount = 0;lCount<=3;lCount++){
@@ -2363,94 +1918,6 @@ general.md5=(function(){
 		}
 	};
 }());
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports) {
-
-initSmoothScrolling();
-function initSmoothScrolling() {
-    if (isCssSmoothSCrollSupported()) {
-        document.getElementById('css-support-msg').className = 'supported';
-        return;
-    }
-    
-    var duration = 400;
-    
-    var pageUrl = location.hash
-        ? stripHash(location.href)
-        : location.href
-    ;
-    
-    delegatedLinkHijacking();
-    //directLinkHijacking();
-    
-    function delegatedLinkHijacking() {
-        document.body.addEventListener('click', onClick, false);
-        
-        function onClick(e) {
-            if (!isInPageLink(e.target))
-                return;
-            
-            e.stopPropagation();
-            e.preventDefault();
-            
-            jump(e.target.hash, {
-                duration: duration,
-                callback: function() {
-                    setFocus(e.target.hash);
-                }
-            });
-        }
-    }
-
-    function directLinkHijacking() {
-        [].slice.call(document.querySelectorAll('a'))
-            .filter(isInPageLink)
-            .forEach(function(a) { a.addEventListener('click', onClick, false); })
-        ;
-            
-        function onClick(e) {
-            e.stopPropagation();
-            e.preventDefault();
-            
-            jump(e.target.hash, {
-                duration: duration
-            });
-        }
-        
-    }
-
-    function isInPageLink(n) {
-        return n.tagName.toLowerCase() === 'a' 
-            && n.hash.length > 0
-            && stripHash(n.href) === pageUrl
-        ;
-    }
-        
-    function stripHash(url) {
-        return url.slice(0, url.lastIndexOf('#'));
-    }
-    
-    function isCssSmoothSCrollSupported() {
-        return 'scrollBehavior' in document.documentElement.style;
-    }
-
-    // Adapted from:
-    // https://www.nczonline.net/blog/2013/01/15/fixing-skip-to-content-links/
-    function setFocus(hash) {
-        var element = document.getElementById(hash.substring(1));
-
-        if (element) {
-            if (!/^(?:a|select|input|button|textarea)$/i.test(element.tagName)) {
-                element.tabIndex = -1;
-            }
-
-            element.focus();
-        }
-    }
-
-}
 
 /***/ })
 /******/ ]);

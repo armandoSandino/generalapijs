@@ -46,10 +46,14 @@
 				});
 			});
 			
-			g.ajax.post({variabu:"arturo",variabd:"vasquez"},"socket.php",function(data){
-				console.log("data devuelta: ");
-				console.log(data);
-			});
+			g.ajax.post(
+				{variabu:"arturo",variabd:"vasquez"},
+				"socket.php",
+				function(data){
+					g.log("data devuelta: ");
+					g.log(data);
+				}
+			);
 		}());
 		</script>
 	</body>

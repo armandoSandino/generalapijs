@@ -1408,35 +1408,76 @@ g.ajax=(function(){
 	      	 * Parámetros:
 	      	 * 0 objvariables
 	      	 * 1 dirsocket
-	      	 * 2 enctype
-	      	 * 3 responsetype
-	      	 * 4 [callback] optional
+	      	 * 2 [callback] optional
 	      	 */
-	        var arrayajax;
-	        var cadenaArgs;
+	      	var i;
+	        var arrayvar;
 	        var ajxProtocol;
-	        var valor;
+	        var dirsocket;
+	        var variablesobj;
+	        var variablesaux;
 	        var sock;
 	        var callback;
 	        var data;
 	        var responset;
 	        var enctype;
-	        arrayajax=new Array();
-	        //almacenar argumentos en el array 'arrayajax'
-	        for(var i=0;i<arguments.length;i++){ 
-	          arrayajax[i]=arguments[i];
+	        var contenedor;
+	        arrayvar=new Array();
+	        variablesobj={};
+	        variablesaux={};
+	        //almacenar argumentos en el array 'arrayvar'
+	        for(i=0;i<arguments.length;i++){ 
+	          arrayvar[i]=arguments[i];
 	        }
-	      	if(arguments.length<4){
-	      		g.log("Faltan Argumentos");
+			if(arguments.length<2){
+	      		g.log("Faltan Argumentos " + arguments.length);
 	      	}
 	      	else{
-	      		if(arguments[4]!=undefined){
-		      		if(typeof arguments[4]!=="function"){
-						g.log("El argumento Calback debe ser de tipo función");
+	      		// Obtener objeto AJAX;
+	      		sock=g.ajax.getxhr();
+	      		// Obtener objeto de variables;
+	      		variablesaux=JSON.stringify(arrayvar[0]);
+	      		variablesobj=JSON.parse(variablesaux);
+	      		g.log(variablesobj);
+	      		// Obtener string de protocolo
+	      		ajxProtocol="POST";
+	      		// Obtener string de dir archivo socket
+	      		dirsocket=arrayvar[1];
+	      		// Obtener string de enctype
+	      		enctype="application/x-www-form-urlencoded";
+	      		// VALIDACIONES
+	      		if(arguments[2]!=undefined){
+		      		if(typeof arguments[2]==="function"){
+						callback=arguments[2];
+					}
+					else{
+						g.log("El argumento Callback debe ser de tipo función");
 					}
 	      		}
-	      		
-	      	}
+	      		////////////////////////////////////////////////////
+	      		// EJECUTAR FUNCION Y CALLBACK//////////////////////
+		        sock.open(ajxProtocol,dirsocket,true);
+				sock.onreadystatechange=function() {
+					if(sock.readyState==4 && sock.status==200){
+		                data=sock.responseText;
+		                g.log("STATUS: " + sock.readyState + " " + sock.status + " " + sock.statusText);
+		                if(callback!=undefined){
+		                	if(typeof callback==="function"){
+								callback(data);
+							}
+							else{
+								g.log("El parámetro Callback no es función o no existe!");
+							}
+		                }
+		                else{
+							g.log("El parámetro Callback no existe!");
+						}
+				 	}
+				}
+				sock.setRequestHeader("Content-Type","application/json; charset=utf-8");
+				sock.send(JSON.stringify(variablesobj));
+		        //////////////////////////////////////////////////// 
+			}
 	      },
 	};
 }());

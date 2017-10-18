@@ -633,32 +633,34 @@ g.ajax=(function(){
 	            localStorage.getItem(varname); 
 	        }
 	      },
-	      upload: function(fileid){
+	      upload: function(fileid,callbackup){
 	      	var filectrl;
 	      	var file;
 	      	var reader;
 	      	var finalfile;
 	      	var fileapi;
 	      	var formData;
+	      	var objnombrefile;
+	      	objnombrefile={};
 	      	//Validación si hay los elementos para realizar la carga asíncrona de archivos
 	      	if(window.File && window.FileList && window.Blob && window.FileReader && window.FormData){
 			    reader=new FileReader();
 				filectrl=g.getdisctId(fileid); //Files[0] = 1st file
 				file=filectrl.files[0];
-				reader.readAsText(file,'UTF-8');
+				reader.readAsBinaryString(file);
 				reader.onload=function(event) {
 				    var result=event.target.result;
 				    var fileName=filectrl.files[0].name;
 				    g.ajax.post(
-						{ 
-							data: result,
-							name: fileName
+						{
+							data:btoa(result),
+							name:fileName
 						},
 						"upload.php",
 						function(data){
 							g.log("data devuelta: ");
 							g.log(data);
-							return data;
+							callbackup(data);
 						}
 					);
 				};

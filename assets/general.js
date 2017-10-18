@@ -655,7 +655,7 @@ g.ajax=(function(){
 						function(data){
 							g.log("data devuelta: ");
 							g.log(data);
-							callbackup(data);
+							callbackup(JSON.parse(data));
 						}
 					);
 				};

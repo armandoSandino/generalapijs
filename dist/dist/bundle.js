@@ -1333,11 +1333,6 @@ g.objeto=(function(){
             return "Solo está peritido escribir letras";
           }
         },
-        val: function(idelement){
-          var element;
-          element=g.getdisctId(id);
-          return element.value;
-        },
         intval: function(number){
           return parseInt(number);
         },
@@ -1416,7 +1411,7 @@ g.ajax=(function(){
 						function(data){
 							g.log("data devuelta: ");
 							g.log(data);
-							callbackup(data);
+							callbackup(JSON.parse(data));
 						}
 					);
 				};
@@ -1435,7 +1430,6 @@ g.ajax=(function(){
 	      	 * 0 objvariables
 	      	 * 1 dirsocket
 	      	 * 2 [callback] optional
-	      	 * 3 [header] optional
 	      	 */
 	      	var i;
 	        var arrayvar;

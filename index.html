@@ -53,10 +53,9 @@
 				//function(data)=callback con return de la data obtenida
 				g.ajax.upload("#holaf",function(data){
 					//tratar variable para convertir string en JSON
-					archivo=JSON.parse(data);
 					//Imprimir variable///////////////////////////////
 					console.log("*******************data[0].file*******************");
-					console.log(archivo[0].file);
+					console.log(data[0].file);
 					console.log("*******************data[0].file*******************");
 					//////////////////////////////////////////////////
 				});

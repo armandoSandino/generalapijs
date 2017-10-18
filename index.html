@@ -49,13 +49,15 @@
 			});
 			g.dom("#btnfile").click(function(){
 				var archivo;
+				//holaf=id del control file
+				//function(data)=callback con return de la data obtenida
 				g.ajax.upload("#holaf",function(data){
 					//tratar variable para convertir string en JSON
 					archivo=JSON.parse(data);
-					//Imprimir variable
-					console.log("*******************data.file*******************");
+					//Imprimir variable///////////////////////////////
+					console.log("*******************data[0].file*******************");
 					console.log(archivo[0].file);
-					console.log("*******************data.file*******************");
+					console.log("*******************data[0].file*******************");
 					//////////////////////////////////////////////////
 				});
 			});

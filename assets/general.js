@@ -577,11 +577,6 @@ g.objeto=(function(){
             return "Solo está peritido escribir letras";
           }
         },
-        val: function(idelement){
-          var element;
-          element=g.getdisctId(id);
-          return element.value;
-        },
         intval: function(number){
           return parseInt(number);
         },

@@ -20,6 +20,15 @@
 		<script>
 		(function(){
 			var cadenamd5;
+			/*
+			 *slideshow Cycle.js
+			 * */
+			var cycle = new g.carousel('.my-cycle', {
+			    autoRun: true,
+			    captionColor: 'rgba(0, 0, 0, 0.55)',
+			    speed: '5000'
+			});
+			g.carousel.style([arrayOfCustomRules]).run();
 			cadenamd5=g.md5.calc("Arat5uro");
 			g.log("CLAVE MD5: " + cadenamd5);
 			g.log("Path JS Version: " + g.path.getVersion());
@@ -27,6 +36,7 @@
 				g.log("Módulo cargado.");
 			});
 			g.path.listen();
+			g.dom("#holap").cursor('pointer');
 			g.dom("#holap").fadeIn(5000);
 			g.dom("#holap").click(function(){
 				g.dom("#holap").smooth("#adiosp",{
@@ -37,7 +47,6 @@
 					}
 				});
 			});
-			
 			g.dom("#adiosp").click(function(){
 				g.dom("#holap").smooth("#adiosp",{
 					duration:'10000',

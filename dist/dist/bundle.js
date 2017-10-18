@@ -519,6 +519,7 @@ __webpack_require__(4);
 __webpack_require__(7);
 __webpack_require__(9);
 __webpack_require__(11);
+__webpack_require__(12);
 
 /***/ }),
 /* 4 */
@@ -700,7 +701,7 @@ exports = module.exports = __webpack_require__(0)(undefined);
 
 
 // module
-exports.push([module.i, ".blink_div{\n    text-decoration: blink;\n    animation: blink 0.9s step-start 0s infinite;\n    -webkit-animation: blink 0.9s step-start 0s infinite;\n}\n\n\n@keyframes blink {  \n  0% { opacity: 1.0; }\n  50% { opacity: 0.0; }\n  100% { opacity: 1.0; }\n}\n@-webkit-keyframes blink {\n  0% { opacity: 1.0; }\n  50% { opacity: 0.0; }\n  100% { opacity: 1.0; }\n}", ""]);
+exports.push([module.i, ".cycle{\n\tposition:relative;\n\tdisplay:block;\n\tfloat:none;\n}\n", ""]);
 
 // exports
 
@@ -752,6 +753,522 @@ exports.push([module.i, "html {\n\tscroll-behavior: smooth;\n}\n\nbody {\n\tmarg
 
 /***/ }),
 /* 11 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/**
+ * Hi :-) This is a class representing a carousel.
+ */
+class carousel {
+  /**
+   * Create a carousel.
+   * @param {Object} options - Optional settings object.
+   */
+  constructor(options) {
+    // Merge defaults with user's settings
+    this.config = carousel.mergeSettings(options);
+
+    // Resolve selector's type
+    this.selector = typeof this.config.selector === 'string' ? document.querySelector(this.config.selector) : this.config.selector;
+
+    // Early throw if selector doesn't exists
+    if (this.selector === null) {
+      throw new Error('Something wrong with your selector 😭');
+    }
+
+    // Create global references
+    this.selectorWidth = this.selector.offsetWidth;
+    this.innerElements = [].slice.call(this.selector.children);
+    this.currentSlide = this.config.startIndex;
+    this.transformProperty = carousel.webkitOrNot();
+
+    // Bind all event handlers for referencability
+    ['resizeHandler', 'touchstartHandler', 'touchendHandler', 'touchmoveHandler', 'mousedownHandler', 'mouseupHandler', 'mouseleaveHandler', 'mousemoveHandler'].forEach(method => {
+      this[method] = this[method].bind(this);
+    });
+
+    // Build markup and apply required styling to elements
+    this.init();
+  }
+  /**
+   * Overrides default settings with custom ones.
+   * @param {Object} options - Optional settings object.
+   * @returns {Object} - Custom carousel settings.
+   */
+  static mergeSettings(options) {
+    const settings = {
+      selector: '.carousel',
+      duration: 200,
+      easing: 'ease-out',
+      perPage: 1,
+      startIndex: 0,
+      draggable: true,
+      multipleDrag: true,
+      threshold: 20,
+      loop: false,
+      onInit: () => {},
+      onChange: () => {},
+    };
+
+    const userSttings = options;
+    for (const attrname in userSttings) {
+      settings[attrname] = userSttings[attrname];
+    }
+
+    return settings;
+  }
+  /**
+   * Determine if browser supports unprefixed transform property.
+   * @returns {string} - Transform property supported by client.
+   */
+  static webkitOrNot() {
+    const style = document.documentElement.style;
+    if (typeof style.transform === 'string') {
+      return 'transform';
+    }
+    return 'WebkitTransform';
+  }
+
+  /**
+   * Attaches listeners to required events.
+   */
+  attachEvents() {
+    // Resize element on window resize
+    window.addEventListener('resize', this.resizeHandler);
+
+    // If element is draggable / swipable, add event handlers
+    if (this.config.draggable) {
+      // Keep track pointer hold and dragging distance
+      this.pointerDown = false;
+      this.drag = {
+        startX: 0,
+        endX: 0,
+        startY: 0,
+        letItGo: null
+      };
+
+      // Touch events
+      this.selector.addEventListener('touchstart', this.touchstartHandler, { passive: true });
+      this.selector.addEventListener('touchend', this.touchendHandler);
+      this.selector.addEventListener('touchmove', this.touchmoveHandler, { passive: true });
+
+      // Mouse events
+      this.selector.addEventListener('mousedown', this.mousedownHandler);
+      this.selector.addEventListener('mouseup', this.mouseupHandler);
+      this.selector.addEventListener('mouseleave', this.mouseleaveHandler);
+      this.selector.addEventListener('mousemove', this.mousemoveHandler);
+    }
+  }
+
+
+  /**
+   * Detaches listeners from required events.
+   */
+  detachEvents() {
+    window.removeEventListener('resize', this.resizeHandler);
+    this.selector.style.cursor = 'auto';
+    this.selector.removeEventListener('touchstart', this.touchstartHandler);
+    this.selector.removeEventListener('touchend', this.touchendHandler);
+    this.selector.removeEventListener('touchmove', this.touchmoveHandler);
+    this.selector.removeEventListener('mousedown', this.mousedownHandler);
+    this.selector.removeEventListener('mouseup', this.mouseupHandler);
+    this.selector.removeEventListener('mouseleave', this.mouseleaveHandler);
+    this.selector.removeEventListener('mousemove', this.mousemoveHandler);
+  }
+
+
+  /**
+   * Builds the markup and attaches listeners to required events.
+   */
+  init() {
+    this.attachEvents();
+
+    // update perPage number dependable of user value
+    this.resolveSlidesNumber();
+
+    // hide everything out of selector's boundaries
+    this.selector.style.overflow = 'hidden';
+
+    // Create frame and apply styling
+    this.sliderFrame = document.createElement('div');
+    this.sliderFrame.style.width = `${(this.selectorWidth / this.perPage) * this.innerElements.length}px`;
+    this.sliderFrame.style.webkitTransition = `all ${this.config.duration}ms ${this.config.easing}`;
+    this.sliderFrame.style.transition = `all ${this.config.duration}ms ${this.config.easing}`;
+
+    if (this.config.draggable) {
+      this.selector.style.cursor = '-webkit-grab';
+    }
+
+    // Create a document fragment to put slides into it
+    const docFragment = document.createDocumentFragment();
+
+    // Loop through the slides, add styling and add them to document fragment
+    for (let i = 0; i < this.innerElements.length; i++) {
+      const elementContainer = document.createElement('div');
+      elementContainer.style.cssFloat = 'left';
+      elementContainer.style.float = 'left';
+      elementContainer.style.width = `${100 / this.innerElements.length}%`;
+      elementContainer.appendChild(this.innerElements[i]);
+      docFragment.appendChild(elementContainer);
+    }
+
+    // Add fragment to the frame
+    this.sliderFrame.appendChild(docFragment);
+
+    // Clear selector (just in case something is there) and insert a frame
+    this.selector.innerHTML = '';
+    this.selector.appendChild(this.sliderFrame);
+
+    // Go to currently active slide after initial build
+    this.slideToCurrent();
+    this.config.onInit.call(this);
+  }
+  /**
+   * Determinates slides number accordingly to clients viewport.
+   */
+  resolveSlidesNumber() {
+    if (typeof this.config.perPage === 'number') {
+      this.perPage = this.config.perPage;
+    }
+    else if (typeof this.config.perPage === 'object') {
+      this.perPage = 1;
+      for (const viewport in this.config.perPage) {
+        if (window.innerWidth >= viewport) {
+          this.perPage = this.config.perPage[viewport];
+        }
+      }
+    }
+  }
+  /**
+   * Go to previous slide.
+   * @param {number} [howManySlides=1] - How many items to slide backward.
+   * @param {function} callback - Optional callback function.
+   */
+  prev(howManySlides = 1, callback) {
+    if (this.innerElements.length <= this.perPage) {
+      return;
+    }
+    const beforeChange = this.currentSlide;
+    if (this.currentSlide === 0 && this.config.loop) {
+      this.currentSlide = this.innerElements.length - this.perPage;
+    }
+    else {
+      this.currentSlide = Math.max(this.currentSlide - howManySlides, 0);
+    }
+    if (beforeChange !== this.currentSlide) {
+      this.slideToCurrent();
+      this.config.onChange.call(this);
+      if (callback) {
+        callback.call(this);
+      }
+    }
+  }
+  /**
+   * Go to next slide.
+   * @param {number} [howManySlides=1] - How many items to slide forward.
+   * @param {function} callback - Optional callback function.
+   */
+  next(howManySlides = 1, callback) {
+    if (this.innerElements.length <= this.perPage) {
+      return;
+    }
+    const beforeChange = this.currentSlide;
+    if (this.currentSlide === this.innerElements.length - this.perPage && this.config.loop) {
+      this.currentSlide = 0;
+    }
+    else {
+      this.currentSlide = Math.min(this.currentSlide + howManySlides, this.innerElements.length - this.perPage);
+    }
+    if (beforeChange !== this.currentSlide) {
+      this.slideToCurrent();
+      this.config.onChange.call(this);
+      if (callback) {
+        callback.call(this);
+      }
+    }
+  }
+  /**
+   * Go to slide with particular index
+   * @param {number} index - Item index to slide to.
+   * @param {function} callback - Optional callback function.
+   */
+  goTo(index, callback) {
+    if (this.innerElements.length <= this.perPage) {
+      return;
+    }
+    const beforeChange = this.currentSlide;
+    this.currentSlide = Math.min(Math.max(index, 0), this.innerElements.length - this.perPage);
+    if (beforeChange !== this.currentSlide) {
+      this.slideToCurrent();
+      this.config.onChange.call(this);
+      if (callback) {
+        callback.call(this);
+      }
+    }
+  }
+  /**
+   * Moves sliders frame to position of currently active slide
+   */
+  slideToCurrent() {
+    this.sliderFrame.style[this.transformProperty] = `translate3d(-${this.currentSlide * (this.selectorWidth / this.perPage)}px, 0, 0)`;
+  }
+  /**
+   * Recalculate drag /swipe event and reposition the frame of a slider
+   */
+  updateAfterDrag() {
+    const movement = this.drag.endX - this.drag.startX;
+    const movementDistance = Math.abs(movement);
+    const howManySliderToSlide = this.config.multipleDrag ? Math.ceil(movementDistance / (this.selectorWidth / this.perPage)) : 1;
+
+    if (movement > 0 && movementDistance > this.config.threshold && this.innerElements.length > this.perPage) {
+      this.prev(howManySliderToSlide);
+    }
+    else if (movement < 0 && movementDistance > this.config.threshold && this.innerElements.length > this.perPage) {
+      this.next(howManySliderToSlide);
+    }
+    this.slideToCurrent();
+  }
+  /**
+   * When window resizes, resize slider components as well
+   */
+  resizeHandler() {
+    // update perPage number dependable of user value
+    this.resolveSlidesNumber();
+
+    this.selectorWidth = this.selector.offsetWidth;
+    this.sliderFrame.style.width = `${(this.selectorWidth / this.perPage) * this.innerElements.length}px`;
+
+    this.slideToCurrent();
+  }
+  /**
+   * Clear drag after touchend and mouseup event
+   */
+  clearDrag() {
+    this.drag = {
+      startX: 0,
+      endX: 0,
+      startY: 0,
+      letItGo: null
+    };
+  }
+  /**
+   * touchstart event handler
+   */
+  touchstartHandler(e) {
+    e.stopPropagation();
+    this.pointerDown = true;
+    this.drag.startX = e.touches[0].pageX;
+    this.drag.startY = e.touches[0].pageY;
+  }
+  /**
+   * touchend event handler
+   */
+  touchendHandler(e) {
+    e.stopPropagation();
+    this.pointerDown = false;
+    this.sliderFrame.style.webkitTransition = `all ${this.config.duration}ms ${this.config.easing}`;
+    this.sliderFrame.style.transition = `all ${this.config.duration}ms ${this.config.easing}`;
+    if (this.drag.endX) {
+      this.updateAfterDrag();
+    }
+    this.clearDrag();
+  }
+  /**
+   * touchmove event handler
+   */
+  touchmoveHandler(e) {
+    e.stopPropagation();
+
+    if (this.drag.letItGo === null) {
+      this.drag.letItGo = Math.abs(this.drag.startY - e.touches[0].pageY) < Math.abs(this.drag.startX - e.touches[0].pageX);
+    }
+
+    if (this.pointerDown && this.drag.letItGo) {
+      e.preventDefault();
+      this.drag.endX = e.touches[0].pageX;
+      this.sliderFrame.style.webkitTransition = `all 0ms ${this.config.easing}`;
+      this.sliderFrame.style.transition = `all 0ms ${this.config.easing}`;
+      this.sliderFrame.style[this.transformProperty] = `translate3d(${(this.currentSlide * (this.selectorWidth / this.perPage) + (this.drag.startX - this.drag.endX)) * -1}px, 0, 0)`;
+    }
+  }
+  /**
+   * mousedown event handler
+   */
+  mousedownHandler(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.pointerDown = true;
+    this.drag.startX = e.pageX;
+  }
+  /**
+   * mouseup event handler
+   */
+  mouseupHandler(e) {
+    e.stopPropagation();
+    this.pointerDown = false;
+    this.selector.style.cursor = '-webkit-grab';
+    this.sliderFrame.style.webkitTransition = `all ${this.config.duration}ms ${this.config.easing}`;
+    this.sliderFrame.style.transition = `all ${this.config.duration}ms ${this.config.easing}`;
+    if (this.drag.endX) {
+      this.updateAfterDrag();
+    }
+    this.clearDrag();
+  }
+  /**
+   * mousemove event handler
+   */
+  mousemoveHandler(e) {
+    e.preventDefault();
+    if (this.pointerDown) {
+      this.drag.endX = e.pageX;
+      this.selector.style.cursor = '-webkit-grabbing';
+      this.sliderFrame.style.webkitTransition = `all 0ms ${this.config.easing}`;
+      this.sliderFrame.style.transition = `all 0ms ${this.config.easing}`;
+      this.sliderFrame.style[this.transformProperty] = `translate3d(${(this.currentSlide * (this.selectorWidth / this.perPage) + (this.drag.startX - this.drag.endX)) * -1}px, 0, 0)`;
+    }
+  }
+  /**
+   * mouseleave event handler
+   */
+  mouseleaveHandler(e) {
+    if (this.pointerDown) {
+      this.pointerDown = false;
+      this.selector.style.cursor = '-webkit-grab';
+      this.drag.endX = e.pageX;
+      this.sliderFrame.style.webkitTransition = `all ${this.config.duration}ms ${this.config.easing}`;
+      this.sliderFrame.style.transition = `all ${this.config.duration}ms ${this.config.easing}`;
+      this.updateAfterDrag();
+      this.clearDrag();
+    }
+  }
+  /**
+   * Update after removing, prepending or appending items.
+   */
+  updateFrame() {
+    // Create frame and apply styling
+    this.sliderFrame = document.createElement('div');
+    this.sliderFrame.style.width = `${(this.selectorWidth / this.perPage) * this.innerElements.length}px`;
+    this.sliderFrame.style.webkitTransition = `all ${this.config.duration}ms ${this.config.easing}`;
+    this.sliderFrame.style.transition = `all ${this.config.duration}ms ${this.config.easing}`;
+
+    if (this.config.draggable) {
+      this.selector.style.cursor = '-webkit-grab';
+    }
+
+    // Create a document fragment to put slides into it
+    const docFragment = document.createDocumentFragment();
+
+    // Loop through the slides, add styling and add them to document fragment
+    for (let i = 0; i < this.innerElements.length; i++) {
+      const elementContainer = document.createElement('div');
+      elementContainer.style.cssFloat = 'left';
+      elementContainer.style.float = 'left';
+      elementContainer.style.width = `${100 / this.innerElements.length}%`;
+      elementContainer.appendChild(this.innerElements[i]);
+      docFragment.appendChild(elementContainer);
+    }
+
+    // Add fragment to the frame
+    this.sliderFrame.appendChild(docFragment);
+
+    // Clear selector (just in case something is there) and insert a frame
+    this.selector.innerHTML = '';
+    this.selector.appendChild(this.sliderFrame);
+
+    // Go to currently active slide after initial build
+    this.slideToCurrent();
+  }
+  /**
+   * Remove item from carousel.
+   * @param {number} index - Item index to remove.
+   * @param {function} callback - Optional callback to call after remove.
+   */
+  remove(index, callback) {
+    if (index < 0 || index >= this.innerElements.length) {
+      throw new Error('Item to remove doesn\'t exist 😭');
+    }
+    this.innerElements.splice(index, 1);
+
+    this.updateFrame();
+    if (callback) {
+      callback.call(this);
+    }
+  }
+  /**
+   * Insert item to carousel at particular index.
+   * @param {HTMLElement} item - Item to insert.
+   * @param {number} index - Index of new new item insertion.
+   * @param {function} callback - Optional callback to call after insert.
+   */
+  insert(item, index, callback) {
+    if (index < 0 || index > this.innerElements.length + 1) {
+      throw new Error('Unable to inset it at this index 😭');
+    }
+    if (this.innerElements.indexOf(item) !== -1) {
+      throw new Error('The same item in a carousel? Really? Nope 😭');
+    }
+    this.innerElements.splice(index, 0, item);
+
+    // Avoid shifting content
+    this.currentSlide = index <= this.currentSlide ? this.currentSlide + 1 : this.currentSlide;
+
+    this.updateFrame();
+    if (callback) {
+      callback.call(this);
+    }
+  }
+  /**
+   * Prepernd item to carousel.
+   * @param {HTMLElement} item - Item to prepend.
+   * @param {function} callback - Optional callback to call after prepend.
+   */
+  prepend(item, callback) {
+    this.insert(item, 0);
+    if (callback) {
+      callback.call(this);
+    }
+  }
+  /**
+   * Append item to carousel.
+   * @param {HTMLElement} item - Item to append.
+   * @param {function} callback - Optional callback to call after append.
+   */
+  append(item, callback) {
+    this.insert(item, this.innerElements.length + 1);
+    if (callback) {
+      callback.call(this);
+    }
+  }
+  /**
+   * Removes listeners and optionally restores to initial markup
+   * @param {boolean} restoreMarkup - Determinants about restoring an initial markup.
+   * @param {function} callback - Optional callback function.
+   */
+  destroy(restoreMarkup = false, callback) {
+    this.detachEvents();
+
+    if (restoreMarkup) {
+      const slides = document.createDocumentFragment();
+      for (let i = 0; i < this.innerElements.length; i++) {
+        slides.appendChild(this.innerElements[i]);
+      }
+      this.selector.innerHTML = '';
+      this.selector.appendChild(slides);
+      this.selector.removeAttribute('style');
+    }
+
+    if (callback) {
+      callback.call(this);
+    }
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["default"] = carousel;
+
+
+
+/***/ }),
+/* 12 */
 /***/ (function(module, exports) {
 
 /*
@@ -797,24 +1314,42 @@ g=(function(){
 				if(typeof id==='string'){
 					cadena=id;
 			      	if(cadena.search("#")==0){
-			          	idreal=id.replace("#","");
-			          	idreal=idreal.replace(".","");
-			        	objeto=document.getElementById(idreal); 
+			        	objeto=document.querySelector(id);
 			      	}
 			      	else if(cadena.search(".")==0){
-			          	idreal=id.replace("#","");
-						idreal=idreal.replace(".","");
-						objeto=document.getElementsByClassName(idreal);
+						objeto=document.querySelector(id);
 					}
 					else{
 						return -1;
 					}
+					g.log(objeto);
 					return objeto;
+				}
+			},
+			getelTag: function(tag){
+				var arrtags=[];
+				if(tag!=undefined){
+					arrtags=document.querySelectorAll(tag);
+					return arrtags;
+				}
+				else{
+					return -1;
 				}
 			},
 			log: function(msg){
 				console.log(msg);
             },
+			each:function(objeto,callbackeach){
+		      	var initial_array;
+		      	var x,y,valor,indice;
+		      	
+		        if(objeto.length!=undefined){
+		        	objeto.forEach(callbackeach);
+		        }
+		        else{
+		        	g.log("Is not an array!");
+		        }
+		      },
             preventDefault: function(e){
 				if(e.preventDefault){
 					e.preventDefault();
@@ -1000,6 +1535,38 @@ g=(function(){
 				sock=g.ajax.getxhr();
 				return sock;
             },
+			getslides:function(opciones){
+				//write code below...
+				//helpers to public functions
+				/*
+				 Private functions
+				 * */
+				function initSlider(){
+					
+				}
+				
+				return{
+					//write code below...
+					/* Public functions
+					 */
+					run:function(){
+						//write code below...
+						//instantiate slideshow and return ...
+					}	
+				}
+			},
+			accordeon:function(elemento,opciones){
+				//write code below...
+				/*
+				 Private functions
+				 * */
+				return{
+					//write code below...
+					/*
+					 Public functions
+					 * */	
+				}
+			},
             dom: function(domel){
 				return{
 					hide: function(){
@@ -1018,7 +1585,7 @@ g=(function(){
 				          fila=g.getdisctId(domel);
 				          fila.style.display="block"; 
 				      },
-				      setStyle:function(estilo){
+				      css:function(estilo){
 				        var fila;
 				          if(!document.getElementById){
 				              return false;
@@ -1028,6 +1595,19 @@ g=(function(){
 				          }
 				          fila=g.getdisctId(domel);
 				          fila.style=estilo;
+				      },
+				      each:function(callbackeach){
+				      	var objeto;
+				      	var initial_array;
+				      	var x,y,valor,indice;
+				      	objeto=g.getelTag(domel);
+				      	g.log(objeto);
+				        if(objeto[0].id!=undefined){
+				        	objeto.forEach(callbackeach);
+				        }
+				        else{
+				        	g.log("Is not an Object!");
+				        }
 				      },
 				      cursor:function(estilo){
 				        var fila;
@@ -1061,14 +1641,6 @@ g=(function(){
 								fila.style.cursor=estilo;
 								break;
 				      	}
-				      },
-				      hide:function(){
-				        var fila;
-						if(!document.getElementById){
-							return false;
-						}
-						fila=g.getdisctId(domel);
-						fila.style.display="none";
 				      },
 				      toggleDisplay: function(){
 				        var fila;
@@ -1111,7 +1683,7 @@ g=(function(){
 						    var element;
 						    element=g.getdisctId(domel);
 						    element.style.display = 'block';
-						    var timer = setInterval(function () {
+						    var timer = setInterval(function(){
 						        if (op >= 1){
 						            clearInterval(timer);
 						        }
@@ -1125,7 +1697,7 @@ g=(function(){
 					    var intervalo=tiempo/80;
 					    var element;
 					    element=g.getdisctId(domel);
-					    var timer = setInterval(function () {
+					    var timer = setInterval(function(){
 					        if (op <= 0.1){
 					            clearInterval(timer);
 					            element.style.display = 'none';
@@ -1135,16 +1707,6 @@ g=(function(){
 					        op -= op * 0.1;
 					    }, intervalo);
 				      },
-				    once: function(seconds, callback){
-				      var counter = 0;
-				      var time=setInterval(function(){
-				        counter++;
-				        if(counter>=seconds){
-				          callback();
-				          clearInterval(time);
-				        }
-				      },400);
-				    },
 				    gotodiv: function(){
 				        var objeto;
 				        objeto=g.getdisctId(domel);
@@ -1296,7 +1858,7 @@ g=(function(){
 							        }
 				        			break;
 				        	}
-				      	},
+				    },
 					load:function(modulourl){
 				        var xmlhttp=false;
 				        var filecont;
@@ -1432,7 +1994,7 @@ g.ajax=(function(){
 				filectrl=g.getdisctId(fileid); //Files[0] = 1st file
 				file=filectrl.files[0];
 				reader.readAsBinaryString(file);
-				reader.onload=function(event) {
+				reader.onload=function(event){
 				    var result=event.target.result;
 				    var fileName=filectrl.files[0].name;
 				    g.ajax.post(
@@ -1511,7 +2073,7 @@ g.ajax=(function(){
 	      		////////////////////////////////////////////////////
 	      		// EJECUTAR FUNCION Y CALLBACK//////////////////////
 		        sock.open(ajxProtocol,dirsocket,true);
-				sock.onreadystatechange=function() {
+				sock.onreadystatechange=function(){
 					if(sock.readyState==4 && sock.status==200){
 		                data=sock.responseText;
 		                g.log("STATUS: " + sock.readyState + " " + sock.status + " " + sock.statusText);
@@ -1581,7 +2143,7 @@ g.ajax=(function(){
 	      		////////////////////////////////////////////////////
 	      		// EJECUTAR FUNCION Y CALLBACK//////////////////////
 		        sock.open(ajxProtocol,dirsocket,true);
-				sock.onreadystatechange=function() {
+				sock.onreadystatechange=function(){
 					if(sock.readyState==4 && sock.status==200){
 		                data=sock.responseText;
 		                g.log("STATUS: " + sock.readyState + " " + sock.status + " " + sock.statusText);
@@ -1625,8 +2187,6 @@ g.webwork=(function(){
       }
   };
 }());
-
-
 g.watch=(function(){
 	//Submodulo WebWorkers
   return{
@@ -1636,14 +2196,14 @@ g.watch=(function(){
 				  enumerable: false
 				, configurable: true
 				, writable: false
-				, value: function (prop, handler){
+				, value: function(prop, handler){
 					var
 					  oldval = this[prop]
 					, newval = oldval
-					, getter = function (){
+					, getter = function(){
 						return newval;
 					}
-					, setter = function (val){
+					, setter = function(val){
 						oldval = newval;
 						return newval = handler.call(this, prop, oldval, val);
 					}
@@ -1673,7 +2233,7 @@ g.unwatch=(function(){
 				  enumerable: false
 				, configurable: true
 				, writable: false
-				, value: function (prop){
+				, value: function(prop){
 					var val = this[prop];
 					delete this[prop]; // remove accessors
 					this[prop] = val;
@@ -1702,10 +2262,10 @@ g.path=(function(){
 				return new g.path.core.route(path);
 	        }
 	    },
-	    root: function (path){
+	    root: function(path){
 	        g.path.routes.root = path;
 	    },
-	    rescue: function (fn){
+	    rescue: function(fn){
 	        g.path.routes.rescue = fn;
 	    },
 	    history: {
@@ -1748,7 +2308,7 @@ g.path=(function(){
 	            }
 	        }
 	    },
-	    match:function (path, parameterize){
+	    match:function(path, parameterize){
 	        var params = {}, route = null, possible_routes, slice, i, j, compare;
 	        for (route in g.path.routes.defined){
 	            if (route !== null && route !== undefined){
@@ -1776,7 +2336,7 @@ g.path=(function(){
 	        }
 	        return null;
 	    },
-	    dispatch:function (passed_route){
+	    dispatch:function(passed_route){
 	        var previous_route, matched_route;
 	        if (g.path.routes.current !== passed_route){
 	            g.path.routes.previous = g.path.routes.current;
@@ -1800,7 +2360,7 @@ g.path=(function(){
 	            }
 	        }
 	    },
-	    listen:function (){
+	    listen:function(){
 	        var fn = function(){ g.path.dispatch(location.hash); }
 	
 	        if (location.hash === ""){
@@ -1822,7 +2382,7 @@ g.path=(function(){
 	        }
 	    },
 	    core:{
-	        route:function (path){
+	        route:function(path){
 	            this.path = path;
 	            this.action = null;
 	            this.do_enter = [];
@@ -1841,11 +2401,11 @@ g.path=(function(){
 	};
 }());
 g.path.core.route.prototype = {
-    'to': function (fn){
+    'to': function(fn){
         this.action = fn;
         return this;
     },
-    enter: function (fns){
+    enter: function(fns){
         if (fns instanceof Array){
             this.do_enter = this.do_enter.concat(fns);
         } else {
@@ -1853,11 +2413,11 @@ g.path.core.route.prototype = {
         }
         return this;
     },
-    exit: function (fn){
+    exit: function(fn){
         this.do_exit = fn;
         return this;
     },
-    partition: function (){
+    partition: function(){
         var parts = [], options = [], re = /\(([^}]+?)\)/g, text, i;
         while (text = re.exec(this.path)){
             parts.push(text[1]);
@@ -1868,7 +2428,7 @@ g.path.core.route.prototype = {
         }
         return options;
     },
-    run: function (){
+    run: function(){
         var halt_execution = false, i, result, previous;
 
         if (g.path.routes.defined[this.path].hasOwnProperty("do_enter")){
@@ -1891,7 +2451,7 @@ g.path.core.route.prototype = {
 g.md5=(function(){
 	//Submodulo WebWorkers
    function RotateLeft(lValue, iShiftBits){
-           return (lValue<<iShiftBits) | (lValue>>>(32-iShiftBits));
+           return(lValue<<iShiftBits) | (lValue>>>(32-iShiftBits));
    }
 
    function AddUnsigned(lX,lY){
@@ -1902,23 +2462,23 @@ g.md5=(function(){
            lY4 = (lY & 0x40000000);
            lResult = (lX & 0x3FFFFFFF)+(lY & 0x3FFFFFFF);
            if (lX4 & lY4){
-                   return (lResult ^ 0x80000000 ^ lX8 ^ lY8);
+                   return(lResult ^ 0x80000000 ^ lX8 ^ lY8);
            }
            if (lX4 | lY4){
                    if (lResult & 0x40000000){
-                           return (lResult ^ 0xC0000000 ^ lX8 ^ lY8);
+                           return(lResult ^ 0xC0000000 ^ lX8 ^ lY8);
                    } else {
-                           return (lResult ^ 0x40000000 ^ lX8 ^ lY8);
+                           return(lResult ^ 0x40000000 ^ lX8 ^ lY8);
                    }
            } else {
-                   return (lResult ^ lX8 ^ lY8);
+                   return(lResult ^ lX8 ^ lY8);
            }
    }
 
-   function F(x,y,z){ return (x & y) | ((~x) & z); }
-   function G(x,y,z){ return (x & z) | (y & (~z)); }
-   function H(x,y,z){ return (x ^ y ^ z); }
-   function I(x,y,z){ return (y ^ (x | (~z))); }
+   function F(x,y,z){ return(x & y) | ((~x) & z); }
+   function G(x,y,z){ return(x & z) | (y & (~z)); }
+   function H(x,y,z){ return(x ^ y ^ z); }
+   function I(x,y,z){ return(y ^ (x | (~z))); }
 
    function FF(a,b,c,d,x,s,ac){
            a = AddUnsigned(a, AddUnsigned(AddUnsigned(F(b, c, d), x), ac));

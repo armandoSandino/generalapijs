@@ -9,27 +9,49 @@
 		<div id="holap" style="height: 1000px;opacity:0;">
 			div1
 		</div>
+		<div id="cargadiv" style="height: 500px;width: 500px;background: #FFF;">
+			
+		</div>
 		<div id="adiosp" style="height: 500px;">
 			div2
 		</div>
-		aqui va a cargar el módulo en cuestion
-		<div id="cargadiv" style="height: 500px;">
-			
+		
+		<div id="slideshow" style="height: 500px;">
+			<div style="height: 500px;">
+			d
+			</div>
+			<div style="height: 500px;">
+			d
+			</div>
+			<div style="height: 500px;">
+			f
+			</div>
+			<div style="height: 500px;">
+			h
+			</div>
 		</div>
+		aqui va a cargar el módulo en cuestion
 		<script src="dist/dist/bundle.js"></script>
 		<script>
 		(function(){
 			var cadenamd5;
+			var h={};
+			h=[
+				{'nombre':'arturo'},
+				{'nombre':'pedro'},
+				{'nombre':'antonio'},
+				{'nombre':'oscar'},
+				{'nombre':'nepo'},
+				];
 			/*
-			 *slideshow Cycle.js
+			 *slideshow carousel.js
 			 * */
-			var cycle = new g.carousel('.my-cycle', {
-			    autoRun: true,
-			    captionColor: 'rgba(0, 0, 0, 0.55)',
-			    speed: '5000'
-			});
-			g.carousel.style([arrayOfCustomRules]).run();
 			cadenamd5=g.md5.calc("Arat5uro");
+			g.dom("#slideshow div").each(
+				function(objeto,indice){
+					g.log(indice + " " + objeto.innerHTML);
+				}
+			);
 			g.log("CLAVE MD5: " + cadenamd5);
 			g.log("Path JS Version: " + g.path.getVersion());
 			g.dom("#cargadiv").load("README.md",function(){

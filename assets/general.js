@@ -41,24 +41,42 @@ g=(function(){
 				if(typeof id==='string'){
 					cadena=id;
 			      	if(cadena.search("#")==0){
-			          	idreal=id.replace("#","");
-			          	idreal=idreal.replace(".","");
-			        	objeto=document.getElementById(idreal); 
+			        	objeto=document.querySelector(id);
 			      	}
 			      	else if(cadena.search(".")==0){
-			          	idreal=id.replace("#","");
-						idreal=idreal.replace(".","");
-						objeto=document.getElementsByClassName(idreal);
+						objeto=document.querySelector(id);
 					}
 					else{
 						return -1;
 					}
+					g.log(objeto);
 					return objeto;
+				}
+			},
+			getelTag: function(tag){
+				var arrtags=[];
+				if(tag!=undefined){
+					arrtags=document.querySelectorAll(tag);
+					return arrtags;
+				}
+				else{
+					return -1;
 				}
 			},
 			log: function(msg){
 				console.log(msg);
             },
+			each:function(objeto,callbackeach){
+		      	var initial_array;
+		      	var x,y,valor,indice;
+		      	
+		        if(objeto.length!=undefined){
+		        	objeto.forEach(callbackeach);
+		        }
+		        else{
+		        	g.log("Is not an array!");
+		        }
+		      },
             preventDefault: function(e){
 				if(e.preventDefault){
 					e.preventDefault();
@@ -244,6 +262,38 @@ g=(function(){
 				sock=g.ajax.getxhr();
 				return sock;
             },
+			getslides:function(opciones){
+				//write code below...
+				//helpers to public functions
+				/*
+				 Private functions
+				 * */
+				function initSlider(){
+					
+				}
+				
+				return{
+					//write code below...
+					/* Public functions
+					 */
+					run:function(){
+						//write code below...
+						//instantiate slideshow and return ...
+					}	
+				}
+			},
+			accordeon:function(elemento,opciones){
+				//write code below...
+				/*
+				 Private functions
+				 * */
+				return{
+					//write code below...
+					/*
+					 Public functions
+					 * */	
+				}
+			},
             dom: function(domel){
 				return{
 					hide: function(){
@@ -262,7 +312,7 @@ g=(function(){
 				          fila=g.getdisctId(domel);
 				          fila.style.display="block"; 
 				      },
-				      setStyle:function(estilo){
+				      css:function(estilo){
 				        var fila;
 				          if(!document.getElementById){
 				              return false;
@@ -272,6 +322,19 @@ g=(function(){
 				          }
 				          fila=g.getdisctId(domel);
 				          fila.style=estilo;
+				      },
+				      each:function(callbackeach){
+				      	var objeto;
+				      	var initial_array;
+				      	var x,y,valor,indice;
+				      	objeto=g.getelTag(domel);
+				      	g.log(objeto);
+				        if(objeto[0].id!=undefined){
+				        	objeto.forEach(callbackeach);
+				        }
+				        else{
+				        	g.log("Is not an Object!");
+				        }
 				      },
 				      cursor:function(estilo){
 				        var fila;
@@ -305,14 +368,6 @@ g=(function(){
 								fila.style.cursor=estilo;
 								break;
 				      	}
-				      },
-				      hide:function(){
-				        var fila;
-						if(!document.getElementById){
-							return false;
-						}
-						fila=g.getdisctId(domel);
-						fila.style.display="none";
 				      },
 				      toggleDisplay: function(){
 				        var fila;
@@ -355,7 +410,7 @@ g=(function(){
 						    var element;
 						    element=g.getdisctId(domel);
 						    element.style.display = 'block';
-						    var timer = setInterval(function () {
+						    var timer = setInterval(function(){
 						        if (op >= 1){
 						            clearInterval(timer);
 						        }
@@ -369,7 +424,7 @@ g=(function(){
 					    var intervalo=tiempo/80;
 					    var element;
 					    element=g.getdisctId(domel);
-					    var timer = setInterval(function () {
+					    var timer = setInterval(function(){
 					        if (op <= 0.1){
 					            clearInterval(timer);
 					            element.style.display = 'none';
@@ -615,361 +670,6 @@ g.objeto=(function(){
         },
   };
 }());
-/**
- * @file g.carousel (Cycle modified) - a dependency free javascript plugin for cycling through images
- *
- * @version 0.0.3
- * @author Brian Ruddy (briancruddy@gmail.com)
- * @copyright 2015
- * @license MIT
- *
- */
-g.carousel=(function () {
-    
-    'use strict';
-    /**
-     *
-     * @type {{getDefaultOptions, initSettings, activateItem, removeClassFromElements, generateEmptyStyleSheet, getDataAttribute, toArray}}
-     */
-    var utils = (function () {
-        
-        return {
-
-            /**
-             * Get g.carousel's default settings
-             * @param {String} [option] - Retrieve a specific g.carousel option
-             * @returns {*}
-             */
-            getDefaultOptions: function (option) {
-                var defaults = {
-                    autoRun: true,
-                    pauseOnHover: true,
-                    selector: '.cycle',
-                    target: 'li',
-                    interval: '2500',
-                    width: '300',
-                    speed: '1000',
-                    captionPosition: 'bottom',
-                    captionColor: '#333',
-                    captionBgColor: 'rgba(255, 255, 255, 0.75)'
-                };
-
-                return !option ? defaults : defaults[option];
-            },
-            /**
-             * Get a g.carousel instance's settings. Priority level: options object passed to constructor -> data-* attributes -> defaults
-             * @param selector - CSS selector to get `data-*` attributes from the `g.carousel.element`
-             * @param [options] - An object containing g.carousel settings
-             * @returns {*}
-             */
-            initSettings: function (selector, options) {
-                if (!options) options = {};
-
-                var defaults = utils.getDefaultOptions();
-
-                return {
-                    autoRun: options.autoRun || defaults.autoRun,
-                    pauseOnHover: options.pauseOnHover || defaults.pauseOnHover,
-                    selector: selector || defaults.selector,
-                    target: options.target || utils.getDataAttribute(selector, 'target') || defaults.target,
-                    width: options.width || utils.getDataAttribute(selector, 'width') || defaults.width,
-                    interval: options.interval || utils.getDataAttribute(selector, 'interval') || defaults.interval,
-                    captionPosition: options.captionPosition || utils.getDataAttribute(selector, 'captionPosition') || defaults.captionPosition,
-                    captionColor: options.captionColor || utils.getDataAttribute(selector, 'captionColor') || defaults.captionColor,
-                    captionBgColor: options.captionBgColor || utils.getDataAttribute(selector, 'captionBg') || defaults.captionBgColor
-                };
-
-            },
-
-            /**
-             * Assigns `active` class to item
-             * @param {NodeList} items - Collection of g.carousel items
-             * @param {Number} index - Index to select item from collection
-             * @void
-             */
-            activateItem: function (items, index) {
-                index %= items.length;
-                items[index].classList.add('active');
-            },
-
-            /**
-             * Remove `active` class from all cycle items
-             * @param {NodeList} elements - Collection of DOMElements
-             * @param {String} _class - Class to assign to `elements`
-             * @void
-             */
-            removeClassFromElements: function (elements, _class) {
-                for (var i = 0; i < elements.length; i++) {
-                    elements[i].classList.remove(_class);
-                }
-            },
-
-            /**
-             * Generates an empty stylesheet and appends it to the document `<head>`
-             * @returns {*}
-             */
-            generateEmptyStyleSheet: function () {
-                var style = document.createElement('style');
-
-                style.appendChild(document.createTextNode('')); // webkit hack
-                document.head.appendChild(style);
-
-                return style.sheet;
-            },
-
-            /**
-             * Gets a DOM element based on the `selector` and returns the `data-*` attribute or an empty string
-             * @param {String} selector - CSS selector to get `data-*` attributes from the `g.carousel.element`
-             * @param {String} attribute - `data-*` attribute name to retrieve
-             * @returns {String}
-             */
-            getDataAttribute: function (selector, attribute) {
-                var target = document.querySelector(selector);
-
-                if (target.dataset.hasOwnProperty(attribute)) {
-                    return target.dataset[attribute]
-                }
-
-                return '';
-            },
-
-            /**
-             * Takes an array like object and returns the object in Array form
-             * @param arrayLike - An array like object (IE `arguments`)
-             * @returns {Array}
-             */
-            toArray: function (arrayLike) {
-                var result = [];
-                for (var i = 0; i < arrayLike.length; i++) {
-                    result.push(arrayLike[i]);
-                }
-
-                return result;
-            }
-        };
-    })();
-    /**
-     * @constructor
-     * @param {String} [selector]
-     * @param {Object} [options] - set options via arg object, data-* attrs, or just use the defaults
-     * @property {Object} settings - object containing a g.carousel instance's settings
-     * @property {HTMLElement} element - parent element, `fire` and `on` both reference this element
-     * @property {NodeList} items - collection containing items that cycle loops through
-     * @property {NodeList} captions - collection containing captions
-     * @property {Object} active - object containing the `index` of the current active item
-     * @property {Boolean} continue - determines whether or not g.carousel's `run` loop calls the `next` method
-     * @returns {g.carousel}
-     */
-    function carousel(selector, options) {
-
-        this.settings = utils.initSettings(selector, options);
-        this.element = document.querySelector(this.settings.selector);
-        this.items = utils.toArray(this.element.querySelectorAll(this.settings.target));
-        this.captions = utils.toArray(this.element.querySelectorAll('.cycle-caption'));
-        this.active = { index: 0 };
-        this.continue = false;
-
-        if (this.settings.autoRun) {
-            this.style().run();
-        }
-
-        return this;
-    }
-
-    /**
-     *
-     * @type {{run: Function, delay: Function, pause: Function, resume: Function, next: Function, previous: Function, style: Function, fire: Function, on: Function, handleHover: Function}}
-     */
-    g.carousel.prototype = {
-
-        /**
-         * Begins the cycle infinite loop
-         * @chainable
-         * @void
-         */
-        run: function () {
-            this.fire('run', this);
-            this.continue = true;
-            this.handleHover();
-
-            setInterval((function () {
-                if (this.continue) {
-                    this.next();
-                }
-            }).bind(this), this.settings.interval);
-
-            return this;
-        },
-
-        /**
-         * Delay Cycle's loop
-         * @param {Number} timeout - Time in MS to delay Cycle
-         * @param {Function} callback - Function to execute after delay
-         * @chainable
-         * @returns {Cycle}
-         */
-        delay: function (timeout, callback) {
-            this.fire('delay', { instance: this, timeout: timeout });
-            this.pause();
-
-            setTimeout((function () {
-                if (callback && typeof callback === 'function') {
-                    callback();
-                }
-                this.resume();
-            }).bind(this), timeout);
-
-            return this;
-        },
-
-        /**
-         * Pause Cycle's loop
-         * @chainable
-         * @returns {Cycle}
-         */
-        pause: function () {
-            this.continue = false;
-            this.fire('pause', this);
-
-            return this;
-        },
-
-        /**
-         * Resume Cycle's loop
-         * @chainable
-         * @returns {Cycle}
-         */
-        resume: function () {
-            this.continue = true;
-            this.fire('resume', this);
-
-            return this;
-        },
-
-        /**
-         * Render the next item in g.carousel.items
-         * @chainable
-         * @returns {carousel}
-         */
-        next: function () {
-            utils.removeClassFromElements(this.items, 'active');
-
-            this.active.index++;
-            this.active.index %= this.items.length;
-            utils.activateItem(this.items, this.active.index);
-
-            this.fire('next', this);
-
-            return this;
-        },
-
-        /**
-         * Render the previous item in g.carousel.items
-         * @chainable
-         * @returns {carousel}
-         */
-        previous: function () {
-            utils.removeClassFromElements(this.items, 'active');
-
-            this.active.index--;
-            if (this.active.index < 0)
-                this.active.index = this.items.length - 1;
-
-            utils.activateItem(this.items, this.active.index);
-
-            this.fire('previous', this);
-
-            return this;
-        },
-
-        /**
-         * @param {Array} [customRules]
-         * @chainable
-         * @returns {carousel}
-         */
-        style: function (customRules) {
-            var styleSheet = utils.generateEmptyStyleSheet();
-
-            var rules = [
-                this.settings.selector + ' { max-width: 100%; position: relative; width: ' + this.settings.width + 'px; list-style: none; padding: 0; }',
-                this.settings.selector + ' > ' + this.settings.target + ' { position: absolute; top: 0; left: 0; bottom: 0; right: 0; z-index: 0; opacity: 0; transition: opacity 300ms; }',
-                this.settings.selector + ' > ' + this.settings.target + ':first-child { position: static; }',
-                this.settings.selector + ' > .active { z-index: 1; opacity: 1; transition: opacity ' + this.settings.speed + 'ms; }',
-                this.settings.selector + ' img { width: 100%; box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.4); }'
-            ];
-
-            if (this.captions.length > 0) {
-                rules.push(this.settings.selector + ' .cycle-caption { position: absolute; left: 0; right: 0; padding: 5px 10px; ' + this.settings.captionPosition + ': 0; background-color: ' + this.settings.captionBgColor + '; color: ' + this.settings.captionColor + ' }');
-            }
-
-
-            rules.concat(customRules || []).forEach(function (rule) {
-                styleSheet.insertRule(rule, 0);
-            });
-
-            return this;
-        },
-
-        /**
-         * Fire a carousel event on `g.carousel.element`
-         * @param {String} name - Event name, automatically prefixed with "cycle:"
-         * @param {*} data - Passed as first argument to carousel's `on` method's callback
-         * @chainable
-         * @returns {carousel}
-         */
-        fire: function (name, data) {
-            var event = new CustomEvent('cycle:' + name, {
-                detail: {
-                    settings: this,
-                    data: data
-                }
-            });
-
-            this.element.dispatchEvent(event);
-
-            return this;
-        },
-
-        /**
-         * Listen for events on `g.carousel.element`
-         * @param {String} eventType - Event name
-         * @param {Function} callback - Function to be executed on event
-         * @chainable
-         * @returns {carousel}
-         */
-        on: function (eventType, callback) {
-
-            this.element.addEventListener(eventType, function (event) {
-                var instanceData = event.detail.data;
-                callback(instanceData, event);
-            }, false);
-
-            return this;
-        },
-
-        /**
-         * Event listener for hover events on the carousel object
-         * @chainable
-         * @returns {carousel}
-         */
-        handleHover: function () {
-            this.on('mouseenter', (function () {
-                if (this.settings.pauseOnHover) {
-                    this.pause();
-                }
-            }).bind(this));
-
-            this.on('mouseout', (function () {
-                if (this.settings.pauseOnHover) {
-                    this.resume();
-                }
-            }).bind(this));
-
-            return this;
-        }
-    };
-    return g.carousel;
-})();
 g.ajax=(function(){
   //Submodulo Ajax
   return{
@@ -1021,7 +721,7 @@ g.ajax=(function(){
 				filectrl=g.getdisctId(fileid); //Files[0] = 1st file
 				file=filectrl.files[0];
 				reader.readAsBinaryString(file);
-				reader.onload=function(event) {
+				reader.onload=function(event){
 				    var result=event.target.result;
 				    var fileName=filectrl.files[0].name;
 				    g.ajax.post(
@@ -1100,7 +800,7 @@ g.ajax=(function(){
 	      		////////////////////////////////////////////////////
 	      		// EJECUTAR FUNCION Y CALLBACK//////////////////////
 		        sock.open(ajxProtocol,dirsocket,true);
-				sock.onreadystatechange=function() {
+				sock.onreadystatechange=function(){
 					if(sock.readyState==4 && sock.status==200){
 		                data=sock.responseText;
 		                g.log("STATUS: " + sock.readyState + " " + sock.status + " " + sock.statusText);
@@ -1170,7 +870,7 @@ g.ajax=(function(){
 	      		////////////////////////////////////////////////////
 	      		// EJECUTAR FUNCION Y CALLBACK//////////////////////
 		        sock.open(ajxProtocol,dirsocket,true);
-				sock.onreadystatechange=function() {
+				sock.onreadystatechange=function(){
 					if(sock.readyState==4 && sock.status==200){
 		                data=sock.responseText;
 		                g.log("STATUS: " + sock.readyState + " " + sock.status + " " + sock.statusText);
@@ -1223,14 +923,14 @@ g.watch=(function(){
 				  enumerable: false
 				, configurable: true
 				, writable: false
-				, value: function (prop, handler){
+				, value: function(prop, handler){
 					var
 					  oldval = this[prop]
 					, newval = oldval
-					, getter = function (){
+					, getter = function(){
 						return newval;
 					}
-					, setter = function (val){
+					, setter = function(val){
 						oldval = newval;
 						return newval = handler.call(this, prop, oldval, val);
 					}
@@ -1260,7 +960,7 @@ g.unwatch=(function(){
 				  enumerable: false
 				, configurable: true
 				, writable: false
-				, value: function (prop){
+				, value: function(prop){
 					var val = this[prop];
 					delete this[prop]; // remove accessors
 					this[prop] = val;
@@ -1289,10 +989,10 @@ g.path=(function(){
 				return new g.path.core.route(path);
 	        }
 	    },
-	    root: function (path){
+	    root: function(path){
 	        g.path.routes.root = path;
 	    },
-	    rescue: function (fn){
+	    rescue: function(fn){
 	        g.path.routes.rescue = fn;
 	    },
 	    history: {
@@ -1335,7 +1035,7 @@ g.path=(function(){
 	            }
 	        }
 	    },
-	    match:function (path, parameterize){
+	    match:function(path, parameterize){
 	        var params = {}, route = null, possible_routes, slice, i, j, compare;
 	        for (route in g.path.routes.defined){
 	            if (route !== null && route !== undefined){
@@ -1363,7 +1063,7 @@ g.path=(function(){
 	        }
 	        return null;
 	    },
-	    dispatch:function (passed_route){
+	    dispatch:function(passed_route){
 	        var previous_route, matched_route;
 	        if (g.path.routes.current !== passed_route){
 	            g.path.routes.previous = g.path.routes.current;
@@ -1387,7 +1087,7 @@ g.path=(function(){
 	            }
 	        }
 	    },
-	    listen:function (){
+	    listen:function(){
 	        var fn = function(){ g.path.dispatch(location.hash); }
 	
 	        if (location.hash === ""){
@@ -1409,7 +1109,7 @@ g.path=(function(){
 	        }
 	    },
 	    core:{
-	        route:function (path){
+	        route:function(path){
 	            this.path = path;
 	            this.action = null;
 	            this.do_enter = [];
@@ -1428,11 +1128,11 @@ g.path=(function(){
 	};
 }());
 g.path.core.route.prototype = {
-    'to': function (fn){
+    'to': function(fn){
         this.action = fn;
         return this;
     },
-    enter: function (fns){
+    enter: function(fns){
         if (fns instanceof Array){
             this.do_enter = this.do_enter.concat(fns);
         } else {
@@ -1440,11 +1140,11 @@ g.path.core.route.prototype = {
         }
         return this;
     },
-    exit: function (fn){
+    exit: function(fn){
         this.do_exit = fn;
         return this;
     },
-    partition: function (){
+    partition: function(){
         var parts = [], options = [], re = /\(([^}]+?)\)/g, text, i;
         while (text = re.exec(this.path)){
             parts.push(text[1]);
@@ -1455,7 +1155,7 @@ g.path.core.route.prototype = {
         }
         return options;
     },
-    run: function (){
+    run: function(){
         var halt_execution = false, i, result, previous;
 
         if (g.path.routes.defined[this.path].hasOwnProperty("do_enter")){
@@ -1478,7 +1178,7 @@ g.path.core.route.prototype = {
 g.md5=(function(){
 	//Submodulo WebWorkers
    function RotateLeft(lValue, iShiftBits){
-           return (lValue<<iShiftBits) | (lValue>>>(32-iShiftBits));
+           return(lValue<<iShiftBits) | (lValue>>>(32-iShiftBits));
    }
 
    function AddUnsigned(lX,lY){
@@ -1489,23 +1189,23 @@ g.md5=(function(){
            lY4 = (lY & 0x40000000);
            lResult = (lX & 0x3FFFFFFF)+(lY & 0x3FFFFFFF);
            if (lX4 & lY4){
-                   return (lResult ^ 0x80000000 ^ lX8 ^ lY8);
+                   return(lResult ^ 0x80000000 ^ lX8 ^ lY8);
            }
            if (lX4 | lY4){
                    if (lResult & 0x40000000){
-                           return (lResult ^ 0xC0000000 ^ lX8 ^ lY8);
+                           return(lResult ^ 0xC0000000 ^ lX8 ^ lY8);
                    } else {
-                           return (lResult ^ 0x40000000 ^ lX8 ^ lY8);
+                           return(lResult ^ 0x40000000 ^ lX8 ^ lY8);
                    }
            } else {
-                   return (lResult ^ lX8 ^ lY8);
+                   return(lResult ^ lX8 ^ lY8);
            }
    }
 
-   function F(x,y,z){ return (x & y) | ((~x) & z); }
-   function G(x,y,z){ return (x & z) | (y & (~z)); }
-   function H(x,y,z){ return (x ^ y ^ z); }
-   function I(x,y,z){ return (y ^ (x | (~z))); }
+   function F(x,y,z){ return(x & y) | ((~x) & z); }
+   function G(x,y,z){ return(x & z) | (y & (~z)); }
+   function H(x,y,z){ return(x ^ y ^ z); }
+   function I(x,y,z){ return(y ^ (x | (~z))); }
 
    function FF(a,b,c,d,x,s,ac){
            a = AddUnsigned(a, AddUnsigned(AddUnsigned(F(b, c, d), x), ac));

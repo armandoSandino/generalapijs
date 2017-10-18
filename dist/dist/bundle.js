@@ -1027,7 +1027,40 @@ g=(function(){
 				              return false;
 				          }
 				          fila=g.getdisctId(domel);
-				          fila.style.display=estilo;
+				          fila.style=estilo;
+				      },
+				      cursor:function(estilo){
+				        var fila;
+				      	switch(estilo){
+				      		case 'auto':
+								fila=g.getdisctId(domel);
+								fila.style.cursor=estilo;
+								break;
+							case 'pointer':
+								fila=g.getdisctId(domel);
+								fila.style.cursor=estilo;
+								break;
+							case 'wait':
+								fila=g.getdisctId(domel);
+								fila.style.cursor=estilo;
+								break;
+							case 'text':
+								fila=g.getdisctId(domel);
+								fila.style.cursor=estilo;
+								break;
+							case 'initial':
+								fila=g.getdisctId(domel);
+								fila.style.cursor=estilo;
+								break;
+							case 'inherit':
+								fila=g.getdisctId(domel);
+								fila.style.cursor=estilo;
+								break;
+							case 'none':
+								fila=g.getdisctId(domel);
+								fila.style.cursor=estilo;
+								break;
+				      	}
 				      },
 				      hide:function(){
 				        var fila;

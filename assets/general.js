@@ -674,7 +674,6 @@ g.ajax=(function(){
 	      	 * 0 objvariables
 	      	 * 1 dirsocket
 	      	 * 2 [callback] optional
-	      	 * 3 [header] optional
 	      	 */
 	      	var i;
 	        var arrayvar;

@@ -1313,7 +1313,7 @@ g=(function(){
 		}
 		else{
 			posreal++;  // update parameters
-			switch(posfinal){
+			switch(posreal){
 				case 'top':
 					elem.style.top = posreal + 'px'; // show frame
 					break;

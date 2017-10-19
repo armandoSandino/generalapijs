@@ -80,13 +80,9 @@
 			);
 			///////////////////////////////////////
 			g.dom("#btnmover").click(function(){
-				g.dom("#div_A").animate("#adiosp",{
-					duration:'5000',
-					offset: 0,
-					callback: function(){
-						g.log("Scroll finalizado");
-					}
-				});
+				g.dom("#div_A").animate(function(){
+					g.log("listo el posho");
+				}).rotate(10);
 			});
 			
 			///////////////////////////////////////

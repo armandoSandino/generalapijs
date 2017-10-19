@@ -519,7 +519,7 @@ __webpack_require__(4);
 __webpack_require__(7);
 __webpack_require__(9);
 __webpack_require__(11);
-__webpack_require__(12);
+
 
 /***/ }),
 /* 4 */
@@ -753,522 +753,6 @@ exports.push([module.i, "html {\n\tscroll-behavior: smooth;\n}\n\nbody {\n\tmarg
 
 /***/ }),
 /* 11 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/**
- * Hi :-) This is a class representing a carousel.
- */
-class carousel {
-  /**
-   * Create a carousel.
-   * @param {Object} options - Optional settings object.
-   */
-  constructor(options) {
-    // Merge defaults with user's settings
-    this.config = carousel.mergeSettings(options);
-
-    // Resolve selector's type
-    this.selector = typeof this.config.selector === 'string' ? document.querySelector(this.config.selector) : this.config.selector;
-
-    // Early throw if selector doesn't exists
-    if (this.selector === null) {
-      throw new Error('Something wrong with your selector 😭');
-    }
-
-    // Create global references
-    this.selectorWidth = this.selector.offsetWidth;
-    this.innerElements = [].slice.call(this.selector.children);
-    this.currentSlide = this.config.startIndex;
-    this.transformProperty = carousel.webkitOrNot();
-
-    // Bind all event handlers for referencability
-    ['resizeHandler', 'touchstartHandler', 'touchendHandler', 'touchmoveHandler', 'mousedownHandler', 'mouseupHandler', 'mouseleaveHandler', 'mousemoveHandler'].forEach(method => {
-      this[method] = this[method].bind(this);
-    });
-
-    // Build markup and apply required styling to elements
-    this.init();
-  }
-  /**
-   * Overrides default settings with custom ones.
-   * @param {Object} options - Optional settings object.
-   * @returns {Object} - Custom carousel settings.
-   */
-  static mergeSettings(options) {
-    const settings = {
-      selector: '.carousel',
-      duration: 200,
-      easing: 'ease-out',
-      perPage: 1,
-      startIndex: 0,
-      draggable: true,
-      multipleDrag: true,
-      threshold: 20,
-      loop: false,
-      onInit: () => {},
-      onChange: () => {},
-    };
-
-    const userSttings = options;
-    for (const attrname in userSttings) {
-      settings[attrname] = userSttings[attrname];
-    }
-
-    return settings;
-  }
-  /**
-   * Determine if browser supports unprefixed transform property.
-   * @returns {string} - Transform property supported by client.
-   */
-  static webkitOrNot() {
-    const style = document.documentElement.style;
-    if (typeof style.transform === 'string') {
-      return 'transform';
-    }
-    return 'WebkitTransform';
-  }
-
-  /**
-   * Attaches listeners to required events.
-   */
-  attachEvents() {
-    // Resize element on window resize
-    window.addEventListener('resize', this.resizeHandler);
-
-    // If element is draggable / swipable, add event handlers
-    if (this.config.draggable) {
-      // Keep track pointer hold and dragging distance
-      this.pointerDown = false;
-      this.drag = {
-        startX: 0,
-        endX: 0,
-        startY: 0,
-        letItGo: null
-      };
-
-      // Touch events
-      this.selector.addEventListener('touchstart', this.touchstartHandler, { passive: true });
-      this.selector.addEventListener('touchend', this.touchendHandler);
-      this.selector.addEventListener('touchmove', this.touchmoveHandler, { passive: true });
-
-      // Mouse events
-      this.selector.addEventListener('mousedown', this.mousedownHandler);
-      this.selector.addEventListener('mouseup', this.mouseupHandler);
-      this.selector.addEventListener('mouseleave', this.mouseleaveHandler);
-      this.selector.addEventListener('mousemove', this.mousemoveHandler);
-    }
-  }
-
-
-  /**
-   * Detaches listeners from required events.
-   */
-  detachEvents() {
-    window.removeEventListener('resize', this.resizeHandler);
-    this.selector.style.cursor = 'auto';
-    this.selector.removeEventListener('touchstart', this.touchstartHandler);
-    this.selector.removeEventListener('touchend', this.touchendHandler);
-    this.selector.removeEventListener('touchmove', this.touchmoveHandler);
-    this.selector.removeEventListener('mousedown', this.mousedownHandler);
-    this.selector.removeEventListener('mouseup', this.mouseupHandler);
-    this.selector.removeEventListener('mouseleave', this.mouseleaveHandler);
-    this.selector.removeEventListener('mousemove', this.mousemoveHandler);
-  }
-
-
-  /**
-   * Builds the markup and attaches listeners to required events.
-   */
-  init() {
-    this.attachEvents();
-
-    // update perPage number dependable of user value
-    this.resolveSlidesNumber();
-
-    // hide everything out of selector's boundaries
-    this.selector.style.overflow = 'hidden';
-
-    // Create frame and apply styling
-    this.sliderFrame = document.createElement('div');
-    this.sliderFrame.style.width = `${(this.selectorWidth / this.perPage) * this.innerElements.length}px`;
-    this.sliderFrame.style.webkitTransition = `all ${this.config.duration}ms ${this.config.easing}`;
-    this.sliderFrame.style.transition = `all ${this.config.duration}ms ${this.config.easing}`;
-
-    if (this.config.draggable) {
-      this.selector.style.cursor = '-webkit-grab';
-    }
-
-    // Create a document fragment to put slides into it
-    const docFragment = document.createDocumentFragment();
-
-    // Loop through the slides, add styling and add them to document fragment
-    for (let i = 0; i < this.innerElements.length; i++) {
-      const elementContainer = document.createElement('div');
-      elementContainer.style.cssFloat = 'left';
-      elementContainer.style.float = 'left';
-      elementContainer.style.width = `${100 / this.innerElements.length}%`;
-      elementContainer.appendChild(this.innerElements[i]);
-      docFragment.appendChild(elementContainer);
-    }
-
-    // Add fragment to the frame
-    this.sliderFrame.appendChild(docFragment);
-
-    // Clear selector (just in case something is there) and insert a frame
-    this.selector.innerHTML = '';
-    this.selector.appendChild(this.sliderFrame);
-
-    // Go to currently active slide after initial build
-    this.slideToCurrent();
-    this.config.onInit.call(this);
-  }
-  /**
-   * Determinates slides number accordingly to clients viewport.
-   */
-  resolveSlidesNumber() {
-    if (typeof this.config.perPage === 'number') {
-      this.perPage = this.config.perPage;
-    }
-    else if (typeof this.config.perPage === 'object') {
-      this.perPage = 1;
-      for (const viewport in this.config.perPage) {
-        if (window.innerWidth >= viewport) {
-          this.perPage = this.config.perPage[viewport];
-        }
-      }
-    }
-  }
-  /**
-   * Go to previous slide.
-   * @param {number} [howManySlides=1] - How many items to slide backward.
-   * @param {function} callback - Optional callback function.
-   */
-  prev(howManySlides = 1, callback) {
-    if (this.innerElements.length <= this.perPage) {
-      return;
-    }
-    const beforeChange = this.currentSlide;
-    if (this.currentSlide === 0 && this.config.loop) {
-      this.currentSlide = this.innerElements.length - this.perPage;
-    }
-    else {
-      this.currentSlide = Math.max(this.currentSlide - howManySlides, 0);
-    }
-    if (beforeChange !== this.currentSlide) {
-      this.slideToCurrent();
-      this.config.onChange.call(this);
-      if (callback) {
-        callback.call(this);
-      }
-    }
-  }
-  /**
-   * Go to next slide.
-   * @param {number} [howManySlides=1] - How many items to slide forward.
-   * @param {function} callback - Optional callback function.
-   */
-  next(howManySlides = 1, callback) {
-    if (this.innerElements.length <= this.perPage) {
-      return;
-    }
-    const beforeChange = this.currentSlide;
-    if (this.currentSlide === this.innerElements.length - this.perPage && this.config.loop) {
-      this.currentSlide = 0;
-    }
-    else {
-      this.currentSlide = Math.min(this.currentSlide + howManySlides, this.innerElements.length - this.perPage);
-    }
-    if (beforeChange !== this.currentSlide) {
-      this.slideToCurrent();
-      this.config.onChange.call(this);
-      if (callback) {
-        callback.call(this);
-      }
-    }
-  }
-  /**
-   * Go to slide with particular index
-   * @param {number} index - Item index to slide to.
-   * @param {function} callback - Optional callback function.
-   */
-  goTo(index, callback) {
-    if (this.innerElements.length <= this.perPage) {
-      return;
-    }
-    const beforeChange = this.currentSlide;
-    this.currentSlide = Math.min(Math.max(index, 0), this.innerElements.length - this.perPage);
-    if (beforeChange !== this.currentSlide) {
-      this.slideToCurrent();
-      this.config.onChange.call(this);
-      if (callback) {
-        callback.call(this);
-      }
-    }
-  }
-  /**
-   * Moves sliders frame to position of currently active slide
-   */
-  slideToCurrent() {
-    this.sliderFrame.style[this.transformProperty] = `translate3d(-${this.currentSlide * (this.selectorWidth / this.perPage)}px, 0, 0)`;
-  }
-  /**
-   * Recalculate drag /swipe event and reposition the frame of a slider
-   */
-  updateAfterDrag() {
-    const movement = this.drag.endX - this.drag.startX;
-    const movementDistance = Math.abs(movement);
-    const howManySliderToSlide = this.config.multipleDrag ? Math.ceil(movementDistance / (this.selectorWidth / this.perPage)) : 1;
-
-    if (movement > 0 && movementDistance > this.config.threshold && this.innerElements.length > this.perPage) {
-      this.prev(howManySliderToSlide);
-    }
-    else if (movement < 0 && movementDistance > this.config.threshold && this.innerElements.length > this.perPage) {
-      this.next(howManySliderToSlide);
-    }
-    this.slideToCurrent();
-  }
-  /**
-   * When window resizes, resize slider components as well
-   */
-  resizeHandler() {
-    // update perPage number dependable of user value
-    this.resolveSlidesNumber();
-
-    this.selectorWidth = this.selector.offsetWidth;
-    this.sliderFrame.style.width = `${(this.selectorWidth / this.perPage) * this.innerElements.length}px`;
-
-    this.slideToCurrent();
-  }
-  /**
-   * Clear drag after touchend and mouseup event
-   */
-  clearDrag() {
-    this.drag = {
-      startX: 0,
-      endX: 0,
-      startY: 0,
-      letItGo: null
-    };
-  }
-  /**
-   * touchstart event handler
-   */
-  touchstartHandler(e) {
-    e.stopPropagation();
-    this.pointerDown = true;
-    this.drag.startX = e.touches[0].pageX;
-    this.drag.startY = e.touches[0].pageY;
-  }
-  /**
-   * touchend event handler
-   */
-  touchendHandler(e) {
-    e.stopPropagation();
-    this.pointerDown = false;
-    this.sliderFrame.style.webkitTransition = `all ${this.config.duration}ms ${this.config.easing}`;
-    this.sliderFrame.style.transition = `all ${this.config.duration}ms ${this.config.easing}`;
-    if (this.drag.endX) {
-      this.updateAfterDrag();
-    }
-    this.clearDrag();
-  }
-  /**
-   * touchmove event handler
-   */
-  touchmoveHandler(e) {
-    e.stopPropagation();
-
-    if (this.drag.letItGo === null) {
-      this.drag.letItGo = Math.abs(this.drag.startY - e.touches[0].pageY) < Math.abs(this.drag.startX - e.touches[0].pageX);
-    }
-
-    if (this.pointerDown && this.drag.letItGo) {
-      e.preventDefault();
-      this.drag.endX = e.touches[0].pageX;
-      this.sliderFrame.style.webkitTransition = `all 0ms ${this.config.easing}`;
-      this.sliderFrame.style.transition = `all 0ms ${this.config.easing}`;
-      this.sliderFrame.style[this.transformProperty] = `translate3d(${(this.currentSlide * (this.selectorWidth / this.perPage) + (this.drag.startX - this.drag.endX)) * -1}px, 0, 0)`;
-    }
-  }
-  /**
-   * mousedown event handler
-   */
-  mousedownHandler(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    this.pointerDown = true;
-    this.drag.startX = e.pageX;
-  }
-  /**
-   * mouseup event handler
-   */
-  mouseupHandler(e) {
-    e.stopPropagation();
-    this.pointerDown = false;
-    this.selector.style.cursor = '-webkit-grab';
-    this.sliderFrame.style.webkitTransition = `all ${this.config.duration}ms ${this.config.easing}`;
-    this.sliderFrame.style.transition = `all ${this.config.duration}ms ${this.config.easing}`;
-    if (this.drag.endX) {
-      this.updateAfterDrag();
-    }
-    this.clearDrag();
-  }
-  /**
-   * mousemove event handler
-   */
-  mousemoveHandler(e) {
-    e.preventDefault();
-    if (this.pointerDown) {
-      this.drag.endX = e.pageX;
-      this.selector.style.cursor = '-webkit-grabbing';
-      this.sliderFrame.style.webkitTransition = `all 0ms ${this.config.easing}`;
-      this.sliderFrame.style.transition = `all 0ms ${this.config.easing}`;
-      this.sliderFrame.style[this.transformProperty] = `translate3d(${(this.currentSlide * (this.selectorWidth / this.perPage) + (this.drag.startX - this.drag.endX)) * -1}px, 0, 0)`;
-    }
-  }
-  /**
-   * mouseleave event handler
-   */
-  mouseleaveHandler(e) {
-    if (this.pointerDown) {
-      this.pointerDown = false;
-      this.selector.style.cursor = '-webkit-grab';
-      this.drag.endX = e.pageX;
-      this.sliderFrame.style.webkitTransition = `all ${this.config.duration}ms ${this.config.easing}`;
-      this.sliderFrame.style.transition = `all ${this.config.duration}ms ${this.config.easing}`;
-      this.updateAfterDrag();
-      this.clearDrag();
-    }
-  }
-  /**
-   * Update after removing, prepending or appending items.
-   */
-  updateFrame() {
-    // Create frame and apply styling
-    this.sliderFrame = document.createElement('div');
-    this.sliderFrame.style.width = `${(this.selectorWidth / this.perPage) * this.innerElements.length}px`;
-    this.sliderFrame.style.webkitTransition = `all ${this.config.duration}ms ${this.config.easing}`;
-    this.sliderFrame.style.transition = `all ${this.config.duration}ms ${this.config.easing}`;
-
-    if (this.config.draggable) {
-      this.selector.style.cursor = '-webkit-grab';
-    }
-
-    // Create a document fragment to put slides into it
-    const docFragment = document.createDocumentFragment();
-
-    // Loop through the slides, add styling and add them to document fragment
-    for (let i = 0; i < this.innerElements.length; i++) {
-      const elementContainer = document.createElement('div');
-      elementContainer.style.cssFloat = 'left';
-      elementContainer.style.float = 'left';
-      elementContainer.style.width = `${100 / this.innerElements.length}%`;
-      elementContainer.appendChild(this.innerElements[i]);
-      docFragment.appendChild(elementContainer);
-    }
-
-    // Add fragment to the frame
-    this.sliderFrame.appendChild(docFragment);
-
-    // Clear selector (just in case something is there) and insert a frame
-    this.selector.innerHTML = '';
-    this.selector.appendChild(this.sliderFrame);
-
-    // Go to currently active slide after initial build
-    this.slideToCurrent();
-  }
-  /**
-   * Remove item from carousel.
-   * @param {number} index - Item index to remove.
-   * @param {function} callback - Optional callback to call after remove.
-   */
-  remove(index, callback) {
-    if (index < 0 || index >= this.innerElements.length) {
-      throw new Error('Item to remove doesn\'t exist 😭');
-    }
-    this.innerElements.splice(index, 1);
-
-    this.updateFrame();
-    if (callback) {
-      callback.call(this);
-    }
-  }
-  /**
-   * Insert item to carousel at particular index.
-   * @param {HTMLElement} item - Item to insert.
-   * @param {number} index - Index of new new item insertion.
-   * @param {function} callback - Optional callback to call after insert.
-   */
-  insert(item, index, callback) {
-    if (index < 0 || index > this.innerElements.length + 1) {
-      throw new Error('Unable to inset it at this index 😭');
-    }
-    if (this.innerElements.indexOf(item) !== -1) {
-      throw new Error('The same item in a carousel? Really? Nope 😭');
-    }
-    this.innerElements.splice(index, 0, item);
-
-    // Avoid shifting content
-    this.currentSlide = index <= this.currentSlide ? this.currentSlide + 1 : this.currentSlide;
-
-    this.updateFrame();
-    if (callback) {
-      callback.call(this);
-    }
-  }
-  /**
-   * Prepernd item to carousel.
-   * @param {HTMLElement} item - Item to prepend.
-   * @param {function} callback - Optional callback to call after prepend.
-   */
-  prepend(item, callback) {
-    this.insert(item, 0);
-    if (callback) {
-      callback.call(this);
-    }
-  }
-  /**
-   * Append item to carousel.
-   * @param {HTMLElement} item - Item to append.
-   * @param {function} callback - Optional callback to call after append.
-   */
-  append(item, callback) {
-    this.insert(item, this.innerElements.length + 1);
-    if (callback) {
-      callback.call(this);
-    }
-  }
-  /**
-   * Removes listeners and optionally restores to initial markup
-   * @param {boolean} restoreMarkup - Determinants about restoring an initial markup.
-   * @param {function} callback - Optional callback function.
-   */
-  destroy(restoreMarkup = false, callback) {
-    this.detachEvents();
-
-    if (restoreMarkup) {
-      const slides = document.createDocumentFragment();
-      for (let i = 0; i < this.innerElements.length; i++) {
-        slides.appendChild(this.innerElements[i]);
-      }
-      this.selector.innerHTML = '';
-      this.selector.appendChild(slides);
-      this.selector.removeAttribute('style');
-    }
-
-    if (callback) {
-      callback.call(this);
-    }
-  }
-}
-/* harmony export (immutable) */ __webpack_exports__["default"] = carousel;
-
-
-
-/***/ }),
-/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -1295,6 +779,7 @@ var idreal;
 var objeto;
 hex_chr="0123456789abcdef";
 IDClass=0;
+var move = __webpack_require__(12);
 g=(function(){
     //aqui se escriben las funciones privadas
     // Private variables / properties
@@ -1687,29 +1172,62 @@ g=(function(){
 				        	g.log("Is not an Object!");
 				        }
 				      },
-				      animate: function(target){
+				      animate: function(callbackanim){
 						return {
+							x:function(x){
+								move(domel).x(x).end();
+								callbackanim();
+							},
+							y:function(y){
+								move(domel).y(y).end();
+								callbackanim();
+							},
+							add:function(attrib,value){
+								move(domel).add(attrib,value).end();
+								callbackanim();
+							},
 							to:function(x,y){
-
+								move(domel).to(x,y).end();
+								callbackanim();
 							},
 							rotate:function(deg){
-								
+								move(domel).rotate(deg).end();
+								callbackanim();
 							},
 							scale:function(deg){
-								
+								move(domel).scale(deg).end();
+								callbackanim();
 							},
 							set:function(x,y){
-								
+								move(domel).set(x,y).end();
+								callbackanim();
 							},
 							duration:function(deg){
-								
+								move(domel).duration(deg).end();
+								callbackanim();
 							},
 							skew:function(x,y){
-								
+								move(domel).skew(x,y).end();
+								callbackanim();
 							},
 							then:function(){
 								return{
-									
+									set:function(x,y){
+										move(domel).then().set(x,y).end();
+										callbackanim();
+									},
+									duration:function(deg){
+										move(domel).then().duration(deg).end();
+										callbackanim();
+									},
+									scale:function(deg){
+										move(domel).then().scale(deg).end();
+										callbackanim();
+									},
+									pop:function(){
+										move(domel).then().pop().end();
+										callbackanim();
+									},
 								}
 							},
 							end:function(){
@@ -2767,712 +2285,37 @@ g.md5=(function(){
 		}
 	};
 }());
-/**
- * Libreria de movimientos de elementos del DOM
- * */
-;(function(){
 
-/**
- * Require the module at `name`.
- *
- * @param {String} name
- * @return {Object} exports
- * @api public
- */
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
 
-function require(name) {
-  var module = require.modules[name];
-  if (!module) throw new Error('failed to require "' + name + '"');
-
-  if (!('exports' in module) && typeof module.definition === 'function') {
-    module.client = module.component = true;
-    module.definition.call(this, module.exports = {}, module);
-    delete module.definition;
-  }
-
-  return module.exports;
-}
-
-/**
- * Meta info, accessible in the global scope unless you use AMD option.
- */
-
-require.loader = 'component';
-
-/**
- * Internal helper object, contains a sorting function for semantiv versioning
- */
-require.helper = {};
-require.helper.semVerSort = function(a, b) {
-  var aArray = a.version.split('.');
-  var bArray = b.version.split('.');
-  for (var i=0; i<aArray.length; ++i) {
-    var aInt = parseInt(aArray[i], 10);
-    var bInt = parseInt(bArray[i], 10);
-    if (aInt === bInt) {
-      var aLex = aArray[i].substr((""+aInt).length);
-      var bLex = bArray[i].substr((""+bInt).length);
-      if (aLex === '' && bLex !== '') return 1;
-      if (aLex !== '' && bLex === '') return -1;
-      if (aLex !== '' && bLex !== '') return aLex > bLex ? 1 : -1;
-      continue;
-    } else if (aInt > bInt) {
-      return 1;
-    } else {
-      return -1;
-    }
-  }
-  return 0;
-}
-
-/**
- * Find and require a module which name starts with the provided name.
- * If multiple modules exists, the highest semver is used. 
- * This function can only be used for remote dependencies.
- * @param {String} name - module name: `user~repo`
- * @param {Boolean} returnPath - returns the canonical require path if true, 
- *                               otherwise it returns the epxorted module
- */
-require.latest = function (name, returnPath) {
-  function showError(name) {
-    throw new Error('failed to find latest module of "' + name + '"');
-  }
-  // only remotes with semvers, ignore local files conataining a '/'
-  var versionRegexp = /(.*)~(.*)@v?(\d+\.\d+\.\d+[^\/]*)$/;
-  var remoteRegexp = /(.*)~(.*)/;
-  if (!remoteRegexp.test(name)) showError(name);
-  var moduleNames = Object.keys(require.modules);
-  var semVerCandidates = [];
-  var otherCandidates = []; // for instance: name of the git branch
-  for (var i=0; i<moduleNames.length; i++) {
-    var moduleName = moduleNames[i];
-    if (new RegExp(name + '@').test(moduleName)) {
-        var version = moduleName.substr(name.length+1);
-        var semVerMatch = versionRegexp.exec(moduleName);
-        if (semVerMatch != null) {
-          semVerCandidates.push({version: version, name: moduleName});
-        } else {
-          otherCandidates.push({version: version, name: moduleName});
-        } 
-    }
-  }
-  if (semVerCandidates.concat(otherCandidates).length === 0) {
-    showError(name);
-  }
-  if (semVerCandidates.length > 0) {
-    var module = semVerCandidates.sort(require.helper.semVerSort).pop().name;
-    if (returnPath === true) {
-      return module;
-    }
-    return require(module);
-  }
-  // if the build contains more than one branch of the same module
-  // you should not use this funciton
-  var module = otherCandidates.sort(function(a, b) {return a.name > b.name})[0].name;
-  if (returnPath === true) {
-    return module;
-  }
-  return require(module);
-}
-
-/**
- * Registered modules.
- */
-
-require.modules = {};
-
-/**
- * Register module at `name` with callback `definition`.
- *
- * @param {String} name
- * @param {Function} definition
- * @api private
- */
-
-require.register = function (name, definition) {
-  require.modules[name] = {
-    definition: definition
+// Patch IE9 and below
+try {
+  document.createElement('DIV').style.setProperty('opacity', 0, '');
+} catch (error) {
+  CSSStyleDeclaration.prototype.getProperty = function(a) {
+    return this.getAttribute(a);
   };
-};
-
-/**
- * Define a module's exports immediately with `exports`.
- *
- * @param {String} name
- * @param {Generic} exports
- * @api private
- */
-
-require.define = function (name, exports) {
-  require.modules[name] = {
-    exports: exports
-  };
-};
-require.register("component~transform-property@0.0.1", function (exports, module) {
-
-var styles = [
-  'webkitTransform',
-  'MozTransform',
-  'msTransform',
-  'OTransform',
-  'transform'
-];
-
-var el = document.createElement('p');
-var style;
-
-for (var i = 0; i < styles.length; i++) {
-  style = styles[i];
-  if (null != el.style[style]) {
-    module.exports = style;
-    break;
-  }
-}
-
-});
-
-require.register("component~has-translate3d@0.0.3", function (exports, module) {
-
-var prop = require('component~transform-property@0.0.1');
-
-// IE <=8 doesn't have `getComputedStyle`
-if (!prop || !window.getComputedStyle) {
-  module.exports = false;
-
-} else {
-  var map = {
-    webkitTransform: '-webkit-transform',
-    OTransform: '-o-transform',
-    msTransform: '-ms-transform',
-    MozTransform: '-moz-transform',
-    transform: 'transform'
+  
+  CSSStyleDeclaration.prototype.setProperty = function(a,b) {
+    return this.setAttribute(a, b + '');
   };
 
-  // from: https://gist.github.com/lorenzopolidori/3794226
-  var el = document.createElement('div');
-  el.style[prop] = 'translate3d(1px,1px,1px)';
-  document.body.insertBefore(el, null);
-  var val = getComputedStyle(el).getPropertyValue(map[prop]);
-  document.body.removeChild(el);
-  module.exports = null != val && val.length && 'none' != val;
+  CSSStyleDeclaration.prototype.removeProperty = function(a) {
+    return this.removeAttribute(a);
+  };
 }
 
-});
-
-require.register("yields~has-transitions@1.0.0", function (exports, module) {
-/**
- * Check if `el` or browser supports transitions.
- *
- * @param {Element} el
- * @return {Boolean}
- * @api public
- */
-
-exports = module.exports = function(el){
-  switch (arguments.length) {
-    case 0: return bool;
-    case 1: return bool
-      ? transitions(el)
-      : bool;
-  }
-};
-
-/**
- * Check if the given `el` has transitions.
- *
- * @param {Element} el
- * @return {Boolean}
- * @api private
- */
-
-function transitions(el, styl){
-  if (el.transition) return true;
-  styl = window.getComputedStyle(el);
-  return !! parseFloat(styl.transitionDuration, 10);
-}
-
-/**
- * Style.
- */
-
-var styl = document.body.style;
-
-/**
- * Export support.
- */
-
-var bool = 'transition' in styl
-  || 'webkitTransition' in styl
-  || 'MozTransition' in styl
-  || 'msTransition' in styl;
-
-});
-
-require.register("component~event@0.1.4", function (exports, module) {
-var bind = window.addEventListener ? 'addEventListener' : 'attachEvent',
-    unbind = window.removeEventListener ? 'removeEventListener' : 'detachEvent',
-    prefix = bind !== 'addEventListener' ? 'on' : '';
-
-/**
- * Bind `el` event `type` to `fn`.
- *
- * @param {Element} el
- * @param {String} type
- * @param {Function} fn
- * @param {Boolean} capture
- * @return {Function}
- * @api public
- */
-
-exports.bind = function(el, type, fn, capture){
-  el[bind](prefix + type, fn, capture || false);
-  return fn;
-};
-
-/**
- * Unbind `el` event `type`'s callback `fn`.
- *
- * @param {Element} el
- * @param {String} type
- * @param {Function} fn
- * @param {Boolean} capture
- * @return {Function}
- * @api public
- */
-
-exports.unbind = function(el, type, fn, capture){
-  el[unbind](prefix + type, fn, capture || false);
-  return fn;
-};
-});
-
-require.register("ecarter~css-emitter@0.0.1", function (exports, module) {
-/**
- * Module Dependencies
- */
-
-var events = require('component~event@0.1.4');
-
-// CSS events
-
-var watch = [
-  'transitionend'
-, 'webkitTransitionEnd'
-, 'oTransitionEnd'
-, 'MSTransitionEnd'
-, 'animationend'
-, 'webkitAnimationEnd'
-, 'oAnimationEnd'
-, 'MSAnimationEnd'
-];
-
-/**
- * Expose `CSSnext`
- */
-
-module.exports = CssEmitter;
-
-/**
- * Initialize a new `CssEmitter`
- *
- */
-
-function CssEmitter(element){
-  if (!(this instanceof CssEmitter)) return new CssEmitter(element);
-  this.el = element;
-}
-
-/**
- * Bind CSS events.
- *
- * @api public
- */
-
-CssEmitter.prototype.bind = function(fn){
-  for (var i=0; i < watch.length; i++) {
-    events.bind(this.el, watch[i], fn);
-  }
-  return this;
-};
-
-/**
- * Unbind CSS events
- * 
- * @api public
- */
-
-CssEmitter.prototype.unbind = function(fn){
-  for (var i=0; i < watch.length; i++) {
-    events.unbind(this.el, watch[i], fn);
-  }
-  return this;
-};
-
-/**
- * Fire callback only once
- * 
- * @api public
- */
-
-CssEmitter.prototype.once = function(fn){
-  var self = this;
-  function on(){
-    self.unbind(on);
-    fn.apply(self.el, arguments);
-  }
-  self.bind(on);
-  return this;
-};
-
-
-});
-
-require.register("component~once@0.0.1", function (exports, module) {
-
-/**
- * Identifier.
- */
-
-var n = 0;
-
-/**
- * Global.
- */
-
-var global = (function(){ return this })();
-
-/**
- * Make `fn` callable only once.
- *
- * @param {Function} fn
- * @return {Function}
- * @api public
- */
-
-module.exports = function(fn) {
-  var id = n++;
-
-  function once(){
-    // no receiver
-    if (this == global) {
-      if (once.called) return;
-      once.called = true;
-      return fn.apply(this, arguments);
-    }
-
-    // receiver
-    var key = '__called_' + id + '__';
-    if (this[key]) return;
-    this[key] = true;
-    return fn.apply(this, arguments);
-  }
-
-  return once;
-};
-
-});
-
-require.register("yields~after-transition@0.0.1", function (exports, module) {
-
-/**
- * dependencies
- */
-
-var has = require('yields~has-transitions@1.0.0')
-  , emitter = require('ecarter~css-emitter@0.0.1')
-  , once = require('component~once@0.0.1');
-
-/**
- * Transition support.
- */
-
-var supported = has();
-
-/**
- * Export `after`
- */
-
-module.exports = after;
-
-/**
- * Invoke the given `fn` after transitions
- *
- * It will be invoked only if the browser
- * supports transitions __and__
- * the element has transitions
- * set in `.style` or css.
- *
- * @param {Element} el
- * @param {Function} fn
- * @return {Function} fn
- * @api public
- */
-
-function after(el, fn){
-  if (!supported || !has(el)) return fn();
-  emitter(el).bind(fn);
-  return fn;
-};
-
-/**
- * Same as `after()` only the function is invoked once.
- *
- * @param {Element} el
- * @param {Function} fn
- * @return {Function}
- * @api public
- */
-
-after.once = function(el, fn){
-  var callback = once(fn);
-  after(el, fn = function(){
-    emitter(el).unbind(fn);
-    callback();
-  });
-};
-
-});
-
-require.register("component~emitter@1.2.0", function (exports, module) {
-
-/**
- * Expose `Emitter`.
- */
-
-module.exports = Emitter;
-
-/**
- * Initialize a new `Emitter`.
- *
- * @api public
- */
-
-function Emitter(obj) {
-  if (obj) return mixin(obj);
-};
-
-/**
- * Mixin the emitter properties.
- *
- * @param {Object} obj
- * @return {Object}
- * @api private
- */
-
-function mixin(obj) {
-  for (var key in Emitter.prototype) {
-    obj[key] = Emitter.prototype[key];
-  }
-  return obj;
-}
-
-/**
- * Listen on the given `event` with `fn`.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.on =
-Emitter.prototype.addEventListener = function(event, fn){
-  this._callbacks = this._callbacks || {};
-  (this._callbacks['$' + event] = this._callbacks['$' + event] || [])
-    .push(fn);
-  return this;
-};
-
-/**
- * Adds an `event` listener that will be invoked a single
- * time then automatically removed.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.once = function(event, fn){
-  function on() {
-    this.off(event, on);
-    fn.apply(this, arguments);
-  }
-
-  on.fn = fn;
-  this.on(event, on);
-  return this;
-};
-
-/**
- * Remove the given callback for `event` or all
- * registered callbacks.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.off =
-Emitter.prototype.removeListener =
-Emitter.prototype.removeAllListeners =
-Emitter.prototype.removeEventListener = function(event, fn){
-  this._callbacks = this._callbacks || {};
-
-  // all
-  if (0 == arguments.length) {
-    this._callbacks = {};
-    return this;
-  }
-
-  // specific event
-  var callbacks = this._callbacks['$' + event];
-  if (!callbacks) return this;
-
-  // remove all handlers
-  if (1 == arguments.length) {
-    delete this._callbacks['$' + event];
-    return this;
-  }
-
-  // remove specific handler
-  var cb;
-  for (var i = 0; i < callbacks.length; i++) {
-    cb = callbacks[i];
-    if (cb === fn || cb.fn === fn) {
-      callbacks.splice(i, 1);
-      break;
-    }
-  }
-  return this;
-};
-
-/**
- * Emit `event` with the given args.
- *
- * @param {String} event
- * @param {Mixed} ...
- * @return {Emitter}
- */
-
-Emitter.prototype.emit = function(event){
-  this._callbacks = this._callbacks || {};
-  var args = [].slice.call(arguments, 1)
-    , callbacks = this._callbacks['$' + event];
-
-  if (callbacks) {
-    callbacks = callbacks.slice(0);
-    for (var i = 0, len = callbacks.length; i < len; ++i) {
-      callbacks[i].apply(this, args);
-    }
-  }
-
-  return this;
-};
-
-/**
- * Return array of callbacks for `event`.
- *
- * @param {String} event
- * @return {Array}
- * @api public
- */
-
-Emitter.prototype.listeners = function(event){
-  this._callbacks = this._callbacks || {};
-  return this._callbacks['$' + event] || [];
-};
-
-/**
- * Check if this emitter has `event` handlers.
- *
- * @param {String} event
- * @return {Boolean}
- * @api public
- */
-
-Emitter.prototype.hasListeners = function(event){
-  return !! this.listeners(event).length;
-};
-
-});
-
-require.register("yields~css-ease@0.0.1", function (exports, module) {
-
-/**
- * CSS Easing functions
- */
-
-module.exports = {
-    'in':                'ease-in'
-  , 'out':               'ease-out'
-  , 'in-out':            'ease-in-out'
-  , 'snap':              'cubic-bezier(0,1,.5,1)'
-  , 'linear':            'cubic-bezier(0.250, 0.250, 0.750, 0.750)'
-  , 'ease-in-quad':      'cubic-bezier(0.550, 0.085, 0.680, 0.530)'
-  , 'ease-in-cubic':     'cubic-bezier(0.550, 0.055, 0.675, 0.190)'
-  , 'ease-in-quart':     'cubic-bezier(0.895, 0.030, 0.685, 0.220)'
-  , 'ease-in-quint':     'cubic-bezier(0.755, 0.050, 0.855, 0.060)'
-  , 'ease-in-sine':      'cubic-bezier(0.470, 0.000, 0.745, 0.715)'
-  , 'ease-in-expo':      'cubic-bezier(0.950, 0.050, 0.795, 0.035)'
-  , 'ease-in-circ':      'cubic-bezier(0.600, 0.040, 0.980, 0.335)'
-  , 'ease-in-back':      'cubic-bezier(0.600, -0.280, 0.735, 0.045)'
-  , 'ease-out-quad':     'cubic-bezier(0.250, 0.460, 0.450, 0.940)'
-  , 'ease-out-cubic':    'cubic-bezier(0.215, 0.610, 0.355, 1.000)'
-  , 'ease-out-quart':    'cubic-bezier(0.165, 0.840, 0.440, 1.000)'
-  , 'ease-out-quint':    'cubic-bezier(0.230, 1.000, 0.320, 1.000)'
-  , 'ease-out-sine':     'cubic-bezier(0.390, 0.575, 0.565, 1.000)'
-  , 'ease-out-expo':     'cubic-bezier(0.190, 1.000, 0.220, 1.000)'
-  , 'ease-out-circ':     'cubic-bezier(0.075, 0.820, 0.165, 1.000)'
-  , 'ease-out-back':     'cubic-bezier(0.175, 0.885, 0.320, 1.275)'
-  , 'ease-out-quad':     'cubic-bezier(0.455, 0.030, 0.515, 0.955)'
-  , 'ease-out-cubic':    'cubic-bezier(0.645, 0.045, 0.355, 1.000)'
-  , 'ease-in-out-quart': 'cubic-bezier(0.770, 0.000, 0.175, 1.000)'
-  , 'ease-in-out-quint': 'cubic-bezier(0.860, 0.000, 0.070, 1.000)'
-  , 'ease-in-out-sine':  'cubic-bezier(0.445, 0.050, 0.550, 0.950)'
-  , 'ease-in-out-expo':  'cubic-bezier(1.000, 0.000, 0.000, 1.000)'
-  , 'ease-in-out-circ':  'cubic-bezier(0.785, 0.135, 0.150, 0.860)'
-  , 'ease-in-out-back':  'cubic-bezier(0.680, -0.550, 0.265, 1.550)'
-};
-
-});
-
-require.register("component~query@0.0.3", function (exports, module) {
-function one(selector, el) {
-  return el.querySelector(selector);
-}
-
-exports = module.exports = function(selector, el){
-  el = el || document;
-  return one(selector, el);
-};
-
-exports.all = function(selector, el){
-  el = el || document;
-  return el.querySelectorAll(selector);
-};
-
-exports.engine = function(obj){
-  if (!obj.one) throw new Error('.one callback required');
-  if (!obj.all) throw new Error('.all callback required');
-  one = obj.one;
-  exports.all = obj.all;
-  return exports;
-};
-
-});
-
-require.register("move", function (exports, module) {
 /**
  * Module Dependencies.
  */
 
-var Emitter = require('component~emitter@1.2.0');
-var query = require('component~query@0.0.3');
-var after = require('yields~after-transition@0.0.1');
-var has3d = require('component~has-translate3d@0.0.3');
-var ease = require('yields~css-ease@0.0.1');
+var Emitter = __webpack_require__(13);
+var query = __webpack_require__(14);
+var after = __webpack_require__(15);
+var has3d = __webpack_require__(19);
+var ease = __webpack_require__(21);
 
 /**
  * CSS Translate
@@ -3481,6 +2324,7 @@ var ease = require('yields~css-ease@0.0.1');
 var translate = has3d
   ? ['translate3d(', ', 0)']
   : ['translate(', ')'];
+
 
 /**
  * Export `Move`
@@ -3620,8 +2464,8 @@ Move.prototype.skewY = function(n){
 /**
  * Translate `x` and `y` axis.
  *
- * @param {Number} x
- * @param {Number} y
+ * @param {Number|String} x
+ * @param {Number|String} y
  * @return {Move} for chaining
  * @api public
  */
@@ -3629,35 +2473,34 @@ Move.prototype.skewY = function(n){
 Move.prototype.translate =
 Move.prototype.to = function(x, y){
   return this.transform(translate.join(''
-    + x +'px, '
-    + (y || 0)
-    + 'px'));
+    + fixUnits(x) + ', '
+    + fixUnits(y || 0)));
 };
 
 /**
  * Translate on the x axis to `n`.
  *
- * @param {Number} n
+ * @param {Number|String} n
  * @return {Move} for chaining
  * @api public
  */
 
 Move.prototype.translateX =
 Move.prototype.x = function(n){
-  return this.transform('translateX(' + n + 'px)');
+  return this.transform('translateX(' + fixUnits(n) + ')');
 };
 
 /**
  * Translate on the y axis to `n`.
  *
- * @param {Number} n
+ * @param {Number|String} n
  * @return {Move} for chaining
  * @api public
  */
 
 Move.prototype.translateY =
 Move.prototype.y = function(n){
-  return this.transform('translateY(' + n + 'px)');
+  return this.transform('translateY(' + fixUnits(n) + ')');
 };
 
 /**
@@ -3840,17 +2683,8 @@ Move.prototype.setVendorProperty = function(prop, val){
  */
 
 Move.prototype.set = function(prop, val){
-  if (typeof prop == "object") {
-    for (var key in prop) {
-      if (prop.hasOwnProperty(key)) {
-        this.transition(key);
-        this._props[key] = prop[key];
-      }
-    }
-  } else {
-    this.transition(prop);
-    this._props[prop] = val;  
-  } 
+  this.transition(prop);
+  this._props[prop] = val;
   return this;
 };
 
@@ -4043,16 +2877,516 @@ Move.prototype.end = function(fn){
   return this;
 };
 
-});
+/**
+ * Fix value units
+ *
+ * @param {Number|String} val
+ * @return {String}
+ * @api private
+ */
+
+function fixUnits(val) {
+  return 'string' === typeof val && isNaN(+val) ? val : val + 'px';
+}
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+/**
+ * Expose `Emitter`.
+ */
 
 if (true) {
-  module.exports = require("move");
-} else if (typeof define == "function" && define.amd) {
-  define("move", [], function(){ return require("move"); });
-} else {
-  (this || window)["move"] = require("move");
+  module.exports = Emitter;
 }
-})()
+
+/**
+ * Initialize a new `Emitter`.
+ *
+ * @api public
+ */
+
+function Emitter(obj) {
+  if (obj) return mixin(obj);
+};
+
+/**
+ * Mixin the emitter properties.
+ *
+ * @param {Object} obj
+ * @return {Object}
+ * @api private
+ */
+
+function mixin(obj) {
+  for (var key in Emitter.prototype) {
+    obj[key] = Emitter.prototype[key];
+  }
+  return obj;
+}
+
+/**
+ * Listen on the given `event` with `fn`.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.on =
+Emitter.prototype.addEventListener = function(event, fn){
+  this._callbacks = this._callbacks || {};
+  (this._callbacks['$' + event] = this._callbacks['$' + event] || [])
+    .push(fn);
+  return this;
+};
+
+/**
+ * Adds an `event` listener that will be invoked a single
+ * time then automatically removed.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.once = function(event, fn){
+  function on() {
+    this.off(event, on);
+    fn.apply(this, arguments);
+  }
+
+  on.fn = fn;
+  this.on(event, on);
+  return this;
+};
+
+/**
+ * Remove the given callback for `event` or all
+ * registered callbacks.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.off =
+Emitter.prototype.removeListener =
+Emitter.prototype.removeAllListeners =
+Emitter.prototype.removeEventListener = function(event, fn){
+  this._callbacks = this._callbacks || {};
+
+  // all
+  if (0 == arguments.length) {
+    this._callbacks = {};
+    return this;
+  }
+
+  // specific event
+  var callbacks = this._callbacks['$' + event];
+  if (!callbacks) return this;
+
+  // remove all handlers
+  if (1 == arguments.length) {
+    delete this._callbacks['$' + event];
+    return this;
+  }
+
+  // remove specific handler
+  var cb;
+  for (var i = 0; i < callbacks.length; i++) {
+    cb = callbacks[i];
+    if (cb === fn || cb.fn === fn) {
+      callbacks.splice(i, 1);
+      break;
+    }
+  }
+  return this;
+};
+
+/**
+ * Emit `event` with the given args.
+ *
+ * @param {String} event
+ * @param {Mixed} ...
+ * @return {Emitter}
+ */
+
+Emitter.prototype.emit = function(event){
+  this._callbacks = this._callbacks || {};
+  var args = [].slice.call(arguments, 1)
+    , callbacks = this._callbacks['$' + event];
+
+  if (callbacks) {
+    callbacks = callbacks.slice(0);
+    for (var i = 0, len = callbacks.length; i < len; ++i) {
+      callbacks[i].apply(this, args);
+    }
+  }
+
+  return this;
+};
+
+/**
+ * Return array of callbacks for `event`.
+ *
+ * @param {String} event
+ * @return {Array}
+ * @api public
+ */
+
+Emitter.prototype.listeners = function(event){
+  this._callbacks = this._callbacks || {};
+  return this._callbacks['$' + event] || [];
+};
+
+/**
+ * Check if this emitter has `event` handlers.
+ *
+ * @param {String} event
+ * @return {Boolean}
+ * @api public
+ */
+
+Emitter.prototype.hasListeners = function(event){
+  return !! this.listeners(event).length;
+};
+
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports) {
+
+function one(selector, el) {
+  return el.querySelector(selector);
+}
+
+exports = module.exports = function(selector, el){
+  el = el || document;
+  return one(selector, el);
+};
+
+exports.all = function(selector, el){
+  el = el || document;
+  return el.querySelectorAll(selector);
+};
+
+exports.engine = function(obj){
+  if (!obj.one) throw new Error('.one callback required');
+  if (!obj.all) throw new Error('.all callback required');
+  one = obj.one;
+  exports.all = obj.all;
+  return exports;
+};
+
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var hasTransitions = __webpack_require__(16);
+var emitter = __webpack_require__(17);
+
+function afterTransition(el, callback) {
+  if(hasTransitions(el)) {
+    return emitter(el).bind(callback);
+  }
+  return callback.apply(el);
+};
+
+afterTransition.once = function(el, callback) {
+  afterTransition(el, function fn(){
+    callback.apply(el);
+    emitter(el).unbind(fn);
+  });
+};
+
+module.exports = afterTransition;
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports) {
+
+/**
+ * This will store the property that the current
+ * browser uses for transitionDuration
+ */
+var property;
+
+/**
+ * The properties we'll check on an element
+ * to determine if it actually has transitions
+ * We use duration as this is the only property
+ * needed to technically have transitions
+ * @type {Array}
+ */
+var types = [
+  "transitionDuration",
+  "MozTransitionDuration",
+  "webkitTransitionDuration"
+];
+
+/**
+ * Determine the correct property for this browser
+ * just once so we done need to check every time
+ */
+while(types.length) {
+  var type = types.shift();
+  if(type in document.body.style) {
+    property = type;
+  }
+}
+
+/**
+ * Determine if the browser supports transitions or
+ * if an element has transitions at all.
+ * @param  {Element}  el Optional. Returns browser support if not included
+ * @return {Boolean}
+ */
+function hasTransitions(el){
+  if(!property) {
+    return false; // No browser support for transitions
+  }
+  if(!el) {
+    return property != null; // We just want to know if browsers support it
+  }
+  var duration = getComputedStyle(el)[property];
+  return duration !== "" && parseFloat(duration) !== 0; // Does this element have transitions?
+}
+
+module.exports = hasTransitions;
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/**
+ * Module Dependencies
+ */
+
+var events = __webpack_require__(18);
+
+// CSS events
+
+var watch = [
+  'transitionend'
+, 'webkitTransitionEnd'
+, 'oTransitionEnd'
+, 'MSTransitionEnd'
+, 'animationend'
+, 'webkitAnimationEnd'
+, 'oAnimationEnd'
+, 'MSAnimationEnd'
+];
+
+/**
+ * Expose `CSSnext`
+ */
+
+module.exports = CssEmitter;
+
+/**
+ * Initialize a new `CssEmitter`
+ *
+ */
+
+function CssEmitter(element){
+  if (!(this instanceof CssEmitter)) return new CssEmitter(element);
+  this.el = element;
+}
+
+/**
+ * Bind CSS events.
+ *
+ * @api public
+ */
+
+CssEmitter.prototype.bind = function(fn){
+  for (var i=0; i < watch.length; i++) {
+    events.bind(this.el, watch[i], fn);
+  }
+  return this;
+};
+
+/**
+ * Unbind CSS events
+ * 
+ * @api public
+ */
+
+CssEmitter.prototype.unbind = function(fn){
+  for (var i=0; i < watch.length; i++) {
+    events.unbind(this.el, watch[i], fn);
+  }
+  return this;
+};
+
+/**
+ * Fire callback only once
+ * 
+ * @api public
+ */
+
+CssEmitter.prototype.once = function(fn){
+  var self = this;
+  function on(){
+    self.unbind(on);
+    fn.apply(self.el, arguments);
+  }
+  self.bind(on);
+  return this;
+};
+
+
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports) {
+
+
+/**
+ * Bind `el` event `type` to `fn`.
+ *
+ * @param {Element} el
+ * @param {String} type
+ * @param {Function} fn
+ * @param {Boolean} capture
+ * @return {Function}
+ * @api public
+ */
+
+exports.bind = function(el, type, fn, capture){
+  if (el.addEventListener) {
+    el.addEventListener(type, fn, capture);
+  } else {
+    el.attachEvent('on' + type, fn);
+  }
+  return fn;
+};
+
+/**
+ * Unbind `el` event `type`'s callback `fn`.
+ *
+ * @param {Element} el
+ * @param {String} type
+ * @param {Function} fn
+ * @param {Boolean} capture
+ * @return {Function}
+ * @api public
+ */
+
+exports.unbind = function(el, type, fn, capture){
+  if (el.removeEventListener) {
+    el.removeEventListener(type, fn, capture);
+  } else {
+    el.detachEvent('on' + type, fn);
+  }
+  return fn;
+};
+
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var prop = __webpack_require__(20);
+
+// IE <=8 doesn't have `getComputedStyle`
+if (!prop || !window.getComputedStyle) {
+  module.exports = false;
+
+} else {
+  var map = {
+    webkitTransform: '-webkit-transform',
+    OTransform: '-o-transform',
+    msTransform: '-ms-transform',
+    MozTransform: '-moz-transform',
+    transform: 'transform'
+  };
+
+  // from: https://gist.github.com/lorenzopolidori/3794226
+  var el = document.createElement('div');
+  el.style[prop] = 'translate3d(1px,1px,1px)';
+  document.body.insertBefore(el, null);
+  var val = getComputedStyle(el).getPropertyValue(map[prop]);
+  document.body.removeChild(el);
+  module.exports = null != val && val.length && 'none' != val;
+}
+
+
+/***/ }),
+/* 20 */
+/***/ (function(module, exports) {
+
+
+var styles = [
+  'webkitTransform',
+  'MozTransform',
+  'msTransform',
+  'OTransform',
+  'transform'
+];
+
+var el = document.createElement('p');
+var style;
+
+for (var i = 0; i < styles.length; i++) {
+  style = styles[i];
+  if (null != el.style[style]) {
+    module.exports = style;
+    break;
+  }
+}
+
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports) {
+
+
+/**
+ * CSS Easing functions
+ */
+
+module.exports = {
+    'in':                'ease-in'
+  , 'out':               'ease-out'
+  , 'in-out':            'ease-in-out'
+  , 'snap':              'cubic-bezier(0,1,.5,1)'
+  , 'linear':            'cubic-bezier(0.250, 0.250, 0.750, 0.750)'
+  , 'ease-in-quad':      'cubic-bezier(0.550, 0.085, 0.680, 0.530)'
+  , 'ease-in-cubic':     'cubic-bezier(0.550, 0.055, 0.675, 0.190)'
+  , 'ease-in-quart':     'cubic-bezier(0.895, 0.030, 0.685, 0.220)'
+  , 'ease-in-quint':     'cubic-bezier(0.755, 0.050, 0.855, 0.060)'
+  , 'ease-in-sine':      'cubic-bezier(0.470, 0.000, 0.745, 0.715)'
+  , 'ease-in-expo':      'cubic-bezier(0.950, 0.050, 0.795, 0.035)'
+  , 'ease-in-circ':      'cubic-bezier(0.600, 0.040, 0.980, 0.335)'
+  , 'ease-in-back':      'cubic-bezier(0.600, -0.280, 0.735, 0.045)'
+  , 'ease-out-quad':     'cubic-bezier(0.250, 0.460, 0.450, 0.940)'
+  , 'ease-out-cubic':    'cubic-bezier(0.215, 0.610, 0.355, 1.000)'
+  , 'ease-out-quart':    'cubic-bezier(0.165, 0.840, 0.440, 1.000)'
+  , 'ease-out-quint':    'cubic-bezier(0.230, 1.000, 0.320, 1.000)'
+  , 'ease-out-sine':     'cubic-bezier(0.390, 0.575, 0.565, 1.000)'
+  , 'ease-out-expo':     'cubic-bezier(0.190, 1.000, 0.220, 1.000)'
+  , 'ease-out-circ':     'cubic-bezier(0.075, 0.820, 0.165, 1.000)'
+  , 'ease-out-back':     'cubic-bezier(0.175, 0.885, 0.320, 1.275)'
+  , 'ease-out-quad':     'cubic-bezier(0.455, 0.030, 0.515, 0.955)'
+  , 'ease-out-cubic':    'cubic-bezier(0.645, 0.045, 0.355, 1.000)'
+  , 'ease-in-out-quart': 'cubic-bezier(0.770, 0.000, 0.175, 1.000)'
+  , 'ease-in-out-quint': 'cubic-bezier(0.860, 0.000, 0.070, 1.000)'
+  , 'ease-in-out-sine':  'cubic-bezier(0.445, 0.050, 0.550, 0.950)'
+  , 'ease-in-out-expo':  'cubic-bezier(1.000, 0.000, 0.000, 1.000)'
+  , 'ease-in-out-circ':  'cubic-bezier(0.785, 0.135, 0.150, 0.860)'
+  , 'ease-in-out-back':  'cubic-bezier(0.680, -0.550, 0.265, 1.550)'
+};
+
 
 /***/ })
 /******/ ]);

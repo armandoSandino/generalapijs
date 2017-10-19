@@ -15,7 +15,10 @@
 		<div id="adiosp" style="height: 500px;">
 			div2
 		</div>
-		
+		<input type="button" name="btnmover" id="btnmover" value="MOVER" />
+		<div id="div_A" style="height: 500px;background: #555;position: relative;float:none;display:block;">
+			a
+		</div>
 		<div id="slideshow" style="height: 500px;">
 			<div style="height: 500px;">
 			a
@@ -36,6 +39,8 @@
 		(function(){
 			var cadenamd5;
 			var h={};
+			var contdivs;
+			var bitvisible;
 			h=[
 				{'nombre':'arturo'},
 				{'nombre':'pedro'},
@@ -51,8 +56,6 @@
 			g.log(nav);
 			g.log("**********NAV**************");
 			cadenamd5=g.md5.calc("Arat5uro");
-			var contdivs;
-			var bitvisible;
 			contdivs=0;
 			bitvisible=0;
 			//INIT SLIDESHOW////////////////////////
@@ -76,9 +79,17 @@
 				}
 			);
 			///////////////////////////////////////
-			g.dom("#cargadiv").animate({'top':'200'},2000,function(){
-				g.log("Módulo cargado.");
+			g.dom("#btnmover").click(function(){
+				g.dom("#div_A").animate("#adiosp",{
+					duration:'5000',
+					offset: 0,
+					callback: function(){
+						g.log("Scroll finalizado");
+					}
+				});
 			});
+			
+			///////////////////////////////////////
 			g.log("Son " + contdivs + " Slides");
 			g.log("CLAVE MD5: " + cadenamd5);
 			g.log("Path JS Version: " + g.path.getVersion());

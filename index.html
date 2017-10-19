@@ -18,16 +18,16 @@
 		
 		<div id="slideshow" style="height: 500px;">
 			<div style="height: 500px;">
-			d
+			a
+			</div>
+			<div style="height: 500px;">
+			b
+			</div>
+			<div style="height: 500px;">
+			c
 			</div>
 			<div style="height: 500px;">
 			d
-			</div>
-			<div style="height: 500px;">
-			f
-			</div>
-			<div style="height: 500px;">
-			h
 			</div>
 		</div>
 		aqui va a cargar el módulo en cuestion
@@ -47,11 +47,32 @@
 			 *slideshow carousel.js
 			 * */
 			cadenamd5=g.md5.calc("Arat5uro");
+			var contdivs;
+			var bitvisible;
+			contdivs=0;
+			bitvisible=0;
+			//INIT SLIDESHOW////////////////////////
+			//#slideshow se puede sustituir por el id que el programador escriba
+			//y quedaria tal que #nombre o .nombre + div por ejemplo
 			g.dom("#slideshow div").each(
 				function(objeto,indice){
 					g.log(indice + " " + objeto.innerHTML);
+					objeto.id="slide_" + contdivs;
+					objeto.style.position="absolute";
+					if(bitvisible<1){
+						objeto.style.display="block";
+						bitvisible++;
+					}
+					else{
+						objeto.style.display="none";
+					}
+					objeto.style.float="none";
+					objeto.style.zIndex=contdivs;
+					contdivs++;
 				}
 			);
+			///////////////////////////////////////
+			g.log("Son " + contdivs + " Slides");
 			g.log("CLAVE MD5: " + cadenamd5);
 			g.log("Path JS Version: " + g.path.getVersion());
 			g.dom("#cargadiv").load("README.md",function(){

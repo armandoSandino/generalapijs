@@ -328,13 +328,40 @@ g=(function(){
 				      	var initial_array;
 				      	var x,y,valor,indice;
 				      	objeto=g.getelTag(domel);
-				      	g.log(objeto);
 				        if(objeto[0].id!=undefined){
 				        	objeto.forEach(callbackeach);
 				        }
 				        else{
 				        	g.log("Is not an Object!");
 				        }
+				      },
+				      animate:function(options){
+				      	//write code below...
+				      	//.animate( properties [, duration ] [, easing ] [, complete ] )
+				      	var obj;
+				      	obj=g.getdisctId(domel);
+				      	
+				      },
+				      addClass:function(classele){
+				      	//write code below...
+				      	//.animate( properties [, duration ] [, easing ] [, complete ] )
+				      	var obj;
+				      	obj=g.getdisctId(domel);
+				      	obj.classList.add(classele);
+				      },
+				      removeClass:function(classele){
+				      	//write code below...
+				      	//.animate( properties [, duration ] [, easing ] [, complete ] )
+				      	var obj;
+				      	obj=g.getdisctId(domel);
+				      	obj.classList.remove(classele);
+				      },
+					  toggleClass:function(classele){
+				      	//write code below...
+				      	//.animate( properties [, duration ] [, easing ] [, complete ] )
+				      	var obj;
+				      	obj=g.getdisctId(domel);
+				      	obj.classList.toggle(classele);
 				      },
 				      cursor:function(estilo){
 				        var fila;

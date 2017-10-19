@@ -417,26 +417,37 @@ g=(function(){
 				      animate: function(target){
 						return {
 							to:function(x,y){
-
+								move(target).to(x,y);
 							},
 							rotate:function(deg){
-								
+								move(target).rotate(deg);
 							},
 							scale:function(deg){
-								
+								move(target).scale(deg);
 							},
 							set:function(x,y){
-								
+								move(target).set(x,y);
 							},
 							duration:function(deg){
-								
+								move(target).duration(deg);
 							},
 							skew:function(x,y){
-								
+								move(target).skew(x,y);
 							},
 							then:function(){
 								return{
-									
+									set:function(x,y){
+										move(target).then().set(x,y);
+									},
+									duration:function(deg){
+										move(target).then().duration(deg);
+									},
+									scale:function(deg){
+										move(target).then().scale(deg);
+									},
+									pop:function(){
+										move(target).then().pop();
+									},
 								}
 							},
 							end:function(){

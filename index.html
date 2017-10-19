@@ -72,6 +72,9 @@
 				}
 			);
 			///////////////////////////////////////
+			g.dom("#cargadiv").animate({'top':'200'},2000,function(){
+				g.log("Módulo cargado.");
+			});
 			g.log("Son " + contdivs + " Slides");
 			g.log("CLAVE MD5: " + cadenamd5);
 			g.log("Path JS Version: " + g.path.getVersion());

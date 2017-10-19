@@ -1307,6 +1307,40 @@ g=(function(){
 	  t--;
 	  return -c / 2 * (t * (t - 2) - 1) + b;
 	};
+	function frame(posreal,elem,final,idinterv){
+		if(posreal==final){ // check finish condition
+			clearInterval(idinterv);
+		}
+		else{
+			posreal++;  // update parameters
+			switch(posfinal){
+				case 'top':
+					elem.style.top = posreal + 'px'; // show frame
+					break;
+				case 'left':
+					elem.style.left = posreal + 'px'; // show frame
+					break;
+				case 'right':
+					elem.style.right = posreal + 'px'; // show frame
+					break;
+				case 'bottom':
+					elem.style.bottom = posreal + 'px'; // show frame
+					break;
+				case 'margin-top':
+					elem.style.marginTop = posreal + 'px'; // show frame
+					break;
+				case 'margin-left':
+					elem.style.marginLeft = posreal + 'px'; // show frame
+					break;
+				case 'margin-right':
+					elem.style.marginRight = posreal + 'px'; // show frame
+					break;
+				case 'margin-bottom':
+					elem.style.marginBottom = posreal + 'px'; // show frame
+					break;
+			}
+		}
+	};
 	return{
 			//Describir funciones públicas
 			getdisctId: function(id){
@@ -1342,9 +1376,13 @@ g=(function(){
 			each:function(objeto,callbackeach){
 		      	var initial_array;
 		      	var x,y,valor,indice;
-		      	
 		        if(objeto.length!=undefined){
 		        	objeto.forEach(callbackeach);
+		        }
+		        else if(typeof objeto==='object'){
+		        	for(prop in objeto){
+		        		callbackeach(prop,objeto);
+		        	}
 		        }
 		        else{
 		        	g.log("Is not an array!");
@@ -1596,6 +1634,25 @@ g=(function(){
 				          fila=g.getdisctId(domel);
 				          fila.style=estilo;
 				      },
+				      find:function(selector,callbackfind){
+						// Final found elements
+						var found_elements = [];
+						var i;
+						// Find all the outer matched elements
+						var outers = document.querySelectorAll(domel);
+						for(i=0;i<outers.length;i++){
+							var elements_in_outer=outers[i].querySelectorAll(selector);
+							// document.querySelectorAll() returns an "array-like" collection of elements
+							// convert this "array-like" collection to an array
+							elements_in_outer=Array.prototype.slice.call(elements_in_outer);
+							found_elements=found_elements.concat(elements_in_outer);
+						}
+						// The final 4 elements
+						if(found_elements.length>0){
+							g.log(found_elements);
+							callbackfind(found_elements);
+						}
+				      },
 				      each:function(callbackeach){
 				      	var objeto;
 				      	var initial_array;
@@ -1608,12 +1665,58 @@ g=(function(){
 				        	g.log("Is not an Object!");
 				        }
 				      },
-				      animate:function(options){
+				      animate:function(position,speed,callback){
 				      	//write code below...
 				      	//.animate( properties [, duration ] [, easing ] [, complete ] )
 				      	var obj;
+				      	var posfinal;
+				      	g.log("POSITION");
+				      	g.each(position,function(x,y){
+				      		posfinal=x;
+				      	});
 				      	obj=g.getdisctId(domel);
-				      	
+				      	switch(posfinal){
+				      		case 'top':
+				      			var top=0;
+				      			id=setInterval(frame, 10);
+				      			frame(posfinal,obj,top,id);
+				      			break;
+				      		case 'left':
+				      			var left=0;
+				      			id=setInterval(frame, 10);
+				      			frame(posfinal,obj,top,id);
+				      			break;
+				      		case 'right':
+				      			var right=0;
+				      			id=setInterval(frame, 10);
+				      			frame(posfinal,obj,top,id);
+				      			break;
+				      		case 'bottom':
+				      			var bottom=0;
+				      			id=setInterval(frame, 10);
+				      			frame(posfinal,obj,top,id);
+				      			break;
+				      		case 'margin-top':
+				      			var margintop=0;
+				      			id=setInterval(frame, 10);
+				      			frame(posfinal,obj,top,id);
+				      			break;
+				      		case 'margin-left':
+				      			var marginleft=0;
+				      			id=setInterval(frame, 10);
+				      			frame(posfinal,obj,top,id);
+				      			break;
+				      		case 'margin-right':
+				      			var marginright=0;
+				      			id=setInterval(frame, 10);
+				      			frame(posfinal,obj,top,id);
+				      			break;
+				      		case 'margin-bottom':
+				      			var marginbottom=0;
+				      			id=setInterval(frame, 10);
+				      			frame(posfinal,obj,top,id);
+				      			break;
+				      	}
 				      },
 				      addClass:function(classele){
 				      	//write code below...

@@ -125,6 +125,46 @@ g=(function(){
 					e.stopPropagation();
 				}
             },
+            browser: function(){
+				//Detect browser and write the corresponding name
+				if (navigator.userAgent.search("MSIE") >= 0){
+				    g.log('"MS Internet Explorer ');
+				    var position = navigator.userAgent.search("MSIE") + 5;
+				    var end = navigator.userAgent.search("; Windows");
+				    var version = navigator.userAgent.substring(position,end);
+				    g.log(version + '"');
+				}
+				else if (navigator.userAgent.search("Chrome") >= 0){
+					g.log('"Google Chrome ');// For some reason in the browser identification Chrome contains the word "Safari" so when detecting for Safari you need to include Not Chrome
+				    var position = navigator.userAgent.search("Chrome") + 7;
+				    var end = navigator.userAgent.search(" Safari");
+				    var version = navigator.userAgent.substring(position,end);
+				    g.log(version + '"');
+				}
+				else if (navigator.userAgent.search("Firefox") >= 0){
+				    g.log('"Mozilla Firefox ');
+				    var position = navigator.userAgent.search("Firefox") + 8;
+				    var version = navigator.userAgent.substring(position);
+				    g.log(version + '"');
+				}
+				else if (navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0){//<< Here
+				    g.log('"Apple Safari ');
+				    var position = navigator.userAgent.search("Version") + 8;
+				    var end = navigator.userAgent.search(" Safari");
+				    var version = navigator.userAgent.substring(position,end);
+				    g.log(version + '"');
+				}
+				else if (navigator.userAgent.search("Opera") >= 0){
+				    g.log('"Opera ');
+				    var position = navigator.userAgent.search("Version") + 8;
+				    var version = navigator.userAgent.substring(position);
+				    g.log(version + '"');
+				}
+				else{
+				    g.log('"Other"');
+				}
+				return navigator.userAgent;
+            },
             rReplace: function(direccion,variable,valor){
                 location.replace([direccion]+"?"+[variable]+"="+[valor]);
             },

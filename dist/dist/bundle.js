@@ -1253,6 +1253,7 @@ g=(function(){
 					  getslides:function(options){
 				      	//write code below...
 				      	//Initialize carousel
+				      	//pass elem as id
 				      	options.elem=g.getnameid(domel);
 				      	var crusel = new carousel(options);
 				      	//return object

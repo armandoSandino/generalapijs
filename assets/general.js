@@ -22,7 +22,9 @@ var idreal;
 var objeto;
 hex_chr="0123456789abcdef";
 IDClass=0;
-var move = require("move-js");
+var move=require("move-js");
+var carousel=require("vanilla-js-carousel");
+
 g=(function(){
     //aqui se escriben las funciones privadas
     // Private variables / properties
@@ -69,6 +71,26 @@ g=(function(){
 					g.log(objeto);
 					return objeto;
 				}
+			},
+			getnameid: function(id){
+				var cadena;
+                  var idreal;
+                  var filareal;
+                  cadena=id;
+                  if(cadena.search("#")==0){
+                      idreal=id.replace("#","");
+                      idreal=idreal.replace(".","");
+                      filareal=idreal;
+                  }
+                  else if(cadena.search(".")==0){
+                      idreal=id.replace("#","");
+                      idreal=idreal.replace(".","");
+                      filareal=idreal;
+                  }
+                  else{
+                      return -1;
+                  }
+                  return  filareal;
 			},
 			getelTag: function(tag){
 				var arrtags=[];
@@ -323,38 +345,6 @@ g=(function(){
 				sock=g.ajax.getxhr();
 				return sock;
             },
-			getslides:function(opciones){
-				//write code below...
-				//helpers to public functions
-				/*
-				 Private functions
-				 * */
-				function initSlider(){
-					
-				}
-				
-				return{
-					//write code below...
-					/* Public functions
-					 */
-					run:function(){
-						//write code below...
-						//instantiate slideshow and return ...
-					}	
-				}
-			},
-			accordeon:function(elemento,opciones){
-				//write code below...
-				/*
-				 Private functions
-				 * */
-				return{
-					//write code below...
-					/*
-					 Public functions
-					 * */	
-				}
-			},
             dom: function(domel){
 				return{
 					hide: function(){
@@ -417,67 +407,100 @@ g=(function(){
 				      },
 				      animate: function(callbackanim){
 						return {
-							x:function(x){
-								move(domel).x(x).end();
-								callbackanim();
+							x:function(x,options){
+								if(options.delay!=undefined){
+									move(domel).delay(options.delay).x(x).end(callbackanim);
+								}
+								else{
+									move(domel).x(x).end(callbackanim);
+								}
+								return{
+									
+								}
 							},
 							y:function(y){
-								move(domel).y(y).end();
-								callbackanim();
+								move(domel).y(y).end(callbackanim);
+								return{
+									
+								}
 							},
 							add:function(attrib,value){
-								move(domel).add(attrib,value).end();
-								callbackanim();
+								move(domel).add(attrib,value).end(callbackanim);
+								return{
+									
+								}
 							},
 							to:function(x,y){
-								move(domel).to(x,y).end();
-								callbackanim();
+								move(domel).to(x,y).end(callbackanim);
+								return{
+									
+								}
 							},
 							rotate:function(deg){
-								move(domel).rotate(deg).end();
-								callbackanim();
+								move(domel).rotate(deg).end(callbackanim);
+								return{
+									
+								}
+							},
+							translate:function(x,y){
+								move(domel).translate(x,y).end(callbackanim);
+								return{
+									
+								}
 							},
 							scale:function(deg){
-								move(domel).scale(deg).end();
-								callbackanim();
+								move(domel).scale(deg).end(callbackanim);
+								return{
+									
+								}
 							},
 							set:function(x,y){
-								move(domel).set(x,y).end();
-								callbackanim();
+								move(domel).set(x,y).end(callbackanim);
+								return{
+									
+								}
 							},
 							duration:function(deg){
-								move(domel).duration(deg).end();
-								callbackanim();
+								move(domel).duration(deg).end(callbackanim);
+								return{
+									
+								}
 							},
 							skew:function(x,y){
-								move(domel).skew(x,y).end();
-								callbackanim();
+								move(domel).skew(x,y).end(callbackanim);
+								return{
+									
+								}
 							},
 							then:function(){
 								return{
 									set:function(x,y){
-										move(domel).then().set(x,y).end();
-										callbackanim();
+										move(domel).then().set(x,y).end(callbackanim);
 									},
 									duration:function(deg){
-										move(domel).then().duration(deg).end();
-										callbackanim();
+										move(domel).then().duration(deg).end(callbackanim);
 									},
 									scale:function(deg){
-										move(domel).then().scale(deg).end();
-										callbackanim();
+										move(domel).then().scale(deg).end(callbackanim);
 									},
 									pop:function(){
-										move(domel).then().pop().end();
-										callbackanim();
+										move(domel).then().pop().end(callbackanim);
 									},
 								}
 							},
-							end:function(){
-								move(target).end();
+							end:function(callbackcall){
+								move(target).end(callbackcall);
 							}
 						}
 					  },
+					  getslides:function(options){
+				      	//write code below...
+				      	//Initialize carousel
+				      	options.elem=g.getnameid(domel);
+				      	var crusel = new carousel(options);
+				      	//return object
+						return crusel;
+				      },
 				      addClass:function(classele){
 				      	//write code below...
 				      	var obj;

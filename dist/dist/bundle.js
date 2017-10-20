@@ -779,7 +779,9 @@ var idreal;
 var objeto;
 hex_chr="0123456789abcdef";
 IDClass=0;
-var move = __webpack_require__(12);
+var move=__webpack_require__(12);
+var carousel=__webpack_require__(22);
+
 g=(function(){
     //aqui se escriben las funciones privadas
     // Private variables / properties
@@ -826,6 +828,26 @@ g=(function(){
 					g.log(objeto);
 					return objeto;
 				}
+			},
+			getnameid: function(id){
+				var cadena;
+                  var idreal;
+                  var filareal;
+                  cadena=id;
+                  if(cadena.search("#")==0){
+                      idreal=id.replace("#","");
+                      idreal=idreal.replace(".","");
+                      filareal=idreal;
+                  }
+                  else if(cadena.search(".")==0){
+                      idreal=id.replace("#","");
+                      idreal=idreal.replace(".","");
+                      filareal=idreal;
+                  }
+                  else{
+                      return -1;
+                  }
+                  return  filareal;
 			},
 			getelTag: function(tag){
 				var arrtags=[];
@@ -1080,38 +1102,6 @@ g=(function(){
 				sock=g.ajax.getxhr();
 				return sock;
             },
-			getslides:function(opciones){
-				//write code below...
-				//helpers to public functions
-				/*
-				 Private functions
-				 * */
-				function initSlider(){
-					
-				}
-				
-				return{
-					//write code below...
-					/* Public functions
-					 */
-					run:function(){
-						//write code below...
-						//instantiate slideshow and return ...
-					}	
-				}
-			},
-			accordeon:function(elemento,opciones){
-				//write code below...
-				/*
-				 Private functions
-				 * */
-				return{
-					//write code below...
-					/*
-					 Public functions
-					 * */	
-				}
-			},
             dom: function(domel){
 				return{
 					hide: function(){
@@ -1174,67 +1164,100 @@ g=(function(){
 				      },
 				      animate: function(callbackanim){
 						return {
-							x:function(x){
-								move(domel).x(x).end();
-								callbackanim();
+							x:function(x,options){
+								if(options.delay!=undefined){
+									move(domel).delay(options.delay).x(x).end(callbackanim);
+								}
+								else{
+									move(domel).x(x).end(callbackanim);
+								}
+								return{
+									
+								}
 							},
 							y:function(y){
-								move(domel).y(y).end();
-								callbackanim();
+								move(domel).y(y).end(callbackanim);
+								return{
+									
+								}
 							},
 							add:function(attrib,value){
-								move(domel).add(attrib,value).end();
-								callbackanim();
+								move(domel).add(attrib,value).end(callbackanim);
+								return{
+									
+								}
 							},
 							to:function(x,y){
-								move(domel).to(x,y).end();
-								callbackanim();
+								move(domel).to(x,y).end(callbackanim);
+								return{
+									
+								}
 							},
 							rotate:function(deg){
-								move(domel).rotate(deg).end();
-								callbackanim();
+								move(domel).rotate(deg).end(callbackanim);
+								return{
+									
+								}
+							},
+							translate:function(x,y){
+								move(domel).translate(x,y).end(callbackanim);
+								return{
+									
+								}
 							},
 							scale:function(deg){
-								move(domel).scale(deg).end();
-								callbackanim();
+								move(domel).scale(deg).end(callbackanim);
+								return{
+									
+								}
 							},
 							set:function(x,y){
-								move(domel).set(x,y).end();
-								callbackanim();
+								move(domel).set(x,y).end(callbackanim);
+								return{
+									
+								}
 							},
 							duration:function(deg){
-								move(domel).duration(deg).end();
-								callbackanim();
+								move(domel).duration(deg).end(callbackanim);
+								return{
+									
+								}
 							},
 							skew:function(x,y){
-								move(domel).skew(x,y).end();
-								callbackanim();
+								move(domel).skew(x,y).end(callbackanim);
+								return{
+									
+								}
 							},
 							then:function(){
 								return{
 									set:function(x,y){
-										move(domel).then().set(x,y).end();
-										callbackanim();
+										move(domel).then().set(x,y).end(callbackanim);
 									},
 									duration:function(deg){
-										move(domel).then().duration(deg).end();
-										callbackanim();
+										move(domel).then().duration(deg).end(callbackanim);
 									},
 									scale:function(deg){
-										move(domel).then().scale(deg).end();
-										callbackanim();
+										move(domel).then().scale(deg).end(callbackanim);
 									},
 									pop:function(){
-										move(domel).then().pop().end();
-										callbackanim();
+										move(domel).then().pop().end(callbackanim);
 									},
 								}
 							},
-							end:function(){
-								move(target).end();
+							end:function(callbackcall){
+								move(target).end(callbackcall);
 							}
 						}
 					  },
+					  getslides:function(options){
+				      	//write code below...
+				      	//Initialize carousel
+				      	options.elem=g.getnameid(domel);
+				      	var crusel = new carousel(options);
+				      	//return object
+						return crusel;
+				      },
 				      addClass:function(classele){
 				      	//write code below...
 				      	var obj;
@@ -3387,6 +3410,12 @@ module.exports = {
   , 'ease-in-out-back':  'cubic-bezier(0.680, -0.550, 0.265, 1.550)'
 };
 
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports) {
+
+module.exports=function(t){function e(){var e={dots:function(){return r()},arrows:function(){return o()},buttons:function(){return a()},autoplay:function(){return b()},infinite:function(){return n(I-1,-S.offsetWidth+"px","afterBegin")},initial:function(){var e=t.initial>=I?I:t.initial;return s(e)}};for(var i in e)t.hasOwnProperty(i)&&t[i]&&e[i]()}function n(t,e,n){var r=S.querySelectorAll("."+j+" > ul li")[t];r.style.marginLeft=e,S.querySelector("."+j+" > ul").removeChild(r),S.querySelector("."+j+" > ul").insertAdjacentHTML(n,r.outerHTML)}function r(){var t=document.createElement("ul");t.classList.add(H),t.addEventListener("click",l.bind(this));for(var e=0;I>e;e++){var n=document.createElement("li");n.setAttribute("data-position",e),t.appendChild(n)}S.appendChild(t),i()}function i(){switch([].forEach.call(S.querySelectorAll("."+H+" li"),function(t){t.classList.remove("is-active")}),B){case-1:B=I-1;break;case I:B=0;break;default:B=B}S.querySelectorAll("."+H+" li")[B].classList.add("is-active")}function l(t){"LI"===t.target.tagName&&s(t.target.getAttribute("data-position"))}function o(){var t=document.createElement("button");t.innerHTML=T,t.classList.add(k);var e=document.createElement("button");e.innerHTML=A,e.classList.add(w),t.addEventListener("click",f),e.addEventListener("click",p),S.appendChild(t),S.appendChild(e)}function a(){var t=document.createElement("button");t.innerHTML=g,t.classList.add(P),t.addEventListener("click",b);var e=document.createElement("button");e.innerHTML=x,e.classList.add(M),e.addEventListener("click",E),S.appendChild(t),S.appendChild(e)}function u(t){t.style.marginLeft=""}function c(t){t.style.marginLeft=-S.offsetWidth+"px"}function s(t){var e=B-t;0>e?d(-e,p):d(e,f)}function d(t,e){for(var n=0;t>n;n++)e()}function f(){t.infinite?v():m()}function v(){u(document.querySelectorAll("."+j+" > ul li")[0]),n(I-1,-S.offsetWidth+"px","afterBegin"),h(-1)}function m(){E(),0!==B&&(u(document.querySelectorAll("."+j+" > ul li")[B-1]),h(-1))}function p(){t.infinite?L():y()}function L(){c(document.querySelectorAll("."+j+" > ul li")[1]),n(0,"","beforeEnd"),h(1)}function y(){return B===I-1?void E():(c(document.querySelectorAll("."+j+" > ul li")[B]),void h(1))}function h(e){B+=e,t.dots&&i()}function b(){N||(N=setInterval(p.bind(this),q))}function E(){clearInterval(N),N=null}function C(){return B}var S=document.getElementById(t.elem||"carousel"),q=t.interval||3e3,g=t.btnPlayText||"Play",x=t.btnStopText||"Stop",A=t.arrNextText||"&rsaquo;",T=t.arrPrevText||"&lsaquo;",j="js-Carousel",k="js-Carousel-arrowPrev",w="js-Carousel-arrowNext",H="js-Carousel-dots",M="js-Carousel-btnStop",P="js-Carousel-btnPlay",I=S.querySelectorAll("li").length,B=0,N=null;return I>1&&e(),{live:C,show:s,prev:f,next:p,play:b,stop:E}};
 
 /***/ })
 /******/ ]);

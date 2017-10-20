@@ -61,28 +61,24 @@
 			//INIT SLIDESHOW////////////////////////
 			//#slideshow se puede sustituir por el id que el programador escriba
 			//y quedaria tal que #nombre o .nombre + div por ejemplo
-			g.dom("#slideshow div").each(
-				function(objeto,indice){
-					g.log(indice + " " + objeto.innerHTML);
-					objeto.id="slide_" + contdivs;
-					objeto.style.position="absolute";
-					if(bitvisible<1){
-						objeto.style.display="block";
-						bitvisible++;
-					}
-					else{
-						objeto.style.display="none";
-					}
-					objeto.style.float="none";
-					objeto.style.zIndex=contdivs;
-					contdivs++;
-				}
-			);
+			var carousel=g.dom("#slideshow").getslides({
+				    // id of the carousel container is obtained from the other parameter
+				    autoplay: true,      // starts the rotation automatically
+				    infinite: true,      // enables infinite mode
+				    interval: 5000,      // interval between slide changes
+				    initial: 0,          // slide to start with
+				    dots: false,          // show navigation dots
+				    arrows: false,        // show navigation arrows
+				    buttons: false,      // hide <play>/<stop> buttons,
+				    btnStopText: 'Pause' // <stop> button text
+			});
 			///////////////////////////////////////
 			g.dom("#btnmover").click(function(){
 				g.dom("#div_A").animate(function(){
 					g.log("listo el posho");
-				}).rotate(10);
+				}).x(150,{
+					delay:1000
+				});
 			});
 			
 			///////////////////////////////////////

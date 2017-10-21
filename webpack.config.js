@@ -1,23 +1,23 @@
 var path = require('path');
-var webpack = require("webpack");
+var webpack = require("webpack"); 
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var LiveReloadPlugin = require('webpack-livereload-plugin');
 var liveReloadOption = {
 	appendScriptTag: true
 };
-const sourcePath = __dirname + '/assets';
-const destinationPath = __dirname + '/result/dist';
+const sourcePath = __dirname + '/source';
+const destinationPath = __dirname + '/dist';
 
 var config = module.exports = {
 	context: sourcePath,
 	watch: false,
 	devtool: 'source-map',
-	entry: {
+	entry:{
 		app: ["./main.js"]
 	},
-	output: {
+	output:{
 		path: path.resolve(__dirname, 'dist'),
-    	filename: 'dist/bundle.js',
+    	filename: 'bundle.js',
     	publicPath: '/',
 	},
 	module:{
@@ -59,9 +59,9 @@ var config = module.exports = {
 				loader: "css-loader"
 			},
 		    { 
-			  test: /\.js$/,
+		      test: /\.js$/,
 		      exclude: /(node_modules|bower_components)/,
-		      include: __dirname + "/assets/libs",
+		      include: __dirname + "/src",
 		      loader: 'babel-loader', // 'babel-loader' is also a valid name to reference
 		      query: {
 		        presets: ['es2015']
@@ -73,10 +73,6 @@ var config = module.exports = {
 	  hot: true
 	},
 	plugins: [
-		new LiveReloadPlugin(liveReloadOption),
-		new HtmlWebpackPlugin({
-      		title: 'App JS',
-      		filename: 'index.html'
-    	})
+		new LiveReloadPlugin(liveReloadOption)
 	]
 };

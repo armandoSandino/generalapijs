@@ -71,6 +71,23 @@ g=(function(){
 			return objeto;
 		}
 	};
+	function getobjtype(id){
+		var cadena;
+		var typestr;
+		if(typeof id==='string'){
+			cadena=id;
+	      	if(cadena.search("#")==0){
+	        	typestr="id";
+	      	}
+	      	else if(cadena.search(".")==0){
+				typestr="class";
+			}
+			else{
+				typestr="element";
+			}
+			return typestr;
+		}
+	};
 	function getnameid(id){
 		var cadena;
           var idreal;
@@ -424,13 +441,13 @@ g=(function(){
 						fila.style.display="none";
 					},
 					show:function(){
-				        var fila;
-				          if(!document.getElementById){
-				              return false;
-				          }
-				          fila=getdisctId(domel);
-				          fila.style.display="block"; 
-				      },
+						var fila;
+						if(!document.getElementById){
+							return false;
+						}
+			          	fila=getdisctId(domel);
+						fila.style.display="block"; 
+					},
 				      css:function(estilo){
 				        var fila;
 				          if(!document.getElementById){
@@ -593,6 +610,43 @@ g=(function(){
 				      	var obj;
 				      	obj=getdisctId(domel);
 				      	obj.classList.remove(classele);
+				      },
+				      addAttribute:function(attr,value){
+				      	//write code below...
+				      	var obj;
+				      	var type;
+				      	var i;
+				      	type=getobjtype(domel);
+				      	glog("type " + type);
+				      	switch(type){
+				      		case 'element':
+				      			obj=getelTag(domel);
+				      			glog("CONTENEDORES");
+				      			glog(obj);
+				      			glog("NODELIST " + obj.NodeList.length);
+				      			for(i=0;i<obj.NodeList.length;i++){
+				      				obj.NodeList[i].setAttribute(attr,value);
+				      			}
+				      			break;				      		
+				      		case 'class':
+				      			obj=getelTag(domel);
+				      			glog("CONTENEDORES");
+				      			glog(obj);
+				      			break;
+				      		case 'id':
+								obj=getdisctId(domel);
+								obj.setAttribute(attr,value);
+								break;
+				      	}
+				      },
+				      getAttribute:function(attr){
+				      	//write code below...
+				      	var obj;
+
+				      },
+				      removeAttribute:function(attr){
+				      	//write code below...
+				      	var obj;
 				      },
 					  toggleClass:function(classele){
 				      	//write code below...

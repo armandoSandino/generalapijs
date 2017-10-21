@@ -47,6 +47,8 @@
 		g.log("Son " + contdivs + " Slides");
 		g.log("CLAVE MD5: " + cadenamd5);
 		g.log("Path JS Version: " + g.path.getVersion());
+		g.dom("#cargadiv").addAttribute("gn-repeat");
+		g.dom("div").addAttribute("gn-repeat","none");
 		g.dom("#cargadiv").load("README.md",function(){
 			g.log("Módulo cargado.");
 		});
@@ -81,6 +83,7 @@
 				g.log("*******************data.file*******************");
 				g.log(data);
 				g.log(data.file);
+				g.log(data.status);
 				g.log("*******************data.file*******************");
 				//////////////////////////////////////////////////
 			});

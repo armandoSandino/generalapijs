@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 3);
+/******/ 	return __webpack_require__(__webpack_require__.s = 2);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -192,7 +192,7 @@ var singleton = null;
 var	singletonCounter = 0;
 var	stylesInsertedAtTop = [];
 
-var	fixUrls = __webpack_require__(7);
+var	fixUrls = __webpack_require__(6);
 
 module.exports = function(list, options) {
 	if (typeof DEBUG !== "undefined" && DEBUG) {
@@ -506,416 +506,29 @@ function updateLink (link, options, obj) {
 
 /***/ }),
 /* 2 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-/**
-* @fileOverview
-* @author Zoltan Toth
-* @version 3.1.0
-*/
+module.exports = __webpack_require__(3);
 
-/**
-* @description
-* 1Kb (gzipped) pure JavaScript carousel with all the basic features.
-*
-* @class
-* @param {object} options - User defined settings for the carousel.
-* @param {string} options.elem [options.elem=carousel] - The HTML id of the carousel container.
-* @param {(boolean)} [options.infinite=false] - Enables infinite mode for the carousel.
-* @param {(boolean)} [options.autoplay=false] - Enables auto play for slides.
-* @param {number} [options.interval=3000] - The interval between slide change.
-* @param {number} [options.show=0] - Index of the slide to start on. Numeration begins at 0.
-*
-* @param {(boolean)} [options.dots=true] - Display navigation dots.
-* @param {(boolean)} [options.arrows=true] - Display navigation arrows (PREV/NEXT).
-* @param {(boolean)} [options.buttons=true] - Display navigation buttons (STOP/PLAY).
-*
-* @param {(string)} [options.btnPlayText=Play] - Text for _PLAY_ button.
-* @param {(string)} [options.btnStopText=Stop] - Text for _STOP_ button.
-* @param {(string)} [options.arrPrevText=&laquo;] - Text for _PREV_ arrow.
-* @param {(string)} [options.arrNextText=&raquo;] - Text for _NEXT_ arrow.
-*/
-carousel=(function(){
-	return{
-		run:function(options){
-	    	var element  = document.getElementById(options.elem || 'carousel'),
-	        interval = options.interval || 3000,
-	
-	        btnPlayText = options.btnPlayText || 'Play',
-	        btnStopText = options.btnStopText || 'Stop',
-	
-	        arrNextText = options.arrNextText || '&rsaquo;',
-	        arrPrevText = options.arrPrevText || '&lsaquo;',
-	
-	        crslClass           = 'js-Carousel',
-	        crslArrowPrevClass  = 'js-Carousel-arrowPrev',
-	        crslArrowNextClass  = 'js-Carousel-arrowNext',
-	        crslDotsClass       = 'js-Carousel-dots',
-	        crslButtonStopClass = 'js-Carousel-btnStop',
-	        crslButtonPlayClass = 'js-Carousel-btnPlay',
-	
-	        count   = element.querySelectorAll('li').length,
-	        current = 0,
-	        cycle   = null;
-			/**
-		    * Render the carousel if more than one slide. 
-		    * Otherwise just show the single item.
-		    */
-		    if (count > 1) {
-		        render();
-		    };
-			play();
-    /**
-    * Render the carousel and all the navigation elements (arrows, dots, 
-    * play/stop buttons) if needed. Start with a particular slide, if set.
-    * If infinite - move the last item to the very beginning and off the display area.
-    */
-    function render() {
-        var actions = {
-            dots: function() {
-                return showDots();
-            },
-            arrows: function() {
-                return showArrows();
-            },
-            buttons: function() {
-                return showButtons();
-            },
-            autoplay: function() {
-                return play();
-            },
-            infinite: function() {
-                return moveItem(count - 1, -element.offsetWidth + 'px', 'afterBegin');
-            },
-            initial: function() {
-                var initial = 0 || (options.initial >= count) ? count : options.initial;
-                return show(initial);
-            }
-        };
-
-        for (var key in actions) {
-            if (options.hasOwnProperty(key) && options[key]) {
-                actions[key]();
-            }
-        }
-    };
-    /**
-    * Helper for moving items - last to be first or first to be the last. Needed 
-    * for infinite rotation of the carousel.
-    *
-    * @param {number} i - Position of the list item to move (either first or last).
-    * @param {number} marginLeft - Left margin to position the item off-screen
-    *        at the beginning or no margin at the end.
-    * @param {string} position - Where to insert the item. One of the following -
-    *        'afterBegin' or 'beforeEnd'.
-    */
-    function moveItem(i, marginLeft, position) {
-        var itemToMove = element.querySelectorAll('.' + crslClass + ' > ul li')[i];
-        itemToMove.style.marginLeft = marginLeft;
-
-        element.querySelector('.' + crslClass + ' > ul')
-          .removeChild(itemToMove);
-
-        element.querySelector('.' + crslClass + ' > ul')
-          .insertAdjacentHTML(position, itemToMove.outerHTML);
-    };
-    /**
-    * Create the navigation dots and attach to carousel.
-    */
-    function showDots() {
-        var dotContainer = document.createElement('ul');
-        dotContainer.classList.add(crslDotsClass);
-        dotContainer.addEventListener('click', scrollToImage.bind(this));
-
-        for (var i = 0; i < count; i++) {
-            var dotElement = document.createElement('li');
-            dotElement.setAttribute('data-position', i);
-
-            dotContainer.appendChild(dotElement);
-        }
-
-        element.appendChild(dotContainer);
-        currentDot();
-    };
-    /**
-    * Highlight the corresponding dot of the currently visible carousel item.
-    */
-    function currentDot() {
-        [].forEach.call(element.querySelectorAll('.' + crslDotsClass + ' li'), function(item) {
-            item.classList.remove('is-active');
-        });
-
-        switch (current) {
-            case -1:
-                current = count - 1;
-                break;
-            case count:
-                current = 0;
-                break;
-            default:
-                current = current;
-        }
-
-        element.querySelectorAll('.' + crslDotsClass + ' li')[current].classList.add('is-active');
-    };
-    /**
-    * Moves the carousel to the desired slide on a navigation dot click.
-    *
-    * @param {object} e - The clicked dot element.
-    */
-    function scrollToImage(e) {
-        if (e.target.tagName === 'LI') {
-            show(e.target.getAttribute('data-position'));
-
-            resetInterval();
-        }
-    };
-    /**
-    * Create the navigation arrows (prev/next) and attach to carousel.
-    */
-    function showArrows() {
-        var buttonPrev = document.createElement('button');
-        buttonPrev.innerHTML = arrPrevText;
-        buttonPrev.classList.add(crslArrowPrevClass);
-
-        var buttonNext = document.createElement('button');
-        buttonNext.innerHTML = arrNextText;
-        buttonNext.classList.add(crslArrowNextClass);
-
-        buttonPrev.addEventListener('click', showPrev);
-        buttonNext.addEventListener('click', showNext);
-
-        element.appendChild(buttonPrev);
-        element.appendChild(buttonNext);
-    };
-    /**
-    * Create the navigation buttons (play/stop) and attach to carousel.
-    */
-    function showButtons() {
-        var buttonPlay = document.createElement('button');
-        buttonPlay.innerHTML = btnPlayText;
-        buttonPlay.classList.add(crslButtonPlayClass);
-        buttonPlay.addEventListener('click', play);
-
-        var buttonStop = document.createElement('button');
-        buttonStop.innerHTML = btnStopText;
-        buttonStop.classList.add(crslButtonStopClass);
-        buttonStop.addEventListener('click', stop);
-
-        element.appendChild(buttonPlay);
-        element.appendChild(buttonStop);
-    };
-    /**
-    * Animate the carousel to go back 1 slide. Moves the very first (off-screen)
-    * item to the visible area.
-    *
-    * @param {object} item - The element to move into view.
-    */
-    function animatePrev(item) {
-        item.style.marginLeft = '';
-    };
-    /**
-    * Animate the carousel to go forward 1 slide.
-    *
-    * @param {object} item - The element to move into view.
-    */
-    function animateNext(item) {
-        item.style.marginLeft = -element.offsetWidth + 'px';
-    };
-    /**
-    * Move the carousel to the desired slide.
-    *
-    * @param {number} slide - The index of the item.
-    * @public
-    */
-    function show(slide) {
-        var delta = current - slide;
-
-        if (delta < 0) {
-            moveByDelta(-delta, showNext);
-        } else {
-            moveByDelta(delta, showPrev);
-        }
-    };
-    /**
-    * Helper to move the slides by index.
-    * 
-    * @param {number} delta - how many slides to move.
-    * @param {function} direction - function to move forward or back.
-    */
-    function moveByDelta(delta, direction) {
-        for (var i = 0; i < delta; i++) {
-            direction();
-        }
-    };
-    /**
-    * Move the carousel back.
-    * 
-    * @public
-    */
-    function showPrev() {
-        if (options.infinite) {
-            showPrevInfinite();
-        } else {
-            showPrevLinear();
-        }
-
-        resetInterval();
-    };
-    /**
-    * Helper function to show the previous slide for INFINITE carousel.
-    * Do the sliding, move the last item to the very beginning.
-    */
-    function showPrevInfinite() {
-        animatePrev(document.querySelectorAll('.' + crslClass + ' > ul li')[0]);
-        moveItem(count - 1, -element.offsetWidth + 'px', 'afterBegin');
-
-        adjustCurrent(-1);
-    };
-    /**
-    * Helper function to show the previous slide for LINEAR carousel.
-    * Stop the autoplay if user goes back. If on the first slide - do nothing.
-    */
-    function showPrevLinear() {
-        stop();
-        if (current === 0) {
-            return;
-        }
-        animatePrev(document.querySelectorAll('.' + crslClass + ' > ul li')[current - 1]);
-        
-        adjustCurrent(-1);
-    };
-    /**
-    * Move the carousel forward.
-    * 
-    * @public
-    */
-    function showNext() {
-        if (options.infinite) {
-            showNextInfinite();
-        } else {
-            showNextLinear();
-        }
-
-        resetInterval();
-    };
-    /**
-    * Helper function to show the next slide for INFINITE carousel.
-    * Do the sliding, move the second item to the very end.
-    */
-    function showNextInfinite() {
-        animateNext(document.querySelectorAll('.' + crslClass + ' > ul li')[1]);
-        moveItem(0, '', 'beforeEnd');
-
-        adjustCurrent(1);
-    };
-    /**
-    * Helper function to show the next slide for LINEAR carousel.
-    * If on the last slide - stop the play and do nothing else.
-    */
-    function showNextLinear() {
-        if (current === count - 1) {
-            stop();
-            return;
-        }
-        animateNext(document.querySelectorAll('.' + crslClass + ' > ul li')[current]);
-
-        adjustCurrent(1);
-    };
-    /**
-    * Adjust _current_ and highlight the respective dot.
-    *
-    * @param {number} val - defines which way current should be corrected.
-    */
-    function adjustCurrent(val) {
-        current += val;
-
-        if (options.dots) {
-            currentDot();
-        }
-    };
-    /**
-    * Reset the autoplay interval.
-    */
-    function resetInterval() {
-        if (cycle) {
-            stop();
-            play();
-        }
-    };
-    /**
-    * Start the auto play.
-    * If already playing do nothing.
-    * 
-    * @public
-    */
-    function play() {
-        if (cycle) {
-            return;
-        }
-        cycle = setInterval(showNext.bind(this), interval);
-    };
-    /**
-    * Stop the auto play.
-    * 
-    * @public
-    */
-    function stop() {
-        clearInterval(cycle);
-        cycle = null;
-    };
-    /**
-    * Returns the current slide index.
-    * 
-    * @public
-    */
-    function live() {
-        return current;
-    };
-	function funcreturn(){
-		var object;
-		object={
-	        'live': this.live,
-	        'show': this.show,
-	        'prev': this.showPrev,
-	        'next': this.showNext,
-	        'play': this.play,
-	        'stop': this.stop
-		};
-		return object; 
-    };	
-		}
-	}
-}());
-module.exports = carousel;
 
 /***/ }),
 /* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(4);
-
+__webpack_require__(4);
+__webpack_require__(7);
+__webpack_require__(9);
+__webpack_require__(11);
+__webpack_require__(26);
 
 /***/ }),
 /* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(5);
-__webpack_require__(8);
-__webpack_require__(10);
-__webpack_require__(12);
-__webpack_require__(14);
-__webpack_require__(2);
-__webpack_require__(26);
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(6);
+var content = __webpack_require__(5);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -940,7 +553,7 @@ if(false) {
 }
 
 /***/ }),
-/* 6 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)(undefined);
@@ -954,7 +567,7 @@ exports.push([module.i, "@font-face{\n  font-family: 'Roboto';\n  font-style: no
 
 
 /***/ }),
-/* 7 */
+/* 6 */
 /***/ (function(module, exports) {
 
 
@@ -1049,13 +662,13 @@ module.exports = function (css) {
 
 
 /***/ }),
-/* 8 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(9);
+var content = __webpack_require__(8);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -1080,7 +693,7 @@ if(false) {
 }
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)(undefined);
@@ -1094,13 +707,13 @@ exports.push([module.i, ".cycle{\n\tposition:relative;\n\tdisplay:block;\n\tfloa
 
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(11);
+var content = __webpack_require__(10);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -1125,7 +738,7 @@ if(false) {
 }
 
 /***/ }),
-/* 11 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)(undefined);
@@ -1139,52 +752,7 @@ exports.push([module.i, "html {\n\tscroll-behavior: smooth;\n}\n\nbody {\n\tmarg
 
 
 /***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// style-loader: Adds some css to the DOM by adding a <style> tag
-
-// load the styles
-var content = __webpack_require__(13);
-if(typeof content === 'string') content = [[module.i, content, '']];
-// Prepare cssTransformation
-var transform;
-
-var options = {}
-options.transform = transform
-// add the styles to the DOM
-var update = __webpack_require__(1)(content, options);
-if(content.locals) module.exports = content.locals;
-// Hot Module Replacement
-if(false) {
-	// When the styles change, update the <style> tags
-	if(!content.locals) {
-		module.hot.accept("!!../../node_modules/css-loader/index.js!./jscarousel.css", function() {
-			var newContent = require("!!../../node_modules/css-loader/index.js!./jscarousel.css");
-			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
-			update(newContent);
-		});
-	}
-	// When the module is disposed, remove the <style> tags
-	module.hot.dispose(function() { update(); });
-}
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-exports = module.exports = __webpack_require__(0)(undefined);
-// imports
-
-
-// module
-exports.push([module.i, ".js-Carousel {\n  background: #272822;\n  height: 255px;\n  margin: 0 auto 2em;\n  overflow: hidden;\n  position: relative;\n  width: 600px;\n}\n.js-Carousel > ul {\n  height: 200px;\n  list-style: none;\n  margin: 0;\n  padding: 0;\n  width: 9999px;\n}\n.js-Carousel > ul li {\n  display: inline-block;\n  float: left;\n  width: 600px;\n  transition: margin-left 0.3s ease;\n}\n.js-Carousel > ul li img {\n  max-width: 100%;\n}\n.js-Carousel .js-Carousel-arrowPrev,\n.js-Carousel .js-Carousel-arrowNext {\n  background: transparent;\n  border: 0;\n  color: #e0e0e0;\n  cursor: pointer;\n  font: 400 10em sans-serif;\n  height: 200px;\n  outline: 0;\n  position: absolute;\n  top: 0;\n  text-shadow: 0 0 10px #444444;\n  width: 90px;\n  transition: all 0.2s ease;\n}\n.js-Carousel .js-Carousel-arrowPrev:hover,\n.js-Carousel .js-Carousel-arrowNext:hover {\n  color: #aaaaaa;\n}\n.js-Carousel .js-Carousel-arrowPrev {\n  left: 0;\n}\n.js-Carousel .js-Carousel-arrowNext {\n  right: 0;\n}\n.js-Carousel .js-Carousel-dots {\n  display: inline-block;\n  height: 1.25em;\n  margin: 0;\n  position: absolute;\n  bottom: 1em;\n  right: 1em;\n  width: auto;\n}\n.js-Carousel .js-Carousel-dots li {\n  background: #aaaaaa;\n  border-radius: .75em;\n  cursor: pointer;\n  display: inline-block;\n  height: .75em;\n  margin: 0 .75em;\n  width: .75em;\n  transition: all 0.2s ease;\n}\n.js-Carousel .js-Carousel-dots li.is-active {\n  background: #ffffff;\n  box-shadow: 0 0 3px 3px #ddd;\n}\n.js-Carousel .js-Carousel-dots li:hover {\n  background: #f5f5f5;\n}\n.js-Carousel .js-Carousel-btnStop,\n.js-Carousel .js-Carousel-btnPlay {\n  background: #aaaaaa;\n  border: 0;\n  cursor: pointer;\n  height: 2.25em;\n  position: absolute;\n  bottom: 1em;\n  left: 2em;\n  text-align: center;\n  width: 5em;\n  transition: all 0.2s ease;\n}\n.js-Carousel .js-Carousel-btnStop:hover,\n.js-Carousel .js-Carousel-btnPlay:hover {\n  background: #f5f5f5;\n}\n.js-Carousel .js-Carousel-btnStop {\n  left: 100px;\n}\n", ""]);
-
-// exports
-
-
-/***/ }),
-/* 14 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -1203,9 +771,11 @@ exports.push([module.i, ".js-Carousel {\n  background: #272822;\n  height: 255px
   Garantías implícitas, incluyendo, sin limitación, los implicados
   GARANTÍAS DE COMERCIALIZACIÓN Y APTITUD PARA UN PROPÓSITO PARTICULAR.
 */
-var carousel=__webpack_require__(2);
+__webpack_require__(12);
+var is=__webpack_require__(13);
+var TinyAnimate=__webpack_require__(14);
 var move=__webpack_require__(15);
-var watchjs = __webpack_require__(25)
+var watchjs = __webpack_require__(25);
 var watch = watchjs.watch;
 var unwatch = watchjs.unwatch;
 var callWatchers = watchjs.callWatchers;
@@ -1223,6 +793,10 @@ g=(function(){
 	  if (t < 1) return c / 2 * t * t + b;
 	  t--;
 	  return -c / 2 * (t * (t - 2) - 1) + b;
+	};
+	function wrap(el, wrapper) {
+	    el.parentNode.insertBefore(wrapper, el);
+	    wrapper.appendChild(el);
 	};
 	function getScreenCordinates(obj) {
         var p = {};
@@ -1307,10 +881,12 @@ g=(function(){
 			return -1;
 		}
 	};
-	function valobj(){
+	function valobj(objval){
         var valor;
         var obj;
-        obj=getdisctId(domel);
+        var args;
+        var tovalue;
+        obj=getdisctId(objval);
         if(obj.type!='select-one' && obj.type!="file"){
 			valor=obj.value;
         }
@@ -1324,14 +900,57 @@ g=(function(){
         }
         return valor;
    };
+   function setval(objval,value){
+        var valor;
+        var obj;
+        var args;
+        var tovalue;
+        obj=getdisctId(objval);
+        if(obj.type!='select-one' && obj.type!="file"){
+			obj.value=value;
+        }
+        return 0;
+   };
     function version(){
     	return "1.0.0";
     };
+	function intfadeIn(elem,tiempo){
+			var op = 0.1;  // initial opacity
+		    var intervalo=tiempo/80;
+		    var element;
+		    element=elem;
+		    glog("element");
+		    glog(element);
+		    element.style.display = 'block';
+		    var timer = setInterval(function(){
+	        if (op >= 1){
+	            clearInterval(timer);
+	        }
+	        element.style.opacity = op;
+	        element.style.filter = 'alpha(opacity=' + op * 100 + ")";
+		        op += op * 0.1;
+		    }, intervalo);
+	  };
+	  function intfadeOut(elem,tiempo){
+	    var op = 1;  // initial opacity
+		var intervalo=tiempo/80;
+		var element;
+		element=elem;
+		var timer = setInterval(function(){
+	    if (op <= 0.1){
+	        clearInterval(timer);
+	        element.style.display = 'none';
+	    }
+	    element.style.opacity = op;
+	    element.style.filter = 'alpha(opacity=' + op * 100 + ")";
+	        op -= op * 0.1;
+	    }, intervalo);
+	 };
 	return{
 		//Describir funciones públicas
 		getdisctId: function(id){
 			var cadena;
-			if(typeof id==='string'){
+			if(is.string(id)){
 				cadena=id;
 		      	if(cadena.search("#")==0){
 		        	objeto=document.querySelector(id);
@@ -1379,21 +998,55 @@ g=(function(){
 		log: function(msg){
 			console.log(msg);
 	    },
+	    map: function(array,callbackmap){
+	    	var val,index;
+			if(array.isArray()){
+				array.map(callbackmap);
+			}
+	    },
+	    slice: function(array,start,end,callbackslc){
+			if(array.isArray()){
+				callbackslc(array.slice(start, end));
+			}
+	    },
+	    encb64: function(string){
+			return atob(string)
+	    },
+	    decb64: function(string){
+			return btoa(string);
+	    },
+		docready: function(fn){
+		  if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading"){
+		    fn();
+		  }
+		  else{
+		    document.addEventListener('DOMContentLoaded', fn);
+		  }
+		},
 		each:function(objeto,callbackeach){
 	      	var initial_array;
 	      	var x,y,valor,indice;
-	        if(objeto.length!=undefined){
+	        if(is.isObject(objeto)){
 	        	objeto.forEach(callbackeach);
-	        }
-	        else if(typeof objeto==='object'){
-	        	for(prop in objeto){
-	        		callbackeach(prop,objeto);
-	        	}
 	        }
 	        else{
 	        	glog("Is not an array!");
 	        }
-	      },
+		},
+		extend:function(out){
+			out = out || {};
+			for (var i = 1; i < arguments.length; i++) {
+				if (!arguments[i]){
+					continue;
+				}
+				for (var key in arguments[i]) {
+					if (arguments[i].hasOwnProperty(key)){
+						out[key] = arguments[i][key];
+					}
+				}
+			}
+			return out;
+		},
 	    preventDefault: function(e){
 			if(e.preventDefault){
 				e.preventDefault();
@@ -1619,6 +1272,14 @@ g=(function(){
 			sock=g.getxhr();
 			return sock;
 	    },
+		  parseHTML:function(str){
+			  var tmp = document.implementation.createHTMLDocument();
+			  tmp.body.innerHTML = str;
+			  return tmp.body.children;
+		  },
+		  parseJSON:function(json){
+			  return JSON.parse(json);
+		  },
 		dom: function(domel){
 				return{
 					hide: function(){
@@ -1630,23 +1291,23 @@ g=(function(){
 						fila.style.display="none";
 					},
 					show:function(){
-						var fila;
+						var domelement;
 						if(!document.getElementById){
 							return false;
 						}
-			          	fila=getdisctId(domel);
-						fila.style.display="block"; 
+			          	domelement=getdisctId(domel);
+						domelement.style.display="block"; 
 					},
 				      css:function(estilo){
-				        var fila;
+				        var domelement;
 				          if(!document.getElementById){
 				              return false;
 				          }
 				          if(estilo==''){
 				              return false;
 				          }
-				          fila=getdisctId(domel);
-				          fila.style=estilo;
+				          domelement=getdisctId(domel);
+				          domelement.style=estilo;
 				      },
 				      find:function(selector,callbackfind){
 						// Final found elements
@@ -1669,15 +1330,189 @@ g=(function(){
 				      },
 				      each:function(callbackeach){
 				      	var objeto;
-				      	var initial_array;
 				      	var x,y,valor,indice;
-				      	objeto=g.getelTag(domel);
-				        if(objeto[0].id!=undefined){
+				      	objeto=getelTag(domel);
+				        if(is.isObject(objeto)){
 				        	objeto.forEach(callbackeach);
 				        }
 				        else{
-				        	glog("Is not an Object!");
+				        	glog("Is not an object!");
 				        }
+				      },
+				      empty:function(){
+				      	var objeto;
+				      	objeto=getdisctId(domel);
+				        objeto.innerHTML='';
+				      },
+				      wrap:function(){
+				      	var objeto;
+				      	objeto=getdisctId(domel);
+						wrap(objeto, document.createElement('div'));
+				      },
+				      html:function(){
+				      	var objeto;
+				      	objeto=getdisctId(domel);
+				      	const args = Array.from(arguments);
+				      	if(args[0]!=undefined){
+				      		string=args[0];
+				      		objeto.innerHTML = string;
+				      	}
+				      	else{
+				      		return objeto.innerHTML;
+				      	}
+				      },
+				      text:function(){
+				      	var objeto;
+				      	objeto=getdisctId(domel);
+				      	const args = Array.from(arguments);
+				      	if(args[0]!=undefined){
+				      		string=args[0];
+				      		objeto.textContent = string;
+				      	}
+				      	else{
+				      		return objeto.textContent;
+				      	}
+				      },
+				      hasClass:function(classElem){
+				      	var objeto;
+				      	objeto=getdisctId(domel);
+				      	if(objeto.classList.contains(classElem)){
+				      		return;
+				      	}
+				      	else{
+				        	return -1;
+				      	}
+				      },
+				      prev:function(){
+				      	var objeto;
+				      	var nextsib;
+				      	objeto=getdisctId(domel);
+				      	prevsib=objeto.previousElementSibling;
+				      },
+				      next:function(){
+				      	var objeto;
+				      	var nextsib;
+				      	objeto=getdisctId(domel);
+				      	nextsib=objeto.nextElementSibling;
+				      },
+				      remove:function(){
+				      	var objeto;
+				      	objeto=getdisctId(domel);
+				      	objeto.parentNode.removeChild(objeto);
+				      },
+				      replaceWith:function(string){
+				      	var objeto;
+				      	objeto=getdisctId(domel);
+				      	objeto.outerHTML = string;
+				      },
+				      matches:function(selector){
+				      	var objeto;
+				      	objeto=getdisctId(domel);
+				      	if(objeto.matches(selector)){
+				      		return;
+				      	}
+				      	else{
+				      		return -1;
+				      	}
+				      },
+				      siblings:function(){
+				      	var objeto;
+				      	objeto=getdisctId(domel);
+				      	Array.prototype.filter.call(objeto.parentNode.children, function(child){
+						  return child !== objeto;
+						});
+				      },
+				      offset:function(){
+				      	var objeto;
+				      	var par;
+				      	var rect;
+				      	var result;
+				      	objeto=getdisctId(domel);
+				      	rect = objeto.getBoundingClientRect();
+						result={
+						  top: rect.top + document.body.scrollTop,
+						  left: rect.left + document.body.scrollLeft
+						}
+						return{
+							
+						}
+				      },
+				      offsetParent:function(){
+				      	var objeto;
+				      	var par;
+				      	var rect;
+				      	var result;
+				      	objeto=getdisctId(domel);
+				      	result=objeto.offsetParent || objeto;
+						return{
+							
+						}
+				      },
+				      parent:function(){
+				      	var objeto;
+				      	objeto=getdisctId(domel);
+						return objeto.parentNode; 
+				      },
+				      position:function(){
+				      	var objeto;
+				      	var result;
+				      	objeto=getdisctId(domel);
+				      	result={left: objeto.offsetLeft, top: objeto.offsetTop};
+						return result; 
+				      },
+				      outerHeight:function(){
+				      	var objeto;
+				      	var result;
+				      	var objeto=getdisctId(domel);
+					    var height=objeto.offsetHeight;
+					    var style=getComputedStyle(objeto);
+				      	const args = Array.from(arguments);
+				      	if(args[0]!=undefined){
+				      		if(args[0]==true){
+							  height+=parseInt(style.marginTop) + parseInt(style.marginBottom);
+							  return height;
+				      		}
+				      		else{
+				      			return objeto.offsetHeight;
+				      		}
+				      	}
+				      	else{
+				      		return objeto.offsetHeight;
+				      	}
+						return{
+							
+						}
+				      },
+					  outerWidth:function(){
+				      	var objeto;
+				      	var result;
+				      	var objeto=getdisctId(domel);
+					    var height=objeto.offsetWidth;
+					    var style=getComputedStyle(objeto);
+				      	const args = Array.from(arguments);
+				      	if(args[0]!=undefined){
+				      		if(args[0]==true){
+							  width += parseInt(style.marginLeft) + parseInt(style.marginRight);
+							  return width;
+				      		}
+				      		else{
+				      			return objeto.offsetWidth;
+				      		}
+				      	}
+				      	else{
+				      		return objeto.offsetHeight;
+				      	}
+						return{
+							
+						}
+				      },
+				      tanimate: function(from, to, duration, update, easing, done){
+				      	var objeto=getdisctId(domel);
+				      	TinyAnimate.animate(from, to, duration, update, easing, done);
+				      },
+				      tanimatecss: function(property, unit, from, to, duration, easing, done){
+				      	var objeto=getdisctId(domel);
+				      	TinyAnimate.animateCSS(objeto, property, unit, from, to, duration, easing, done);
 				      },
 				      animate: function(callbackanim){
 						return {
@@ -1767,26 +1602,113 @@ g=(function(){
 							}
 						}
 					  },
-					  getslides:function(options){
+					  cycle:function(options){
 					  	var crusel;
 					  	var optfinal;
-				      	//write code below...
-				      	//Initialize carousel
-				      	//pass elem as id
-				      	optfinal={
-						    elem: getnameid(domel),    // id of the carousel container
-						    autoplay: options.autoplay,     // starts the rotation automatically
-						    infinite: options.infinite,      // enables the infinite mode
-						    interval: options.interval,      // interval between slide changes
-						    initial: options.initial,          // slide to start with
-						    dots: options.dots,          // show navigation dots
-						    arrows: options.arrows,        // show navigation arrows
-						    buttons: options.buttons,      // hide play/stop buttons,
-						    btnStopText: options.btnStopText // STOP button text
-				      	}
-				      	//return object
-						carousel.run(optfinal);
+					  	var findelem;
+					  	var numelems=0;
+					  	var elemindex=0;
+					  	var domelems;
+					  	var bitvisible=0;
+					  	if(!options){
+					  		glog("Faltan argumentos, no se puede iniciar cycle");
+					  	}
+					  	else{
+					  		if(!options.search){
+					  			glog("Faltan argumento 'Find', no se puede iniciar cycle");
+					  		}
+					  		else{
+						      	optfinal={
+								    elem: getnameid(domel),    // id of the carousel container
+								    fx: options.fx,                  // starts the rotation automatically
+								    search: options.search,      // enables the infinite mode
+								    infinite: options.infinite || false,      // enables the infinite mode
+								    interval: options.interval || 1000,      // interval between slide changes
+						      	}
+						      	glog("-- INIT --");
+						      	findelem=domel + " > " + optfinal.search;
+						      	glog("ELEMENTS INSIDE");
+						      	children=g.dom(domel).children();
+						      	numelems=children.length;
+						      	glog("children**********************");
+						      	for(i=0;i<numelems;i++){
+						      		if(i>0){
+						      			glog("hijo " + i);
+										children[i].style.display="none";
+										children[i].style.position="absolute";
+										children[i].style.left="0";
+										children[i].style.top="0";
+						      		}
+						      	}
+						      	glog("---ELEMENTS INSIDE");
+						      	glog("---ELEMENTS INSIDE NUM " + numelems);
+						      	if(numelems>1){
+						      		domelems=getelTag(findelem);
+						      		glog(domelems);
+						      		domcycle=setInterval(fadingfunc,optfinal.interval);
+						      		function fadingfunc(){
+						      			intfadeOut(children[elemindex],optfinal.interval);
+						      			if(elemindex==(numelems-1)){
+						      				elemindex=0;
+						      			}
+						      			else{
+						      				elemindex++;
+						      			}
+						      			intfadeIn(children[elemindex],optfinal.interval);
+						      									      			glog("SLIDES");
+						      			glog("**************************");
+						      			glog("children " + elemindex);
+						      			glog(children[elemindex]);
+						      			glog(children);
+						      			glog("**************************");
+						      		}
+						      	}
+						      	else{
+						      		glog("Número de slides insuficiente para crear slider.");
+						      		glog("ABORTING...");
+						      	}
+						      	glog("---ELEMENTS INSIDE");
+					  		}
+					  	}
 						return;
+				      },
+				      after:function(htmlstr){
+				      	//write code below...
+				      	var obj;
+				      	obj=getdisctId(domel);
+						obj.insertAdjacentHTML('afterend', htmlstr);
+				      },
+				      before:function(htmlstr){
+				      	//write code below...
+				      	var obj;
+				      	obj=getdisctId(domel);
+						obj.insertAdjacentHTML('beforebegin', htmlstr);
+				      },
+				      append:function(elem){
+				      	//write code below...
+				      	var obj;
+				      	obj=getdisctId(domel);
+						parent.insertBefore(elem, obj.firstChild);
+				      },
+				      prepend:function(html){
+				      	//write code below...
+				      	var obj;
+				      	obj=getdisctId(domel);
+						obj.insertAdjacentHTML('afterend', html);
+				      },
+				      clone:function(){
+				      	//write code below...
+				      	var obj;
+				      	obj=getdisctId(domel);
+				      	obj.cloneNode(true);
+				      },
+				      children:function(){
+				      	//write code below...
+				      	var obj;
+				      	var childf;
+				      	obj=getdisctId(domel);
+						childf=obj.children;
+						return childf; 
 				      },
 				      addClass:function(classele){
 				      	//write code below...
@@ -1800,26 +1722,24 @@ g=(function(){
 				      	obj=getdisctId(domel);
 				      	obj.classList.remove(classele);
 				      },
-				      addAttribute:function(attr,value){
+				      addAttrb:function(attr,value){
 				      	//write code below...
 				      	var obj;
 				      	var type;
 				      	var i;
 				      	type=getobjtype(domel);
-				      	glog("type " + type);
 				      	switch(type){
 				      		case 'element':
 				      			obj=getelTag(domel);
-				      			glog("CONTENEDORES");
-				      			glog(obj);
-				      			for(i=0;i<obj.NodeList.length;i++){
-				      				obj.NodeList[i].setAttribute(attr,value);
+				      			for(i=0;i<obj.length;i++){
+				      				obj[i].setAttribute(attr,value);
 				      			}
-				      			break;				      		
+				      			break;
 				      		case 'class':
 				      			obj=getelTag(domel);
-				      			glog("CONTENEDORES");
-				      			glog(obj);
+				      			for(i=0;i<obj.length;i++){
+				      				obj[i].setAttribute(attr,value);
+				      			}
 				      			break;
 				      		case 'id':
 								obj=getdisctId(domel);
@@ -1827,14 +1747,60 @@ g=(function(){
 								break;
 				      	}
 				      },
-				      getAttribute:function(attr){
-				      	//write code below...
+				      getAttrb:function(attr){
+						//write code below...
 				      	var obj;
-
+				      	var type;
+				      	var i;
+				      	var result;
+				      	result=Array;
+				      	type=getobjtype(domel);
+				      	switch(type){
+				      		case 'element':
+				      			obj=getelTag(domel);
+				      			for(i=0;i<obj.length;i++){
+				      				result[i]=obj[i].getAttribute(attr);
+				      			}
+				      			return result; 
+				      			break;
+				      		case 'class':
+				      			obj=getelTag(domel);
+				      			for(i=0;i<obj.length;i++){
+				      				result[i]=obj[i].getAttribute(attr);
+				      			}
+				      			return result;
+				      			break;
+				      		case 'id':
+								obj=getdisctId(domel);
+								result[i]=obj.getAttribute(attr);
+								return result;
+								break;
+				      	}
 				      },
-				      removeAttribute:function(attr){
+				      rmAttrb:function(attr){
 				      	//write code below...
 				      	var obj;
+				      	var type;
+				      	var i;
+				      	type=getobjtype(domel);
+				      	switch(type){
+				      		case 'element':
+				      			obj=getelTag(domel);
+				      			for(i=0;i<obj.length;i++){
+				      				obj[i].removeAttribute(attr);
+				      			}
+				      			break;
+				      		case 'class':
+				      			obj=getelTag(domel);
+				      			for(i=0;i<obj.length;i++){
+				      				obj[i].removeAttribute(attr);
+				      			}
+				      			break;
+				      		case 'id':
+								obj=getdisctId(domel);
+								obj.removeAttribute(attr);
+								break;
+				      	}
 				      },
 					  toggleClass:function(classele){
 				      	//write code below...
@@ -1895,20 +1861,28 @@ g=(function(){
 				        },
 			            val: function(){
 			                var valor;
-			                valor=valobj(obj);
-			                return valor;
+			                var args;
+			                args=arguments;
+							glog(domel);
+			                if(args[0]==undefined){
+				                valor=valobj(domel);
+				                return valor;
+			                }
+			                else{
+			                	setval(domel,args[0]);
+			                }
 			            },
 			            version: function(){
 			                glog(version());
 			            },
 				        intval: function(){
 							var number;
-							valor=valobj(obj);
+							valor=valobj(domel);
 							return parseInt(valor);
 				        },
 				        floatval: function(){
 				        	var number;
-							valor=valobj(obj);
+							valor=valobj(domel);
 							return parseFloat(valor);
 				        },
 						fadeIn:function(tiempo){
@@ -2008,90 +1982,174 @@ g=(function(){
 				        	callbackfunc();
 				        }
 			      	},
-				        click:function(callbackfunc){
-				        	var control;
-				        	control=getdisctId(domel);
-					        control.onclick=function(){
-					        	callbackfunc();
-					        }
-				      	},
-				      	change:function(callbackfunc){
-					        var control;
-				        	control=getdisctId(domel);
-					        control.onchange=function(){
-					        	callbackfunc();
-					        }
-				      	},
-				      	blur:function(callbackfunc){
-					        var control;
-				        	control=getdisctId(domel);
-					        control.onblur=function(){
-					        	callbackfunc();
-					        }
-				      	},
-				        on:function(){
-							var control;
-							var idcontrol;
-							var event;
-							var callback;
-							idcontrol=domel;
-							event=arguments[1];
-							callback=arguments[2];;
-							control=getdisctId(idcontrol);
-							glog(control);
-				        	switch(event){
-				        		case 'error':
-									control.onerror=function(){
-							        	callback();
-							        }
-				        			break;
-				        		case 'load':
-									control.onload=function(){
-							        	callback();
-							        }
-				        			break;
-				        		case 'submit':
-									control.onsubmit=function(){
-							        	callback();
-							        }
-				        			break;
-				        		case 'click':
-									control.onclick=function(){
-							        	callback();
-							        }
-				        			break;
-				        		case 'blur':
-									control.onblur=function(){
-							        	callback();
-							        }
-				        			break;
-				        		case 'change':
-									control.onchange=function(){
-							        	callback();
-							        }
-							        break;
-								case 'resize':
-									control.onresize=function(){
-							        	callback();
-							        }
-				        			break;
-								case 'unload':
-									control.onunload=function(){
-							        	callback();
-							        }
-				        			break;
-								case 'pageshow':
-									control.onpageshow=function(){
-							        	callback();
-							        }
-				        			break;
-								case 'popstate':
-									control.onpopstate=function(){
-							        	callback();
-							        }
-				        			break;
-				        	}
-				    },
+			        click:function(callbackfunc){
+			        	var control;
+			        	control=getdisctId(domel);
+				        control.onclick=function(){
+				        	callbackfunc();
+				        }
+			      	},
+			      	change:function(callbackfunc){
+				        var control;
+			        	control=getdisctId(domel);
+				        control.onchange=function(){
+				        	callbackfunc();
+				        }
+			      	},
+			      	blur:function(callbackfunc){
+				        var control;
+			        	control=getdisctId(domel);
+				        control.onblur=function(){
+				        	callbackfunc();
+				        }
+			      	},
+			      	bind:function(e){
+						var control;
+						var idcontrol;
+						var event;
+						var callback;
+						idcontrol=domel;
+						event=arguments[0];
+						callback=arguments[1];;
+						control=getdisctId(idcontrol);
+						glog(control);
+			        	switch(event){
+			        		case 'error':
+			        			control.addEventListener('error',callback);
+			        			break;
+			        		case 'load':
+								control.addEventListener('load',callback);
+			        			break;
+			        		case 'submit':
+								control.addEventListener('submit',callback);
+			        			break;
+			        		case 'click':
+								control.addEventListener('click',callback);
+			        			break;
+			        		case 'dblclick':
+								control.addEventListener('dblclick',callback);
+			        			break;
+							case 'mouseup':
+								control.addEventListener('mouseup',callback);
+			        			break;
+			        		case 'mousedown':
+								control.addEventListener('mousedown',callback);
+			        			break;
+			        		case 'mouseenter':
+								control.addEventListener('mouseenter',callback);
+			        			break;
+			        		case 'mouseleave':
+								control.addEventListener('mouseleave',callback);
+			        			break;
+			        		case 'mousemove':
+								control.addEventListener('mousemove',callback);
+			        			break;
+			        		case 'mouseover':
+								control.addEventListener('mouseover',callback);
+			        			break;
+			        		case 'mouseout':
+								control.addEventListener('mouseout',callback);
+			        			break;
+			        		case 'blur':
+								control.addEventListener('blur',callback);
+			        			break;
+			        		case 'change':
+								control.addEventListener('change',callback);
+						        break;
+							case 'resize':
+								control.addEventListener('resize',callback);
+			        			break;
+							case 'unload':
+								control.addEventListener('unload',callback);
+			        			break;
+							case 'pageshow':
+								control.addEventListener('pageshow',callback);
+			        			break;
+							case 'popstate':
+								control.addEventListener('popstate',callback);
+			        			break;
+			        		case 'keyup':
+								control.addEventListener('keyup',callback);
+			        			break;
+			        		case 'keydown':
+								control.addEventListener('keyup',callback);
+			        			break;
+			        		case 'keypress':
+								control.addEventListener('keypress',callback);
+			        			break;
+			        	}
+			      	},
+			        on:function(e){
+						var event;
+						var callback;
+						event=arguments[0];
+						callback=arguments[1];;
+			        	switch(event){
+			        		case 'error':
+			        			g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'load':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'submit':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'click':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'dblclick':
+								g.dom(domel).bind(event,callback);
+			        			break;
+							case 'mouseup':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'mousedown':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'mouseenter':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'mouseleave':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'mousemove':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'mouseover':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'mouseout':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'blur':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'change':
+								g.dom(domel).bind(event,callback);
+						        break;
+							case 'resize':
+								g.dom(domel).bind(event,callback);
+			        			break;
+							case 'unload':
+								g.dom(domel).bind(event,callback);
+			        			break;
+							case 'pageshow':
+								g.dom(domel).bind(event,callback);
+			        			break;
+							case 'popstate':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'keyup':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'keydown':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'keypress':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        	}
+			    	},
 					load:function(modulourl){
 				        var xmlhttp=false;
 				        var filecont;
@@ -2139,36 +2197,57 @@ g=(function(){
              * Se encarga de registrar eventos
              *
              * */
+            inArray: function(item, elem){
+	          return elem.indexOf(item);
+	        },
+	        indexOf: function(item, elem){
+	          return elem.indexOf(item);
+	        },
 	        getKey: function(e){
-	          if(window.event)keyCode=window.event.keyCode;
-	          else if(e) keyCode=e.which;
-	          return keyCode;
+				var KeyCode;
+				if(e){
+					if(e.keyCode>0){
+						KeyCode=e.keyCode;
+					}
+					else{
+						KeyCode=e.charCode;	
+					}
+				}
+				return KeyCode;
 	        },
 	        blockNumber: function(e){
 	          //bloquear teclado a solo numeros
-	          teclap=g.objeto.getTecla(e);
-	          teclan=chr(teclap);
+	          teclap=g.getKey(e);
+	          teclan=String.fromCharCode(teclap);
 	          if(IsNumeric(teclan)==false){
 	            return "Solo está peritido escribir numeros";
 	          }
 	        },
+	        getChar: function(event){
+	        	var cadena;
+				//bloquear teclado a solo numeros
+				teclan=g.getKey(event);
+				cadena=String.fromCharCode(teclan);
+				glog("TECLA " + cadena);
+				return String.fromCharCode(teclan); 
+	        },
 	        blockChar: function(e){
 	          //bloquear teclado a solo letras
-	          teclap=g.objeto.getTecla(e);
-	          teclan=chr(teclap);
+	          teclap=g.getKey(e);
+	          teclan=String.fromCharCode(teclap);
 	          if(IsNumeric(teclan)==true){
 	            return "Solo está peritido escribir letras";
 	          }
 	        },
 	        bloqNum: function(e){
-	          teclap=g.objeto.getTecla(e);
-	          teclan=chr(teclap);
+	          teclap=g.getKey(e);
+	          teclan=String.fromCharCode(teclap);
 	          if(IsNumeric(teclan)==false){
 	            return "Solo esta permitido escribir numeros";
 	          }
 	        },
 			getTrim: function(cadena){
-			    return cadena.replace(/^\s+/g,'').replace(/\s+$/g,'');
+			    return cadena.trim();
 			},
 			setLocal: function(varname,valor){
 			    //localstorage programming
@@ -2182,27 +2261,19 @@ g=(function(){
 			        localStorage.getItem(varname); 
 			    }
 			},
+			type: function(objname){
+				var obj;
+			    obj=getdisctId(objname);
+			    return Object.prototype.toString.call(obj).replace(/^\[object (.+)\]$/, '$1').toLowerCase();
+			},
 			/**
 			 * Ajax Clase
 			 * Funciones XHR para trabajar con AJAX
 			 * */
-	        getxhr:function(){
-	        var xmlhttp=false;
-	        try{
-	          xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
-	        }
-	        catch (e){
-	            try{
-	              xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-	            }
-	            catch (E){
-	              xmlhttp = false;
-	            }
-	         }
-	        if (!xmlhttp && typeof XMLHttpRequest!='undefined'){
-	          xmlhttp = new XMLHttpRequest();
-	        }
-	        return xmlhttp;
+		  getxhr:function(){
+		  	var xhr;
+			xhr=window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+			return xhr;
 	      },
 	      upload: function(fileid,callbackup){
 	      	var filectrl;
@@ -2281,6 +2352,8 @@ g=(function(){
 	      	else{
 	      		// Obtener objeto AJAX;
 	      		sock=g.getxhr();
+	      		sock.addEventListener("load", transferComplete);
+				sock.addEventListener("error", transferFailed);
 	      		// Obtener objeto de variables;
 	      		variablesaux=JSON.stringify(arrayvar[0]);
 	      		variablesobj=JSON.parse(variablesaux);
@@ -2303,22 +2376,27 @@ g=(function(){
 	      		////////////////////////////////////////////////////
 	      		// EJECUTAR FUNCION Y CALLBACK//////////////////////
 		        sock.open(ajxProtocol,dirsocket,true);
-				sock.onreadystatechange=function(){
-					if(sock.readyState==4 && sock.status==200){
-		                data=sock.responseText;
-		                g.log("STATUS: " + sock.readyState + " " + sock.status + " " + sock.statusText);
-		                if(callback!=undefined){
-		                	if(typeof callback==="function"){
-								callback(data);
-							}
-							else{
-								g.log("El parámetro Callback no es función o no existe!");
-							}
-		                }
-		                else{
-							g.log("El parámetro Callback no existe!");
+				function transferComplete(event){
+					glog("event***********************");
+					glog(event);
+					glog("event***********************");
+	                data=event.target.responseText;
+	                g.log("STATUS: " + event.target.readyState + " " + event.target.status + " " + event.target.statusText);
+	                if(callback!=undefined){
+	                	if(typeof callback==="function"){
+							callback(data);
 						}
-				 	}
+						else{
+							g.log("El parámetro Callback no es función o no existe!");
+						}
+	                }
+	                else{
+						g.log("El parámetro Callback no existe!");
+					}
+				}
+				
+				function transferFailed(event){
+					glog(event.target.error);
 				}
 	      		sock.setRequestHeader("Content-Type",headers);
 				sock.send(JSON.stringify(variablesobj));
@@ -2357,6 +2435,8 @@ g=(function(){
 	      	else{
 	      		// Obtener objeto AJAX;
 	      		sock=g.getxhr();
+	      		sock.addEventListener("load", transferComplete);
+				sock.addEventListener("error", transferFailed);
 	      		// Obtener string de protocolo
 	      		ajxProtocol="GET";
 	      		// Obtener string de dir archivo socket
@@ -2373,22 +2453,27 @@ g=(function(){
 	      		////////////////////////////////////////////////////
 	      		// EJECUTAR FUNCION Y CALLBACK//////////////////////
 		        sock.open(ajxProtocol,dirsocket,true);
-				sock.onreadystatechange=function(){
-					if(sock.readyState==4 && sock.status==200){
-		                data=sock.responseText;
-		                g.log("STATUS: " + sock.readyState + " " + sock.status + " " + sock.statusText);
-		                if(callback!=undefined){
-		                	if(typeof callback==="function"){
-								callback(data);
-							}
-							else{
-								g.log("El parámetro Callback no es función o no existe!");
-							}
-		                }
-		                else{
-							g.log("El parámetro Callback no existe!");
+		        function transferComplete(event){
+					glog("event***********************");
+					glog(event);
+					glog("event***********************");
+	                data=event.target.responseText;
+	                g.log("STATUS: " + event.target.readyState + " " + event.target.status + " " + event.target.statusText);
+	                if(callback!=undefined){
+	                	if(typeof callback==="function"){
+							callback(data);
 						}
-				 	}
+						else{
+							g.log("El parámetro Callback no es función o no existe!");
+						}
+	                }
+	                else{
+						g.log("El parámetro Callback no existe!");
+					}
+				}
+				
+				function transferFailed(event){
+					glog(event.target.error);
 				}
 				sock.send(null);
 		        //////////////////////////////////////////////////// 
@@ -2426,7 +2511,7 @@ g=(function(){
 	}
 }());
 g.path=(function(){
-	//Submodulo Path / Rewrite PathJS
+	//Submodulo g.path / Rewrite g.pathJS
 	function version(){
 		return "0.8.4"; 
 	};
@@ -2550,7 +2635,7 @@ g.path=(function(){
 	            }
 	        }
 	
-	        // The 'document.documentMode' checks below ensure that PathJS fires the right events
+	        // The 'document.documentMode' checks below ensure that g.pathJS fires the right events
 	        // even in IE "Quirks Mode".
 	        if ("onhashchange" in window && (!document.documentMode || document.documentMode >= 8)){
 	            window.onhashchange = fn;
@@ -2695,7 +2780,7 @@ g.md5=(function(){
 				   string = Utf8Encode(cadena);
 				   x = ConvertToWordArray(string);
 				   a = 0x67452301; b = 0xEFCDAB89; c = 0x98BADCFE; d = 0x10325476;
-				   for (k=0;k<x.length;k+=16){
+				   for(k=0;k<x.length;k+=16){
 				           AA=a; BB=b; CC=c; DD=d;
 				           a=FF(a,b,c,d,x[k+0], S11,0xD76AA478);
 				           d=FF(d,a,b,c,x[k+1], S12,0xE8C7B756);
@@ -2771,10 +2856,426 @@ g.md5=(function(){
 				}
 			}
 }());
+g.path.core.route.prototype = {
+    'to': function (fn) {
+        this.action = fn;
+        return this;
+    },
+    'enter': function (fns) {
+        if (fns instanceof Array) {
+            this.do_enter = this.do_enter.concat(fns);
+        } else {
+            this.do_enter.push(fns);
+        }
+        return this;
+    },
+    'exit': function (fn) {
+        this.do_exit = fn;
+        return this;
+    },
+    'partition': function () {
+        var parts = [], options = [], re = /\(([^}]+?)\)/g, text, i;
+        while (text = re.exec(this.path)) {
+            parts.push(text[1]);
+        }
+        options.push(this.path.split("(")[0]);
+        for (i = 0; i < parts.length; i++) {
+            options.push(options[options.length - 1] + parts[i]);
+        }
+        return options;
+    },
+    'run': function () {
+        var halt_execution = false, i, result, previous;
+
+        if (g.path.routes.defined[this.path].hasOwnProperty("do_enter")) {
+            if (g.path.routes.defined[this.path].do_enter.length > 0) {
+                for (i = 0; i < g.path.routes.defined[this.path].do_enter.length; i++) {
+                    result = g.path.routes.defined[this.path].do_enter[i].apply(this, null);
+                    if (result === false) {
+                        halt_execution = true;
+                        break;
+                    }
+                }
+            }
+        }
+        if (!halt_execution) {
+            g.path.routes.defined[this.path].action();
+        }
+    }
+};
+
+show=function(){
+	glog(hola);
+}
+
+g.extend(g.modal,show);
 module.exports = g;
 
 /*** EXPORTS FROM exports-loader ***/
 module.exports = g;
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports) {
+
+!function(){for(var n=0,i=["webkit","moz"],e=0;e<i.length&&!window.requestAnimationFrame;++e)window.requestAnimationFrame=window[i[e]+"RequestAnimationFrame"],window.cancelAnimationFrame=window[i[e]+"CancelAnimationFrame"]||window[i[e]+"CancelRequestAnimationFrame"];window.requestAnimationFrame||(window.requestAnimationFrame=function(i){var e=(new Date).getTime(),a=Math.max(0,16-(e-n)),o=window.setTimeout(function(){i(e+a)},a);return n=e+a,o}),window.cancelAnimationFrame||(window.cancelAnimationFrame=function(n){clearTimeout(n)})}();
+//# sourceMappingURL=requestAnimationFrame.js.map
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports) {
+
+
+/* 
+is.js 1.4 ~ Copyright (c) 2012-2014 Cedrik Boudreau
+https://github.com/Cedriking/is.js
+http://isjs.quipoapps.com
+is.js may be freely distributed under the MIT Licence.
+ */
+
+
+/* Fixing ECMA262-5 array method if not supported natively ( old IE versions ) */
+
+(function() {
+  var exports;
+
+  if (!Array.prototype.forEach) {
+    Array.prototype.forEach = function(func, option) {
+      var i;
+      if (typeof func !== 'function') {
+        throw new TypeError();
+      }
+      for (i = 0; i < this.length; i++) {
+        func.call(option, this[i], i, this);
+      }
+    };
+  }
+
+  exports = this;
+
+  exports.is = (function() {
+    var av, dateP, each, extend, isClass, methods, object, proto, stringP, ua;
+    object = Object;
+    proto = object.prototype;
+    ua = (window.navigator && navigator.userAgent) || "";
+    av = (window.navigator && navigator.appVersion) || "";
+    dateP = Date.prototype;
+    stringP = String.prototype;
+    isClass = function(obj, klass) {
+      return proto.toString.call(obj) === ("[object " + klass + "]");
+    };
+    extend = function(target, source) {
+      return Array.prototype.slice.call(arguments, 1).forEach(function(source) {
+        var key;
+        for (key in source) {
+          target[key] = source[key];
+        }
+        return target;
+      });
+    };
+    each = function(elements, callback) {
+      var element, key, _i, _len;
+      if (typeof elements === 'array') {
+        for (_i = 0, _len = elements.length; _i < _len; _i++) {
+          element = elements[_i];
+          if (!callback.call(element, _i, element)) {
+            return elements;
+          }
+        }
+      } else {
+        for (key in elements) {
+          if (!callback.call(elements[key], key, elements[key])) {
+            return elements;
+          }
+        }
+      }
+      return elements;
+    };
+    methods = {};
+    each(['Object', 'Array', 'Boolean', 'Date', 'Function', 'Number', 'String', 'RegExp'], function(i, type) {
+      return methods["is" + type] = function() {
+        return isClass(this, type);
+      };
+    });
+    extend(methods, {
+      isInteger: function() {
+        return this % 1 === 0;
+      },
+      isFloat: function() {
+        return !this.isInteger();
+      },
+      isOdd: function() {
+        return !this.isEven();
+      },
+      isEven: function() {
+        return this.isMultipleOf(2);
+      },
+      isMultipleOf: function(multiple) {
+        return this % multiple === 0;
+      },
+      isNaN: function() {
+        return !this.isNumber();
+      },
+      isEmpty: function() {
+        if (this === null || typeof this !== 'object') {
+          return !(this && this.length > 0);
+        }
+        return object.keys(this).length === 0;
+      },
+      isSameType: function(obj) {
+        return proto.toString.call(this) === proto.toString.call(obj);
+      },
+      isOwnProperty: function(prop) {
+        return proto.hasOwnProperty.call(this, prop);
+      },
+      isType: function(type) {
+        return isClass(this, type);
+      },
+      isBlank: function() {
+        return this.trim().length === 0;
+      }
+    });
+
+    /* d = new Date() */
+    extend(dateP, {
+      isPast: function(d) {
+        if (d == null) {
+          d = this;
+        }
+        return this.getTime() < d.getTime();
+      },
+      isFuture: function(d) {
+        if (d == null) {
+          d = this;
+        }
+        return this.getTime() > d.getTime();
+      },
+      isWeekday: function() {
+        return this.getUTCDay() > 0 && this.getUTCDay() < 6;
+      },
+      isWeekend: function() {
+        return this.getUTCDay() === 0 || this.getUTCDay() === 6;
+      },
+      isBefore: function(d) {
+        if (d == null) {
+          d = this;
+        }
+        return this.isPast(d);
+      },
+      isAfter: function(d) {
+        if (d == null) {
+          d = this;
+        }
+        return this.isFuture(d);
+      },
+      isLeapYear: function() {
+        var year;
+        year = this.getFullYear();
+        return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+      },
+      isValid: function() {
+        return !this.getTime().isNaN();
+      }
+    });
+    extend(stringP, {
+
+      /* Added in version 1.3 */
+      isCC: function(type) {
+        var regex;
+        if (type == null) {
+          type = 'any';
+        }
+        regex = (function() {
+          switch (type) {
+            case 'any':
+              return /^[0-9]{15,16}$/;
+            case 'ae' || 'AmericanExpress':
+              return /^(34)|(37)\d{14}$/;
+            case 'Discover':
+              return /^6011\d{12}$/;
+            case 'mc' || 'MasterCard':
+              return /^5[1-5]\d{14}$/;
+            case 'Visa':
+              return /^4\d{15}$/;
+          }
+        })();
+        return regex.test(this);
+      },
+      isCreditCard: function(type) {
+        if (type == null) {
+          type = 'any';
+        }
+        return this.isCC(type);
+      },
+      isEmail: function() {
+        return /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(this);
+      },
+      isLatLng: function() {
+        return /-?\d{1,3}\.\d+/.test(this);
+      },
+      isLatLong: function() {
+        return this.isLatLng();
+      },
+      isPhone: function(country) {
+        var regex;
+        if (country == null) {
+          country = 'us';
+        }
+        regex = (function() {
+          switch (country) {
+            case 'ar':
+              return /^(?:\+|[0]{2})?(54)?(:?[\s-])*\d{4}(:?[\s-])*\d{4}$/;
+            case 'au':
+              return /^(?:\+|0)?(?:61)?\s?[2-478](?:[ -]?[0-9]){8}$/;
+            case 'ca':
+              return /^(1-?)?(([2-9]\d{2})|[2-9]\d{2})-?[2-9]\d{2}-?\d{4}$/;
+            case 'fr':
+              return /^(?:0|\(?\+33\)?\s?|0033\s?)[1-79](?:[\.\-\s]?\d\d){4}$/;
+            case 'is':
+              return /^(?:\+|[0]{2})?(354)?(:?[\s-])*\d{3}(:?[\s-])*\d{4}$/;
+            case 'uk':
+              return /^(?:\+|044)?(?:\s+)?\(?(\d{1,5}|\d{4}\s*\d{1,2})\)?\s+|-(\d{1,4}(\s+|-)?\d{1,4}|(\d{6}))\d{6}$/;
+            case 'us':
+              return /^(1-?)?(\d{3})(:?[\s\-])*(\d{3})(:?[\s\-])*(\d{4})$/;
+          }
+        })();
+        return regex.test(this);
+      },
+      isZip: function(country) {
+        var regex;
+        if (country == null) {
+          country = 'us';
+        }
+        regex = (function() {
+          switch (country) {
+            case 'ar':
+              return /^\d{4}$/;
+            case 'au':
+              return /^\d{4}$/;
+            case 'at':
+              return /^\d{4}$/;
+            case 'be':
+              return /^\d{4}$/;
+            case 'br':
+              return /^\d{5}[\-]?\d{3}$/;
+            case 'ca':
+              return /^[A-Za-z]\d[A-Za-z] \d[A-Za-z]\d$/;
+            case 'dk':
+              return /^\d{3,4}$/;
+            case 'de':
+              return /^\d{5}$/;
+            case 'es':
+              return /^((0[1-9]|5[0-2])|[1-4]\d)\d{3}$/;
+            case 'gb':
+              return /^[A-Za-z]{1,2}[0-9Rr][0-9A-Za-z]? \d[ABD-HJLNP-UW-Zabd-hjlnp-uw-z]{2}$/;
+            case 'hu':
+              return /^\d{4}$/;
+            case 'is':
+              return /^\d{3}$/;
+            case 'it':
+              return /^\d{5}$/;
+            case 'jp':
+              return /^\d{3}-\d{4}$/;
+            case 'nl':
+              return /^\d{4}$/;
+            case 'pl':
+              return /^\d{2}\-\d{3}$/;
+            case 'se':
+              return /^\d{3}\s?\d{2}$/;
+            case 'us':
+              return /^(\d{5}([\-]\d{4})?)$/;
+          }
+        })();
+        return regex.test(this);
+      }
+    });
+    extend(proto, methods);
+    return {
+      ie: function() {
+        return /msie/i.test(ua);
+      },
+      ie6: function() {
+        return /msie 6/i.test(ua);
+      },
+      ie7: function() {
+        return /msie 7/i.test(ua);
+      },
+      ie8: function() {
+        return /msie 8/i.test(ua);
+      },
+      ie9: function() {
+        return /msie 9/i.test(ua);
+      },
+      ie10: function() {
+        return /msie 10/i.test(ua);
+      },
+      ie11: function() {
+        return /Trident.*rv[ :]*11\./.test(ua);
+      },
+      firefox: function() {
+        return /firefox/i.test(ua);
+      },
+      gecko: function() {
+        return /gecko/i.test(ua);
+      },
+      opera: function() {
+        return /opera/i.test(ua);
+      },
+      safari: function() {
+        return /webkit\W(?!.*chrome).*safari\W/i.test(ua);
+      },
+      chrome: function() {
+        return /webkit\W.*(chrome|chromium)\W/i.test(ua);
+      },
+      webkit: function() {
+        return /webkit\W/i.test(ua);
+      },
+      mobile: function() {
+        return /iphone|ipod|(android.*?mobile)|blackberry|nokia/i.test(ua);
+      },
+      tablet: function() {
+        return /ipad|android(?!.*mobile)/i.test(ua);
+      },
+      desktop: function() {
+        return !this.mobile() && !this.tablet();
+      },
+      kindle: function() {
+        return /kindle|silk/i.test(ua);
+      },
+      tv: function() {
+        return /googletv|sonydtv|appletv|roku|smarttv/i.test(ua);
+      },
+      online: function() {
+        return navigator.onLine;
+      },
+      offline: function() {
+        return !this.online();
+      },
+      windows: function() {
+        return /win/i.test(av);
+      },
+      mac: function() {
+        return /mac/i.test(av);
+      },
+      unix: function() {
+        return /x11/i.test(av);
+      },
+      linux: function() {
+        return /linux/i.test(av);
+      }
+    };
+  })();
+
+}).call(this);
+
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!function(n,t){ true?!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(e){t(n.TinyAnimate=e)}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)):t("object"==typeof exports?exports:n.TinyAnimate={})}(this,function(n){n.animate=function(n,e,u,a,r,i){function o(t){if(!f){var M=(t||+new Date)-h;M>=0&&a(r(M,n,s,u)),M>=0&&M>=u?(a(e),i()):c(o)}}if("number"==typeof n&&"number"==typeof e&&"number"==typeof u&&"function"==typeof a){"string"==typeof r&&t[r]&&(r=t[r]),"function"!=typeof r&&(r=t.linear),"function"!=typeof i&&(i=function(){});var c=window.requestAnimationFrame||function(n){window.setTimeout(n,1e3/60)},f=!1,s=e-n;a(n);var h=window.performance&&window.performance.now?window.performance.now():+new Date;return c(o),{cancel:function(){f=!0}}}},n.animateCSS=function(t,e,u,a,r,i,o,c){var f=function(n){t.style[e]=n+u};return n.animate(a,r,i,f,o,c)},n.cancel=function(n){n&&n.cancel()};var t=n.easings={};t.linear=function(n,t,e,u){return e*n/u+t},t.easeInQuad=function(n,t,e,u){return e*(n/=u)*n+t},t.easeOutQuad=function(n,t,e,u){return-e*(n/=u)*(n-2)+t},t.easeInOutQuad=function(n,t,e,u){return(n/=u/2)<1?e/2*n*n+t:-e/2*(--n*(n-2)-1)+t},t.easeInCubic=function(n,t,e,u){return e*(n/=u)*n*n+t},t.easeOutCubic=function(n,t,e,u){return e*((n=n/u-1)*n*n+1)+t},t.easeInOutCubic=function(n,t,e,u){return(n/=u/2)<1?e/2*n*n*n+t:e/2*((n-=2)*n*n+2)+t},t.easeInQuart=function(n,t,e,u){return e*(n/=u)*n*n*n+t},t.easeOutQuart=function(n,t,e,u){return-e*((n=n/u-1)*n*n*n-1)+t},t.easeInOutQuart=function(n,t,e,u){return(n/=u/2)<1?e/2*n*n*n*n+t:-e/2*((n-=2)*n*n*n-2)+t},t.easeInQuint=function(n,t,e,u){return e*(n/=u)*n*n*n*n+t},t.easeOutQuint=function(n,t,e,u){return e*((n=n/u-1)*n*n*n*n+1)+t},t.easeInOutQuint=function(n,t,e,u){return(n/=u/2)<1?e/2*n*n*n*n*n+t:e/2*((n-=2)*n*n*n*n+2)+t},t.easeInSine=function(n,t,e,u){return-e*Math.cos(n/u*(Math.PI/2))+e+t},t.easeOutSine=function(n,t,e,u){return e*Math.sin(n/u*(Math.PI/2))+t},t.easeInOutSine=function(n,t,e,u){return-e/2*(Math.cos(Math.PI*n/u)-1)+t},t.easeInExpo=function(n,t,e,u){return 0==n?t:e*Math.pow(2,10*(n/u-1))+t},t.easeOutExpo=function(n,t,e,u){return n==u?t+e:e*(-Math.pow(2,-10*n/u)+1)+t},t.easeInOutExpo=function(n,t,e,u){return 0==n?t:n==u?t+e:(n/=u/2)<1?e/2*Math.pow(2,10*(n-1))+t:e/2*(-Math.pow(2,-10*--n)+2)+t},t.easeInCirc=function(n,t,e,u){return-e*(Math.sqrt(1-(n/=u)*n)-1)+t},t.easeOutCirc=function(n,t,e,u){return e*Math.sqrt(1-(n=n/u-1)*n)+t},t.easeInOutCirc=function(n,t,e,u){return(n/=u/2)<1?-e/2*(Math.sqrt(1-n*n)-1)+t:e/2*(Math.sqrt(1-(n-=2)*n)+1)+t},t.easeInElastic=function(n,t,e,u){var a=0,r=e;if(0==n)return t;if(1==(n/=u))return t+e;if(a||(a=.3*u),r<Math.abs(e)){r=e;var i=a/4}else var i=a/(2*Math.PI)*Math.asin(e/r);return-(r*Math.pow(2,10*(n-=1))*Math.sin((n*u-i)*(2*Math.PI)/a))+t},t.easeOutElastic=function(n,t,e,u){var a=0,r=e;if(0==n)return t;if(1==(n/=u))return t+e;if(a||(a=.3*u),r<Math.abs(e)){r=e;var i=a/4}else var i=a/(2*Math.PI)*Math.asin(e/r);return r*Math.pow(2,-10*n)*Math.sin((n*u-i)*(2*Math.PI)/a)+e+t},t.easeInOutElastic=function(n,t,e,u){var a=0,r=e;if(0==n)return t;if(2==(n/=u/2))return t+e;if(a||(a=u*(.3*1.5)),r<Math.abs(e)){r=e;var i=a/4}else var i=a/(2*Math.PI)*Math.asin(e/r);return 1>n?-.5*(r*Math.pow(2,10*(n-=1))*Math.sin((n*u-i)*(2*Math.PI)/a))+t:r*Math.pow(2,-10*(n-=1))*Math.sin((n*u-i)*(2*Math.PI)/a)*.5+e+t},t.easeInBack=function(n,t,e,u,a){return void 0==a&&(a=1.70158),e*(n/=u)*n*((a+1)*n-a)+t},t.easeOutBack=function(n,t,e,u,a){return void 0==a&&(a=1.70158),e*((n=n/u-1)*n*((a+1)*n+a)+1)+t},t.easeInOutBack=function(n,t,e,u,a){return void 0==a&&(a=1.70158),(n/=u/2)<1?e/2*(n*n*(((a*=1.525)+1)*n-a))+t:e/2*((n-=2)*n*(((a*=1.525)+1)*n+a)+2)+t},t.easeInBounce=function(n,e,u,a){return u-t.easeOutBounce(a-n,0,u,a)+e},t.easeOutBounce=function(n,t,e,u){return(n/=u)<1/2.75?e*(7.5625*n*n)+t:2/2.75>n?e*(7.5625*(n-=1.5/2.75)*n+.75)+t:2.5/2.75>n?e*(7.5625*(n-=2.25/2.75)*n+.9375)+t:e*(7.5625*(n-=2.625/2.75)*n+.984375)+t},t.easeInOutBounce=function(n,e,u,a){return a/2>n?.5*t.easeInBounce(2*n,0,u,a)+e:.5*t.easeOutBounce(2*n-a,0,u,a)+.5*u+e}});
+//# sourceMappingURL=TinyAnimate.js.map
 
 /***/ }),
 /* 15 */
@@ -4687,108 +5188,7 @@ module.exports = {
 /* 26 */
 /***/ (function(module, exports) {
 
-(function(){
-		var cadenamd5;
-		var h={};
-		var contdivs;
-		var bitvisible;
-		h=[
-			{'nombre':'arturo'},
-			{'nombre':'pedro'},
-			{'nombre':'antonio'},
-			{'nombre':'oscar'},
-			{'nombre':'nepo'},
-			];
-		/*
-		 * slideshow carousel.js
-		 * */
-		nav=g.browser();
-		g.log("**********NAV**************");
-		g.log(nav);
-		g.log("**********NAV**************");
-		cadenamd5=g.md5.calc("Arat5uro");
-		g.log("MD5***************" + cadenamd5);
-		contdivs=0;
-		bitvisible=0;
-		//INIT SLIDESHOW////////////////////////
-		//#slideshow se puede sustituir por el id que el programador escriba
-		//y quedaria tal que #nombre o .nombre + div por ejemplo
-		g.dom("#carouselslide").getslides({
-			    // id of the carousel container is obtained from the other parameter
-			    autoplay: true,       // starts the rotation automatically
-			    infinite: true,       // enables infinite mode
-			    interval: 5000,       // interval between slide changes
-			    initial: 0,           // slide to start with
-			    dots: false,          // show navigation dots
-			    arrows: false,        // show navigation arrows
-			    buttons: false,       // hide <play>/<stop> buttons,
-			    btnStopText: 'Pause'  // <stop> button text
-		});
-		///////////////////////////////////////
-		g.dom("#btnmover").click(function(){
-			g.dom("#div_A").animate(function(){
-				g.log("listo el posho");
-			}).x(150,{
-				delay:1000
-			});
-		});
-		///////////////////////////////////////
-		g.log("Son " + contdivs + " Slides");
-		g.log("CLAVE MD5: " + cadenamd5);
-		g.log("Path JS Version: " + g.path.getVersion());
-		g.dom("#cargadiv").addAttribute("gn-repeat");
-		g.dom("div").addAttribute("gn-repeat","none");
-		g.dom("#cargadiv").load("README.md",function(){
-			g.log("Módulo cargado.");
-		});
-		g.path.listen();
-		g.dom("#holap").cursor('pointer');
-		g.dom("#holap").fadeIn(5000);
-		g.dom("#holap").click(function(){
-			g.dom("#holap").smooth("#adiosp",{
-				duration:'10000',
-				offset: 0,
-				callback: function(){
-					g.log("Scroll finalizado");
-				}
-			});
-		});
-		g.dom("#adiosp").click(function(){
-			g.dom("#holap").smooth("#adiosp",{
-				duration:'10000',
-				offset: 0,
-				callback: function(){
-					g.log("Scroll finalizado");
-				}
-			});
-		});
-		g.dom("#btnfile").click(function(){
-			var archivo;
-			//holaf=id del control file
-			//function(data)=callback con return de la data obtenida
-			g.upload("#holaf",function(data){
-				//tratar variable para convertir string en JSON
-				//Imprimir variable///////////////////////////////
-				g.log("*******************data.file*******************");
-				g.log(data);
-				g.log(data.file);
-				g.log(data.status);
-				g.log("*******************data.file*******************");
-				//////////////////////////////////////////////////
-			});
-		});
-		g.post(
-			{
-				varu:"arturo",
-				vard:"vasquez"
-			},
-			"socket.php",
-			function(data){
-				g.log("data devuelta: ");
-				g.log(data);
-			}
-		);
-	}());
+
 
 /***/ })
 /******/ ]);

@@ -14,9 +14,11 @@
   Garantías implícitas, incluyendo, sin limitación, los implicados
   GARANTÍAS DE COMERCIALIZACIÓN Y APTITUD PARA UN PROPÓSITO PARTICULAR.
 */
-var carousel=require("./jscarousel.js");
+require("./requestAnimationFrame.js");
+var is=require("./is.js");
+var TinyAnimate=require("./TinyAnimate.js");
 var move=require("move-js");
-var watchjs = require("./watch.js")
+var watchjs = require("./watch.js");
 var watch = watchjs.watch;
 var unwatch = watchjs.unwatch;
 var callWatchers = watchjs.callWatchers;
@@ -34,6 +36,10 @@ g=(function(){
 	  if (t < 1) return c / 2 * t * t + b;
 	  t--;
 	  return -c / 2 * (t * (t - 2) - 1) + b;
+	};
+	function wrap(el, wrapper) {
+	    el.parentNode.insertBefore(wrapper, el);
+	    wrapper.appendChild(el);
 	};
 	function getScreenCordinates(obj) {
         var p = {};
@@ -118,10 +124,12 @@ g=(function(){
 			return -1;
 		}
 	};
-	function valobj(){
+	function valobj(objval){
         var valor;
         var obj;
-        obj=getdisctId(domel);
+        var args;
+        var tovalue;
+        obj=getdisctId(objval);
         if(obj.type!='select-one' && obj.type!="file"){
 			valor=obj.value;
         }
@@ -135,14 +143,57 @@ g=(function(){
         }
         return valor;
    };
+   function setval(objval,value){
+        var valor;
+        var obj;
+        var args;
+        var tovalue;
+        obj=getdisctId(objval);
+        if(obj.type!='select-one' && obj.type!="file"){
+			obj.value=value;
+        }
+        return 0;
+   };
     function version(){
     	return "1.0.0";
     };
+	function intfadeIn(elem,tiempo){
+			var op = 0.1;  // initial opacity
+		    var intervalo=tiempo/80;
+		    var element;
+		    element=elem;
+		    glog("element");
+		    glog(element);
+		    element.style.display = 'block';
+		    var timer = setInterval(function(){
+	        if (op >= 1){
+	            clearInterval(timer);
+	        }
+	        element.style.opacity = op;
+	        element.style.filter = 'alpha(opacity=' + op * 100 + ")";
+		        op += op * 0.1;
+		    }, intervalo);
+	  };
+	  function intfadeOut(elem,tiempo){
+	    var op = 1;  // initial opacity
+		var intervalo=tiempo/80;
+		var element;
+		element=elem;
+		var timer = setInterval(function(){
+	    if (op <= 0.1){
+	        clearInterval(timer);
+	        element.style.display = 'none';
+	    }
+	    element.style.opacity = op;
+	    element.style.filter = 'alpha(opacity=' + op * 100 + ")";
+	        op -= op * 0.1;
+	    }, intervalo);
+	 };
 	return{
 		//Describir funciones públicas
 		getdisctId: function(id){
 			var cadena;
-			if(typeof id==='string'){
+			if(is.string(id)){
 				cadena=id;
 		      	if(cadena.search("#")==0){
 		        	objeto=document.querySelector(id);
@@ -190,21 +241,55 @@ g=(function(){
 		log: function(msg){
 			console.log(msg);
 	    },
+	    map: function(array,callbackmap){
+	    	var val,index;
+			if(array.isArray()){
+				array.map(callbackmap);
+			}
+	    },
+	    slice: function(array,start,end,callbackslc){
+			if(array.isArray()){
+				callbackslc(array.slice(start, end));
+			}
+	    },
+	    encb64: function(string){
+			return atob(string)
+	    },
+	    decb64: function(string){
+			return btoa(string);
+	    },
+		docready: function(fn){
+		  if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading"){
+		    fn();
+		  }
+		  else{
+		    document.addEventListener('DOMContentLoaded', fn);
+		  }
+		},
 		each:function(objeto,callbackeach){
 	      	var initial_array;
 	      	var x,y,valor,indice;
-	        if(objeto.length!=undefined){
+	        if(is.isObject(objeto)){
 	        	objeto.forEach(callbackeach);
-	        }
-	        else if(typeof objeto==='object'){
-	        	for(prop in objeto){
-	        		callbackeach(prop,objeto);
-	        	}
 	        }
 	        else{
 	        	glog("Is not an array!");
 	        }
-	      },
+		},
+		extend:function(out){
+			out = out || {};
+			for (var i = 1; i < arguments.length; i++) {
+				if (!arguments[i]){
+					continue;
+				}
+				for (var key in arguments[i]) {
+					if (arguments[i].hasOwnProperty(key)){
+						out[key] = arguments[i][key];
+					}
+				}
+			}
+			return out;
+		},
 	    preventDefault: function(e){
 			if(e.preventDefault){
 				e.preventDefault();
@@ -430,6 +515,14 @@ g=(function(){
 			sock=g.getxhr();
 			return sock;
 	    },
+		  parseHTML:function(str){
+			  var tmp = document.implementation.createHTMLDocument();
+			  tmp.body.innerHTML = str;
+			  return tmp.body.children;
+		  },
+		  parseJSON:function(json){
+			  return JSON.parse(json);
+		  },
 		dom: function(domel){
 				return{
 					hide: function(){
@@ -441,23 +534,23 @@ g=(function(){
 						fila.style.display="none";
 					},
 					show:function(){
-						var fila;
+						var domelement;
 						if(!document.getElementById){
 							return false;
 						}
-			          	fila=getdisctId(domel);
-						fila.style.display="block"; 
+			          	domelement=getdisctId(domel);
+						domelement.style.display="block"; 
 					},
 				      css:function(estilo){
-				        var fila;
+				        var domelement;
 				          if(!document.getElementById){
 				              return false;
 				          }
 				          if(estilo==''){
 				              return false;
 				          }
-				          fila=getdisctId(domel);
-				          fila.style=estilo;
+				          domelement=getdisctId(domel);
+				          domelement.style=estilo;
 				      },
 				      find:function(selector,callbackfind){
 						// Final found elements
@@ -480,15 +573,189 @@ g=(function(){
 				      },
 				      each:function(callbackeach){
 				      	var objeto;
-				      	var initial_array;
 				      	var x,y,valor,indice;
-				      	objeto=g.getelTag(domel);
-				        if(objeto[0].id!=undefined){
+				      	objeto=getelTag(domel);
+				        if(is.isObject(objeto)){
 				        	objeto.forEach(callbackeach);
 				        }
 				        else{
-				        	glog("Is not an Object!");
+				        	glog("Is not an object!");
 				        }
+				      },
+				      empty:function(){
+				      	var objeto;
+				      	objeto=getdisctId(domel);
+				        objeto.innerHTML='';
+				      },
+				      wrap:function(){
+				      	var objeto;
+				      	objeto=getdisctId(domel);
+						wrap(objeto, document.createElement('div'));
+				      },
+				      html:function(){
+				      	var objeto;
+				      	objeto=getdisctId(domel);
+				      	const args = Array.from(arguments);
+				      	if(args[0]!=undefined){
+				      		string=args[0];
+				      		objeto.innerHTML = string;
+				      	}
+				      	else{
+				      		return objeto.innerHTML;
+				      	}
+				      },
+				      text:function(){
+				      	var objeto;
+				      	objeto=getdisctId(domel);
+				      	const args = Array.from(arguments);
+				      	if(args[0]!=undefined){
+				      		string=args[0];
+				      		objeto.textContent = string;
+				      	}
+				      	else{
+				      		return objeto.textContent;
+				      	}
+				      },
+				      hasClass:function(classElem){
+				      	var objeto;
+				      	objeto=getdisctId(domel);
+				      	if(objeto.classList.contains(classElem)){
+				      		return;
+				      	}
+				      	else{
+				        	return -1;
+				      	}
+				      },
+				      prev:function(){
+				      	var objeto;
+				      	var nextsib;
+				      	objeto=getdisctId(domel);
+				      	prevsib=objeto.previousElementSibling;
+				      },
+				      next:function(){
+				      	var objeto;
+				      	var nextsib;
+				      	objeto=getdisctId(domel);
+				      	nextsib=objeto.nextElementSibling;
+				      },
+				      remove:function(){
+				      	var objeto;
+				      	objeto=getdisctId(domel);
+				      	objeto.parentNode.removeChild(objeto);
+				      },
+				      replaceWith:function(string){
+				      	var objeto;
+				      	objeto=getdisctId(domel);
+				      	objeto.outerHTML = string;
+				      },
+				      matches:function(selector){
+				      	var objeto;
+				      	objeto=getdisctId(domel);
+				      	if(objeto.matches(selector)){
+				      		return;
+				      	}
+				      	else{
+				      		return -1;
+				      	}
+				      },
+				      siblings:function(){
+				      	var objeto;
+				      	objeto=getdisctId(domel);
+				      	Array.prototype.filter.call(objeto.parentNode.children, function(child){
+						  return child !== objeto;
+						});
+				      },
+				      offset:function(){
+				      	var objeto;
+				      	var par;
+				      	var rect;
+				      	var result;
+				      	objeto=getdisctId(domel);
+				      	rect = objeto.getBoundingClientRect();
+						result={
+						  top: rect.top + document.body.scrollTop,
+						  left: rect.left + document.body.scrollLeft
+						}
+						return{
+							
+						}
+				      },
+				      offsetParent:function(){
+				      	var objeto;
+				      	var par;
+				      	var rect;
+				      	var result;
+				      	objeto=getdisctId(domel);
+				      	result=objeto.offsetParent || objeto;
+						return{
+							
+						}
+				      },
+				      parent:function(){
+				      	var objeto;
+				      	objeto=getdisctId(domel);
+						return objeto.parentNode; 
+				      },
+				      position:function(){
+				      	var objeto;
+				      	var result;
+				      	objeto=getdisctId(domel);
+				      	result={left: objeto.offsetLeft, top: objeto.offsetTop};
+						return result; 
+				      },
+				      outerHeight:function(){
+				      	var objeto;
+				      	var result;
+				      	var objeto=getdisctId(domel);
+					    var height=objeto.offsetHeight;
+					    var style=getComputedStyle(objeto);
+				      	const args = Array.from(arguments);
+				      	if(args[0]!=undefined){
+				      		if(args[0]==true){
+							  height+=parseInt(style.marginTop) + parseInt(style.marginBottom);
+							  return height;
+				      		}
+				      		else{
+				      			return objeto.offsetHeight;
+				      		}
+				      	}
+				      	else{
+				      		return objeto.offsetHeight;
+				      	}
+						return{
+							
+						}
+				      },
+					  outerWidth:function(){
+				      	var objeto;
+				      	var result;
+				      	var objeto=getdisctId(domel);
+					    var height=objeto.offsetWidth;
+					    var style=getComputedStyle(objeto);
+				      	const args = Array.from(arguments);
+				      	if(args[0]!=undefined){
+				      		if(args[0]==true){
+							  width += parseInt(style.marginLeft) + parseInt(style.marginRight);
+							  return width;
+				      		}
+				      		else{
+				      			return objeto.offsetWidth;
+				      		}
+				      	}
+				      	else{
+				      		return objeto.offsetHeight;
+				      	}
+						return{
+							
+						}
+				      },
+				      tanimate: function(from, to, duration, update, easing, done){
+				      	var objeto=getdisctId(domel);
+				      	TinyAnimate.animate(from, to, duration, update, easing, done);
+				      },
+				      tanimatecss: function(property, unit, from, to, duration, easing, done){
+				      	var objeto=getdisctId(domel);
+				      	TinyAnimate.animateCSS(objeto, property, unit, from, to, duration, easing, done);
 				      },
 				      animate: function(callbackanim){
 						return {
@@ -578,26 +845,113 @@ g=(function(){
 							}
 						}
 					  },
-					  getslides:function(options){
+					  cycle:function(options){
 					  	var crusel;
 					  	var optfinal;
-				      	//write code below...
-				      	//Initialize carousel
-				      	//pass elem as id
-				      	optfinal={
-						    elem: getnameid(domel),    // id of the carousel container
-						    autoplay: options.autoplay,     // starts the rotation automatically
-						    infinite: options.infinite,      // enables the infinite mode
-						    interval: options.interval,      // interval between slide changes
-						    initial: options.initial,          // slide to start with
-						    dots: options.dots,          // show navigation dots
-						    arrows: options.arrows,        // show navigation arrows
-						    buttons: options.buttons,      // hide play/stop buttons,
-						    btnStopText: options.btnStopText // STOP button text
-				      	}
-				      	//return object
-						carousel.run(optfinal);
+					  	var findelem;
+					  	var numelems=0;
+					  	var elemindex=0;
+					  	var domelems;
+					  	var bitvisible=0;
+					  	if(!options){
+					  		glog("Faltan argumentos, no se puede iniciar cycle");
+					  	}
+					  	else{
+					  		if(!options.search){
+					  			glog("Faltan argumento 'Find', no se puede iniciar cycle");
+					  		}
+					  		else{
+						      	optfinal={
+								    elem: getnameid(domel),    // id of the carousel container
+								    fx: options.fx,                  // starts the rotation automatically
+								    search: options.search,      // enables the infinite mode
+								    infinite: options.infinite || false,      // enables the infinite mode
+								    interval: options.interval || 1000,      // interval between slide changes
+						      	}
+						      	glog("-- INIT --");
+						      	findelem=domel + " > " + optfinal.search;
+						      	glog("ELEMENTS INSIDE");
+						      	children=g.dom(domel).children();
+						      	numelems=children.length;
+						      	glog("children**********************");
+						      	for(i=0;i<numelems;i++){
+						      		if(i>0){
+						      			glog("hijo " + i);
+										children[i].style.display="none";
+										children[i].style.position="absolute";
+										children[i].style.left="0";
+										children[i].style.top="0";
+						      		}
+						      	}
+						      	glog("---ELEMENTS INSIDE");
+						      	glog("---ELEMENTS INSIDE NUM " + numelems);
+						      	if(numelems>1){
+						      		domelems=getelTag(findelem);
+						      		glog(domelems);
+						      		domcycle=setInterval(fadingfunc,optfinal.interval);
+						      		function fadingfunc(){
+						      			intfadeOut(children[elemindex],optfinal.interval);
+						      			if(elemindex==(numelems-1)){
+						      				elemindex=0;
+						      			}
+						      			else{
+						      				elemindex++;
+						      			}
+						      			intfadeIn(children[elemindex],optfinal.interval);
+						      									      			glog("SLIDES");
+						      			glog("**************************");
+						      			glog("children " + elemindex);
+						      			glog(children[elemindex]);
+						      			glog(children);
+						      			glog("**************************");
+						      		}
+						      	}
+						      	else{
+						      		glog("Número de slides insuficiente para crear slider.");
+						      		glog("ABORTING...");
+						      	}
+						      	glog("---ELEMENTS INSIDE");
+					  		}
+					  	}
 						return;
+				      },
+				      after:function(htmlstr){
+				      	//write code below...
+				      	var obj;
+				      	obj=getdisctId(domel);
+						obj.insertAdjacentHTML('afterend', htmlstr);
+				      },
+				      before:function(htmlstr){
+				      	//write code below...
+				      	var obj;
+				      	obj=getdisctId(domel);
+						obj.insertAdjacentHTML('beforebegin', htmlstr);
+				      },
+				      append:function(elem){
+				      	//write code below...
+				      	var obj;
+				      	obj=getdisctId(domel);
+						parent.insertBefore(elem, obj.firstChild);
+				      },
+				      prepend:function(html){
+				      	//write code below...
+				      	var obj;
+				      	obj=getdisctId(domel);
+						obj.insertAdjacentHTML('afterend', html);
+				      },
+				      clone:function(){
+				      	//write code below...
+				      	var obj;
+				      	obj=getdisctId(domel);
+				      	obj.cloneNode(true);
+				      },
+				      children:function(){
+				      	//write code below...
+				      	var obj;
+				      	var childf;
+				      	obj=getdisctId(domel);
+						childf=obj.children;
+						return childf; 
 				      },
 				      addClass:function(classele){
 				      	//write code below...
@@ -611,27 +965,24 @@ g=(function(){
 				      	obj=getdisctId(domel);
 				      	obj.classList.remove(classele);
 				      },
-				      addAttribute:function(attr,value){
+				      addAttrb:function(attr,value){
 				      	//write code below...
 				      	var obj;
 				      	var type;
 				      	var i;
 				      	type=getobjtype(domel);
-				      	glog("type " + type);
 				      	switch(type){
 				      		case 'element':
 				      			obj=getelTag(domel);
-				      			glog("CONTENEDORES");
-				      			glog(obj);
-				      			glog("NODELIST " + obj.NodeList.length);
-				      			for(i=0;i<obj.NodeList.length;i++){
-				      				obj.NodeList[i].setAttribute(attr,value);
+				      			for(i=0;i<obj.length;i++){
+				      				obj[i].setAttribute(attr,value);
 				      			}
-				      			break;				      		
+				      			break;
 				      		case 'class':
 				      			obj=getelTag(domel);
-				      			glog("CONTENEDORES");
-				      			glog(obj);
+				      			for(i=0;i<obj.length;i++){
+				      				obj[i].setAttribute(attr,value);
+				      			}
 				      			break;
 				      		case 'id':
 								obj=getdisctId(domel);
@@ -639,14 +990,60 @@ g=(function(){
 								break;
 				      	}
 				      },
-				      getAttribute:function(attr){
-				      	//write code below...
+				      getAttrb:function(attr){
+						//write code below...
 				      	var obj;
-
+				      	var type;
+				      	var i;
+				      	var result;
+				      	result=Array;
+				      	type=getobjtype(domel);
+				      	switch(type){
+				      		case 'element':
+				      			obj=getelTag(domel);
+				      			for(i=0;i<obj.length;i++){
+				      				result[i]=obj[i].getAttribute(attr);
+				      			}
+				      			return result; 
+				      			break;
+				      		case 'class':
+				      			obj=getelTag(domel);
+				      			for(i=0;i<obj.length;i++){
+				      				result[i]=obj[i].getAttribute(attr);
+				      			}
+				      			return result;
+				      			break;
+				      		case 'id':
+								obj=getdisctId(domel);
+								result[i]=obj.getAttribute(attr);
+								return result;
+								break;
+				      	}
 				      },
-				      removeAttribute:function(attr){
+				      rmAttrb:function(attr){
 				      	//write code below...
 				      	var obj;
+				      	var type;
+				      	var i;
+				      	type=getobjtype(domel);
+				      	switch(type){
+				      		case 'element':
+				      			obj=getelTag(domel);
+				      			for(i=0;i<obj.length;i++){
+				      				obj[i].removeAttribute(attr);
+				      			}
+				      			break;
+				      		case 'class':
+				      			obj=getelTag(domel);
+				      			for(i=0;i<obj.length;i++){
+				      				obj[i].removeAttribute(attr);
+				      			}
+				      			break;
+				      		case 'id':
+								obj=getdisctId(domel);
+								obj.removeAttribute(attr);
+								break;
+				      	}
 				      },
 					  toggleClass:function(classele){
 				      	//write code below...
@@ -707,20 +1104,28 @@ g=(function(){
 				        },
 			            val: function(){
 			                var valor;
-			                valor=valobj(obj);
-			                return valor;
+			                var args;
+			                args=arguments;
+							glog(domel);
+			                if(args[0]==undefined){
+				                valor=valobj(domel);
+				                return valor;
+			                }
+			                else{
+			                	setval(domel,args[0]);
+			                }
 			            },
 			            version: function(){
 			                glog(version());
 			            },
 				        intval: function(){
 							var number;
-							valor=valobj(obj);
+							valor=valobj(domel);
 							return parseInt(valor);
 				        },
 				        floatval: function(){
 				        	var number;
-							valor=valobj(obj);
+							valor=valobj(domel);
 							return parseFloat(valor);
 				        },
 						fadeIn:function(tiempo){
@@ -820,90 +1225,174 @@ g=(function(){
 				        	callbackfunc();
 				        }
 			      	},
-				        click:function(callbackfunc){
-				        	var control;
-				        	control=getdisctId(domel);
-					        control.onclick=function(){
-					        	callbackfunc();
-					        }
-				      	},
-				      	change:function(callbackfunc){
-					        var control;
-				        	control=getdisctId(domel);
-					        control.onchange=function(){
-					        	callbackfunc();
-					        }
-				      	},
-				      	blur:function(callbackfunc){
-					        var control;
-				        	control=getdisctId(domel);
-					        control.onblur=function(){
-					        	callbackfunc();
-					        }
-				      	},
-				        on:function(){
-							var control;
-							var idcontrol;
-							var event;
-							var callback;
-							idcontrol=domel;
-							event=arguments[1];
-							callback=arguments[2];;
-							control=getdisctId(idcontrol);
-							glog(control);
-				        	switch(event){
-				        		case 'error':
-									control.onerror=function(){
-							        	callback();
-							        }
-				        			break;
-				        		case 'load':
-									control.onload=function(){
-							        	callback();
-							        }
-				        			break;
-				        		case 'submit':
-									control.onsubmit=function(){
-							        	callback();
-							        }
-				        			break;
-				        		case 'click':
-									control.onclick=function(){
-							        	callback();
-							        }
-				        			break;
-				        		case 'blur':
-									control.onblur=function(){
-							        	callback();
-							        }
-				        			break;
-				        		case 'change':
-									control.onchange=function(){
-							        	callback();
-							        }
-							        break;
-								case 'resize':
-									control.onresize=function(){
-							        	callback();
-							        }
-				        			break;
-								case 'unload':
-									control.onunload=function(){
-							        	callback();
-							        }
-				        			break;
-								case 'pageshow':
-									control.onpageshow=function(){
-							        	callback();
-							        }
-				        			break;
-								case 'popstate':
-									control.onpopstate=function(){
-							        	callback();
-							        }
-				        			break;
-				        	}
-				    },
+			        click:function(callbackfunc){
+			        	var control;
+			        	control=getdisctId(domel);
+				        control.onclick=function(){
+				        	callbackfunc();
+				        }
+			      	},
+			      	change:function(callbackfunc){
+				        var control;
+			        	control=getdisctId(domel);
+				        control.onchange=function(){
+				        	callbackfunc();
+				        }
+			      	},
+			      	blur:function(callbackfunc){
+				        var control;
+			        	control=getdisctId(domel);
+				        control.onblur=function(){
+				        	callbackfunc();
+				        }
+			      	},
+			      	bind:function(e){
+						var control;
+						var idcontrol;
+						var event;
+						var callback;
+						idcontrol=domel;
+						event=arguments[0];
+						callback=arguments[1];;
+						control=getdisctId(idcontrol);
+						glog(control);
+			        	switch(event){
+			        		case 'error':
+			        			control.addEventListener('error',callback);
+			        			break;
+			        		case 'load':
+								control.addEventListener('load',callback);
+			        			break;
+			        		case 'submit':
+								control.addEventListener('submit',callback);
+			        			break;
+			        		case 'click':
+								control.addEventListener('click',callback);
+			        			break;
+			        		case 'dblclick':
+								control.addEventListener('dblclick',callback);
+			        			break;
+							case 'mouseup':
+								control.addEventListener('mouseup',callback);
+			        			break;
+			        		case 'mousedown':
+								control.addEventListener('mousedown',callback);
+			        			break;
+			        		case 'mouseenter':
+								control.addEventListener('mouseenter',callback);
+			        			break;
+			        		case 'mouseleave':
+								control.addEventListener('mouseleave',callback);
+			        			break;
+			        		case 'mousemove':
+								control.addEventListener('mousemove',callback);
+			        			break;
+			        		case 'mouseover':
+								control.addEventListener('mouseover',callback);
+			        			break;
+			        		case 'mouseout':
+								control.addEventListener('mouseout',callback);
+			        			break;
+			        		case 'blur':
+								control.addEventListener('blur',callback);
+			        			break;
+			        		case 'change':
+								control.addEventListener('change',callback);
+						        break;
+							case 'resize':
+								control.addEventListener('resize',callback);
+			        			break;
+							case 'unload':
+								control.addEventListener('unload',callback);
+			        			break;
+							case 'pageshow':
+								control.addEventListener('pageshow',callback);
+			        			break;
+							case 'popstate':
+								control.addEventListener('popstate',callback);
+			        			break;
+			        		case 'keyup':
+								control.addEventListener('keyup',callback);
+			        			break;
+			        		case 'keydown':
+								control.addEventListener('keyup',callback);
+			        			break;
+			        		case 'keypress':
+								control.addEventListener('keypress',callback);
+			        			break;
+			        	}
+			      	},
+			        on:function(e){
+						var event;
+						var callback;
+						event=arguments[0];
+						callback=arguments[1];;
+			        	switch(event){
+			        		case 'error':
+			        			g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'load':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'submit':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'click':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'dblclick':
+								g.dom(domel).bind(event,callback);
+			        			break;
+							case 'mouseup':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'mousedown':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'mouseenter':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'mouseleave':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'mousemove':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'mouseover':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'mouseout':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'blur':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'change':
+								g.dom(domel).bind(event,callback);
+						        break;
+							case 'resize':
+								g.dom(domel).bind(event,callback);
+			        			break;
+							case 'unload':
+								g.dom(domel).bind(event,callback);
+			        			break;
+							case 'pageshow':
+								g.dom(domel).bind(event,callback);
+			        			break;
+							case 'popstate':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'keyup':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'keydown':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        		case 'keypress':
+								g.dom(domel).bind(event,callback);
+			        			break;
+			        	}
+			    	},
 					load:function(modulourl){
 				        var xmlhttp=false;
 				        var filecont;
@@ -951,36 +1440,57 @@ g=(function(){
              * Se encarga de registrar eventos
              *
              * */
+            inArray: function(item, elem){
+	          return elem.indexOf(item);
+	        },
+	        indexOf: function(item, elem){
+	          return elem.indexOf(item);
+	        },
 	        getKey: function(e){
-	          if(window.event)keyCode=window.event.keyCode;
-	          else if(e) keyCode=e.which;
-	          return keyCode;
+				var KeyCode;
+				if(e){
+					if(e.keyCode>0){
+						KeyCode=e.keyCode;
+					}
+					else{
+						KeyCode=e.charCode;	
+					}
+				}
+				return KeyCode;
 	        },
 	        blockNumber: function(e){
 	          //bloquear teclado a solo numeros
-	          teclap=g.objeto.getTecla(e);
-	          teclan=chr(teclap);
+	          teclap=g.getKey(e);
+	          teclan=String.fromCharCode(teclap);
 	          if(IsNumeric(teclan)==false){
 	            return "Solo está peritido escribir numeros";
 	          }
 	        },
+	        getChar: function(event){
+	        	var cadena;
+				//bloquear teclado a solo numeros
+				teclan=g.getKey(event);
+				cadena=String.fromCharCode(teclan);
+				glog("TECLA " + cadena);
+				return String.fromCharCode(teclan); 
+	        },
 	        blockChar: function(e){
 	          //bloquear teclado a solo letras
-	          teclap=g.objeto.getTecla(e);
-	          teclan=chr(teclap);
+	          teclap=g.getKey(e);
+	          teclan=String.fromCharCode(teclap);
 	          if(IsNumeric(teclan)==true){
 	            return "Solo está peritido escribir letras";
 	          }
 	        },
 	        bloqNum: function(e){
-	          teclap=g.objeto.getTecla(e);
-	          teclan=chr(teclap);
+	          teclap=g.getKey(e);
+	          teclan=String.fromCharCode(teclap);
 	          if(IsNumeric(teclan)==false){
 	            return "Solo esta permitido escribir numeros";
 	          }
 	        },
 			getTrim: function(cadena){
-			    return cadena.replace(/^\s+/g,'').replace(/\s+$/g,'');
+			    return cadena.trim();
 			},
 			setLocal: function(varname,valor){
 			    //localstorage programming
@@ -994,27 +1504,19 @@ g=(function(){
 			        localStorage.getItem(varname); 
 			    }
 			},
+			type: function(objname){
+				var obj;
+			    obj=getdisctId(objname);
+			    return Object.prototype.toString.call(obj).replace(/^\[object (.+)\]$/, '$1').toLowerCase();
+			},
 			/**
 			 * Ajax Clase
 			 * Funciones XHR para trabajar con AJAX
 			 * */
-	        getxhr:function(){
-	        var xmlhttp=false;
-	        try{
-	          xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
-	        }
-	        catch (e){
-	            try{
-	              xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-	            }
-	            catch (E){
-	              xmlhttp = false;
-	            }
-	         }
-	        if (!xmlhttp && typeof XMLHttpRequest!='undefined'){
-	          xmlhttp = new XMLHttpRequest();
-	        }
-	        return xmlhttp;
+		  getxhr:function(){
+		  	var xhr;
+			xhr=window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+			return xhr;
 	      },
 	      upload: function(fileid,callbackup){
 	      	var filectrl;
@@ -1093,6 +1595,8 @@ g=(function(){
 	      	else{
 	      		// Obtener objeto AJAX;
 	      		sock=g.getxhr();
+	      		sock.addEventListener("load", transferComplete);
+				sock.addEventListener("error", transferFailed);
 	      		// Obtener objeto de variables;
 	      		variablesaux=JSON.stringify(arrayvar[0]);
 	      		variablesobj=JSON.parse(variablesaux);
@@ -1115,22 +1619,27 @@ g=(function(){
 	      		////////////////////////////////////////////////////
 	      		// EJECUTAR FUNCION Y CALLBACK//////////////////////
 		        sock.open(ajxProtocol,dirsocket,true);
-				sock.onreadystatechange=function(){
-					if(sock.readyState==4 && sock.status==200){
-		                data=sock.responseText;
-		                g.log("STATUS: " + sock.readyState + " " + sock.status + " " + sock.statusText);
-		                if(callback!=undefined){
-		                	if(typeof callback==="function"){
-								callback(data);
-							}
-							else{
-								g.log("El parámetro Callback no es función o no existe!");
-							}
-		                }
-		                else{
-							g.log("El parámetro Callback no existe!");
+				function transferComplete(event){
+					glog("event***********************");
+					glog(event);
+					glog("event***********************");
+	                data=event.target.responseText;
+	                g.log("STATUS: " + event.target.readyState + " " + event.target.status + " " + event.target.statusText);
+	                if(callback!=undefined){
+	                	if(typeof callback==="function"){
+							callback(data);
 						}
-				 	}
+						else{
+							g.log("El parámetro Callback no es función o no existe!");
+						}
+	                }
+	                else{
+						g.log("El parámetro Callback no existe!");
+					}
+				}
+				
+				function transferFailed(event){
+					glog(event.target.error);
 				}
 	      		sock.setRequestHeader("Content-Type",headers);
 				sock.send(JSON.stringify(variablesobj));
@@ -1169,6 +1678,8 @@ g=(function(){
 	      	else{
 	      		// Obtener objeto AJAX;
 	      		sock=g.getxhr();
+	      		sock.addEventListener("load", transferComplete);
+				sock.addEventListener("error", transferFailed);
 	      		// Obtener string de protocolo
 	      		ajxProtocol="GET";
 	      		// Obtener string de dir archivo socket
@@ -1185,22 +1696,27 @@ g=(function(){
 	      		////////////////////////////////////////////////////
 	      		// EJECUTAR FUNCION Y CALLBACK//////////////////////
 		        sock.open(ajxProtocol,dirsocket,true);
-				sock.onreadystatechange=function(){
-					if(sock.readyState==4 && sock.status==200){
-		                data=sock.responseText;
-		                g.log("STATUS: " + sock.readyState + " " + sock.status + " " + sock.statusText);
-		                if(callback!=undefined){
-		                	if(typeof callback==="function"){
-								callback(data);
-							}
-							else{
-								g.log("El parámetro Callback no es función o no existe!");
-							}
-		                }
-		                else{
-							g.log("El parámetro Callback no existe!");
+		        function transferComplete(event){
+					glog("event***********************");
+					glog(event);
+					glog("event***********************");
+	                data=event.target.responseText;
+	                g.log("STATUS: " + event.target.readyState + " " + event.target.status + " " + event.target.statusText);
+	                if(callback!=undefined){
+	                	if(typeof callback==="function"){
+							callback(data);
 						}
-				 	}
+						else{
+							g.log("El parámetro Callback no es función o no existe!");
+						}
+	                }
+	                else{
+						g.log("El parámetro Callback no existe!");
+					}
+				}
+				
+				function transferFailed(event){
+					glog(event.target.error);
 				}
 				sock.send(null);
 		        //////////////////////////////////////////////////// 
@@ -1238,7 +1754,7 @@ g=(function(){
 	}
 }());
 g.path=(function(){
-	//Submodulo Path / Rewrite PathJS
+	//Submodulo g.path / Rewrite g.pathJS
 	function version(){
 		return "0.8.4"; 
 	};
@@ -1362,7 +1878,7 @@ g.path=(function(){
 	            }
 	        }
 	
-	        // The 'document.documentMode' checks below ensure that PathJS fires the right events
+	        // The 'document.documentMode' checks below ensure that g.pathJS fires the right events
 	        // even in IE "Quirks Mode".
 	        if ("onhashchange" in window && (!document.documentMode || document.documentMode >= 8)){
 	            window.onhashchange = fn;
@@ -1507,7 +2023,7 @@ g.md5=(function(){
 				   string = Utf8Encode(cadena);
 				   x = ConvertToWordArray(string);
 				   a = 0x67452301; b = 0xEFCDAB89; c = 0x98BADCFE; d = 0x10325476;
-				   for (k=0;k<x.length;k+=16){
+				   for(k=0;k<x.length;k+=16){
 				           AA=a; BB=b; CC=c; DD=d;
 				           a=FF(a,b,c,d,x[k+0], S11,0xD76AA478);
 				           d=FF(d,a,b,c,x[k+1], S12,0xE8C7B756);
@@ -1583,4 +2099,57 @@ g.md5=(function(){
 				}
 			}
 }());
+g.path.core.route.prototype = {
+    'to': function (fn) {
+        this.action = fn;
+        return this;
+    },
+    'enter': function (fns) {
+        if (fns instanceof Array) {
+            this.do_enter = this.do_enter.concat(fns);
+        } else {
+            this.do_enter.push(fns);
+        }
+        return this;
+    },
+    'exit': function (fn) {
+        this.do_exit = fn;
+        return this;
+    },
+    'partition': function () {
+        var parts = [], options = [], re = /\(([^}]+?)\)/g, text, i;
+        while (text = re.exec(this.path)) {
+            parts.push(text[1]);
+        }
+        options.push(this.path.split("(")[0]);
+        for (i = 0; i < parts.length; i++) {
+            options.push(options[options.length - 1] + parts[i]);
+        }
+        return options;
+    },
+    'run': function () {
+        var halt_execution = false, i, result, previous;
+
+        if (g.path.routes.defined[this.path].hasOwnProperty("do_enter")) {
+            if (g.path.routes.defined[this.path].do_enter.length > 0) {
+                for (i = 0; i < g.path.routes.defined[this.path].do_enter.length; i++) {
+                    result = g.path.routes.defined[this.path].do_enter[i].apply(this, null);
+                    if (result === false) {
+                        halt_execution = true;
+                        break;
+                    }
+                }
+            }
+        }
+        if (!halt_execution) {
+            g.path.routes.defined[this.path].action();
+        }
+    }
+};
+
+show=function(){
+	glog(hola);
+}
+
+g.extend(g.modal,show);
 module.exports = g;

@@ -36,7 +36,9 @@ carousel=(function(){
 	
 	        arrNextText = options.arrNextText || '&rsaquo;',
 	        arrPrevText = options.arrPrevText || '&lsaquo;',
-	
+			
+			fx = options.fx || 'scrollHrz',
+			
 	        crslClass           = 'js-Carousel',
 	        crslArrowPrevClass  = 'js-Carousel-arrowPrev',
 	        crslArrowNextClass  = 'js-Carousel-arrowNext',
@@ -47,6 +49,7 @@ carousel=(function(){
 	        count   = element.querySelectorAll('li').length,
 	        current = 0,
 	        cycle   = null;
+	        console.log(options);
 			/**
 		    * Render the carousel if more than one slide. 
 		    * Otherwise just show the single item.
@@ -55,6 +58,7 @@ carousel=(function(){
 		        render();
 		    };
 			play();
+			console.log(fx);
     /**
     * Render the carousel and all the navigation elements (arrows, dots, 
     * play/stop buttons) if needed. Start with a particular slide, if set.
@@ -90,6 +94,36 @@ carousel=(function(){
         }
     };
     /**
+     * FadeIn and FadeOut
+     * 
+     * */
+	function fadeIn(element,tiempo){
+		var op = 0.1;  // initial opacity
+	    var intervalo=tiempo/80;
+	    element.style.display = 'block';
+	    var timer = setInterval(function(){
+	        if (op >= 1){
+	            clearInterval(timer);
+	        }
+	        element.style.opacity = op;
+	        element.style.filter = 'alpha(opacity=' + op * 100 + ")";
+	        op += op * 0.1;
+	    }, intervalo);
+  	};
+  function fadeOut(element,tiempo){
+    var op = 1;  // initial opacity
+    var intervalo=tiempo/80;
+    var timer = setInterval(function(){
+        if (op <= 0.1){
+            clearInterval(timer);
+            element.style.display = 'none';
+        }
+        element.style.opacity = op;
+        element.style.filter = 'alpha(opacity=' + op * 100 + ")";
+        op -= op * 0.1;
+    }, intervalo);
+  };
+    /**
     * Helper for moving items - last to be first or first to be the last. Needed 
     * for infinite rotation of the carousel.
     *
@@ -108,6 +142,12 @@ carousel=(function(){
 
         element.querySelector('.' + crslClass + ' > ul')
           .insertAdjacentHTML(position, itemToMove.outerHTML);
+    };
+    function fadeItem(i){
+        var itemToOut = element.querySelectorAll('.' + crslClass + ' > ul li')[i];
+        var itemToIn = element.querySelectorAll('.' + crslClass + ' > ul li')[i+1];
+        fadeOut(itemToOut,interval);
+        fadeIn(itemToIn,interval);
     };
     /**
     * Create the navigation dots and attach to carousel.
@@ -220,7 +260,6 @@ carousel=(function(){
     */
     function show(slide) {
         var delta = current - slide;
-
         if (delta < 0) {
             moveByDelta(-delta, showNext);
         } else {
@@ -272,7 +311,6 @@ carousel=(function(){
             return;
         }
         animatePrev(document.querySelectorAll('.' + crslClass + ' > ul li')[current - 1]);
-        
         adjustCurrent(-1);
     };
     /**
@@ -281,12 +319,11 @@ carousel=(function(){
     * @public
     */
     function showNext() {
-        if (options.infinite) {
-            showNextInfinite();
-        } else {
-            showNextLinear();
-        }
-
+	        if (options.infinite) {
+	            showNextInfinite();
+	        } else {
+	            showNextLinear();
+	        }
         resetInterval();
     };
     /**
@@ -294,10 +331,14 @@ carousel=(function(){
     * Do the sliding, move the second item to the very end.
     */
     function showNextInfinite() {
-        animateNext(document.querySelectorAll('.' + crslClass + ' > ul li')[1]);
-        moveItem(0, '', 'beforeEnd');
-
-        adjustCurrent(1);
+		if(fx!='fade'){
+	        animateNext(document.querySelectorAll('.' + crslClass + ' > ul li')[1]);
+	        moveItem(0, '', 'beforeEnd');
+	        adjustCurrent(1);
+		}
+		else{
+			fadeItem(0)
+		}
     };
     /**
     * Helper function to show the next slide for LINEAR carousel.
@@ -309,7 +350,6 @@ carousel=(function(){
             return;
         }
         animateNext(document.querySelectorAll('.' + crslClass + ' > ul li')[current]);
-
         adjustCurrent(1);
     };
     /**
@@ -319,7 +359,6 @@ carousel=(function(){
     */
     function adjustCurrent(val) {
         current += val;
-
         if (options.dots) {
             currentDot();
         }
@@ -359,21 +398,21 @@ carousel=(function(){
     * 
     * @public
     */
-    function live() {
-        return current;
-    };
-	function funcreturn(){
-		var object;
-		object={
-	        'live': this.live,
-	        'show': this.show,
-	        'prev': this.showPrev,
-	        'next': this.showNext,
-	        'play': this.play,
-	        'stop': this.stop
-		};
-		return object; 
-    };	
+	    function live() {
+	        return current;
+	    };
+		function funcreturn(){
+			var object;
+				object={
+			        'live': this.live,
+			        'show': this.show,
+			        'prev': this.showPrev,
+			        'next': this.showNext,
+			        'play': this.play,
+			        'stop': this.stop
+				};
+				return object; 
+    		};	
 		}
 	}
 }());

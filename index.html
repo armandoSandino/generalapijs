@@ -5,6 +5,11 @@
 	<body>
 		<input type="file" name="holaf" id="holaf" />
 		<input type="button" name="btnfile" id="btnfile" value="CARGAR" />
+		<input name="databind" id="databind" value="hola" />
+		<input name="dataresp" id="dataresp" value="" />
+		<div id="response" style="height: 1000px;opacity:0;">
+			
+		</div>
 		<a href="#adiosp">Ir a AdiosP</a>
 		<div id="holap" style="height: 1000px;opacity:0;">
 			div1
@@ -20,27 +25,135 @@
 			a
 		</div>
 		<div id="slideshow" style="height: 500px;">
-			<div style="height: 500px;">
+			<section class="abc" style="height: 500px;">
 			a
-			</div>
-			<div style="height: 500px;">
+			</section>
+			<section class="abc" style="height: 500px;">
 			b
-			</div>
-			<div style="height: 500px;">
+			</section>
+			<section class="abc" style="height: 500px;">
 			c
-			</div>
-			<div style="height: 500px;">
+			</section>
+			<section class="abc" style="height: 500px;">
 			d
-			</div>
+			</section>
 		</div>
-		<div class="js-Carousel" id="carouselslide">
-			<ul>
-		        <li><img src="banner_cuad/P1070268.jpg" alt=""></li>
-		        <li><img src="banner_cuad/P1070276.jpg" alt=""></li>
-		        <li><img src="banner_cuad/P1070280.jpg" alt=""></li>
-		    </ul>
-		</div>
+		<div id="homeelements"></div>
 		aqui va a cargar el módulo en cuestion
 		<script src="dist/bundle.js"></script>
+		<script>
+			g.docready(function(){
+				var cadenamd5;
+				var h={};
+				var contdivs;
+				var bitvisible;
+				var cadena;
+				h=[
+					{'nombre':'arturo'},
+					{'nombre':'pedro'},
+					{'nombre':'antonio'},
+					{'nombre':'oscar'},
+					{'nombre':'nepo'},
+					];
+				/*
+				 * slideshow carousel.js
+				 * */
+				g.log("H ARRAY");
+				g.each(h,function(x,y){
+					g.log(x);
+					g.log(y);
+				})
+				g.log("FIN H ARRAY");
+				nav=g.browser();
+				g.log("**********NAV**************");
+				g.log(nav);
+				g.log("**********NAV**************");
+				cadenamd5=g.md5.calc("Arat5uro");
+				g.log("MD5***************" + cadenamd5);
+				g.dom("#databind").on('keyup',function(e){
+					var valornew;
+					valornew=g.dom("#databind").val();
+					g.dom("#dataresp").val(valornew);
+				});
+				contdivs=0;
+				bitvisible=0;
+				//INIT SLIDESHOW////////////////////////
+				//#slideshow se puede sustituir por el id que el programador escriba
+				//y quedaria tal que #nombre o .nombre + div por ejemplo
+				///////////////////////////////////////
+				g.dom("#btnmover").click(function(){
+					g.dom("#div_A").animate(function(){
+						g.log("listo el posho");
+					}).x(150,{
+						delay:1000
+					});
+				});
+				///////////////////////////////////////
+				g.log("CLAVE MD5: " + cadenamd5);
+				g.log("Path JS Version: " + g.path.getVersion());
+				g.dom("div").addAttrb("gn-repeat","none");
+				g.dom(".abc").addAttrb("gn-repeat","none");
+				result=g.dom(".abc").getAttrb("gn-repeat");
+				g.dom(".abc").rmAttrb("gn-repeat");
+				g.path.map("#/prueba").to(function(){
+					g.dom("#cargadiv").load("README.md",function(){
+						g.log("Módulo cargado.");
+					});
+				});
+				g.path.listen();
+				// g.dom("#homeelements").cycle({
+					// search:"div",
+					// fx:"fade",
+					// interval:"1500",
+					// infinite:true
+				// });
+				g.dom("#holap").cursor('pointer');
+				g.dom("#holap").fadeIn(5000);
+				g.dom("#holap").click(function(){
+					g.dom("#holap").smooth("#adiosp",{
+						duration:'10000',
+						offset: 0,
+						callback: function(){
+							g.log("Scroll finalizado");
+						}
+					});
+				});
+				g.dom("#adiosp").click(function(){
+					g.dom("#holap").smooth("#adiosp",{
+						duration:'10000',
+						offset: 0,
+						callback: function(){
+							g.log("Scroll finalizado");
+						}
+					});
+				});
+				g.dom("#btnfile").click(function(){
+					var archivo;
+					//holaf=id del control file
+					//function(data)=callback con return de la data obtenida
+					g.upload("#holaf",function(data){
+						//tratar variable para convertir string en JSON
+						//Imprimir variable///////////////////////////////
+						g.log("*******************data.file*******************");
+						g.log(data);
+						g.log(data.file);
+						g.log(data.status);
+						g.log("*******************data.file*******************");
+						//////////////////////////////////////////////////
+					});
+				});
+				g.post(
+					{
+						varu:"arturo",
+						vard:"vasquez"
+					},
+					"socket.php",
+					function(data){
+						g.log("data devuelta: ");
+						g.log(data);
+					}
+				);
+			});
+		</script>
 	</body>
 </html>

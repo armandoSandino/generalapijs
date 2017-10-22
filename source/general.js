@@ -58,7 +58,7 @@ g=(function(){
         return p;
 	};
 	function glog(msg){
-			console.log(msg);
+		console.log(msg);
 	};
 	function getdisctId(id){
 			var cadena;
@@ -73,7 +73,6 @@ g=(function(){
 			else{
 				return -1;
 			}
-			glog(objeto);
 			return objeto;
 		}
 	};
@@ -155,7 +154,7 @@ g=(function(){
         return 0;
    };
     function version(){
-    	return "1.0.0";
+    	return "0.0.1";
     };
 	function intfadeIn(elem,tiempo){
 			var op = 0.1;  // initial opacity
@@ -247,6 +246,9 @@ g=(function(){
 				array.map(callbackmap);
 			}
 	    },
+		create:function(domelement){
+			document.createElement(domelement);
+		},
 	    slice: function(array,start,end,callbackslc){
 			if(array.isArray()){
 				callbackslc(array.slice(start, end));
@@ -590,7 +592,24 @@ g=(function(){
 				      wrap:function(){
 				      	var objeto;
 				      	objeto=getdisctId(domel);
-						wrap(objeto, document.createElement('div'));
+						wrap(objeto, g.create('div'));
+				      },
+				      prop:function(prper){
+				      	var obj;
+				      	var val;
+				      	obj=getdisctId(domel);
+				      	result=obj[0].getAttribute(prper);
+						return result;
+				      },
+				      unwrap:function(docunw){
+				      	var objeto;
+				      	objeto=getdisctId(docunw);
+						// get the element's parent node
+						var parent = objeto.parentNode;
+						// move all children out of the element
+						while (objeto.firstChild) parent.insertBefore(objeto.firstChild, objeto);
+						// remove the empty element
+						parent.removeChild(objeto);
 				      },
 				      html:function(){
 				      	var objeto;
@@ -2147,9 +2166,4 @@ g.path.core.route.prototype = {
     }
 };
 
-show=function(){
-	glog(hola);
-}
-
-g.extend(g.modal,show);
 module.exports = g;

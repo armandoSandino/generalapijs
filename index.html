@@ -48,6 +48,7 @@
 				var contdivs;
 				var bitvisible;
 				var cadena;
+				var elementos=[];
 				h=[
 					{'nombre':'arturo'},
 					{'nombre':'pedro'},
@@ -58,6 +59,18 @@
 				/*
 				 * slideshow carousel.js
 				 * */
+				var ajxhr=g.ajax();
+				g.log("**************prop Function************");
+				//buscar sin ID pero sabiendo la etiqueta
+				g.log(g.dom("html").prop("data-scope"));
+				//buscar con ID, sabiendo el atributo
+				g.log(g.data("#appdata0").get("scope"));
+				//buscar solo el atributo
+				elementos=g.propAll(".abc");
+				g.log("**************ELEMENTOS************");
+				g.log(elementos);
+				g.log("**************ELEMENTOS************");
+				g.log("**************prop Function************");
 				g.log("H ARRAY");
 				g.each(h,function(x,y){
 					g.log(x);

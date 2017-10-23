@@ -519,7 +519,8 @@ __webpack_require__(4);
 __webpack_require__(7);
 __webpack_require__(9);
 __webpack_require__(11);
-__webpack_require__(26);
+__webpack_require__(13);
+__webpack_require__(29);
 
 /***/ }),
 /* 4 */
@@ -755,6 +756,51 @@ exports.push([module.i, "html {\n\tscroll-behavior: smooth;\n}\n\nbody {\n\tmarg
 /* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(12);
+if(typeof content === 'string') content = [[module.i, content, '']];
+// Prepare cssTransformation
+var transform;
+
+var options = {}
+options.transform = transform
+// add the styles to the DOM
+var update = __webpack_require__(1)(content, options);
+if(content.locals) module.exports = content.locals;
+// Hot Module Replacement
+if(false) {
+	// When the styles change, update the <style> tags
+	if(!content.locals) {
+		module.hot.accept("!!../../node_modules/css-loader/index.js!./main.css", function() {
+			var newContent = require("!!../../node_modules/css-loader/index.js!./main.css");
+			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+			update(newContent);
+		});
+	}
+	// When the module is disposed, remove the <style> tags
+	module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(0)(undefined);
+// imports
+
+
+// module
+exports.push([module.i, "#slider-wrapper-slide {\n\twidth:100%;\n\theight: 300px;\n\tposition: relative;\n\tfloat:none;\n\tdisplay:block;\n\ttransition: left 400ms linear;\n}", ""]);
+
+// exports
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
 /*
   Copyright (C) 2016 Arturo Vasquez Soluciones Web.
   Todos los derechos reservados.
@@ -771,22 +817,22 @@ exports.push([module.i, "html {\n\tscroll-behavior: smooth;\n}\n\nbody {\n\tmarg
   Garantías implícitas, incluyendo, sin limitación, los implicados
   GARANTÍAS DE COMERCIALIZACIÓN Y APTITUD PARA UN PROPÓSITO PARTICULAR.
 */
-__webpack_require__(12);
-var is=__webpack_require__(13);
-var TinyAnimate=__webpack_require__(14);
-var move=__webpack_require__(15);
-var watchjs = __webpack_require__(25);
+__webpack_require__(14);
+datab=__webpack_require__(15);
+var is=__webpack_require__(16);
+var TinyAnimate=__webpack_require__(17);
+var move=__webpack_require__(18);
+var watchjs = __webpack_require__(28);
 var watch = watchjs.watch;
 var unwatch = watchjs.unwatch;
 var callWatchers = watchjs.callWatchers;
 var hex_chr;
-var IDClass;
-var objGlobal;
 var cadena;
 var idreal;
 var objeto;
+var scopeg;
+var numapps=0;
 hex_chr="0123456789abcdef";
-IDClass=0;
 g=(function(){
 	function easeInOutQuad(t, b, c, d){
 	  t /= d / 2;
@@ -798,6 +844,47 @@ g=(function(){
 	    el.parentNode.insertBefore(wrapper, el);
 	    wrapper.appendChild(el);
 	};
+	function createScope(){
+		scopenom="generalapp";
+		g.dom("html").addAttrb("id","appdata"+numapps);
+		g.dom("html").addAttrb("name","appdata"+numapps);
+		g.dom("html").addAttrb("data-scope",scopenom);
+		var attrbdata=g.dom("html").getAttrb("data-scope");
+		glog("SCOPE ATTRB ");
+		glog(attrbdata[0]);
+		var model = new datab.Model(scopenom);
+		glog("databind******************");
+		glog("nombre del scope******************");
+		glog(model.scope + "********************");
+		glog("nombre del scope******************");
+		glog(model);
+		numapps++;
+	}
+	function prop(element,proper){
+		//busca dentro del objeto y devuelve solo la primera acepcion
+		var obj;
+		var val;
+		obj=getelTag(element);
+		if(is.isObject(obj)){
+		  	result=obj[0].getAttribute(proper);
+			return result;
+		}
+	}
+	function propAll(proper){
+		//busca dentro del objeto y devuelve solo la primera acepcion
+		var val='';
+		var array_tags=[];
+		var array_final=[];
+		var i=0;
+		array_tags=getelTag(proper);
+		glog(array_tags);
+		if(array_tags.length>0){
+			for(i=0;i<array_tags.length;i++){
+				array_final[i]=array_tags[i];
+			}
+			return array_final;
+		}
+	}
 	function getScreenCordinates(obj) {
         var p = {};
         p.x = obj.offsetLeft;
@@ -818,8 +905,8 @@ g=(function(){
 		console.log(msg);
 	};
 	function getdisctId(id){
-			var cadena;
-			if(typeof id==='string'){
+		var cadena;
+		if(typeof id==='string'){
 			cadena=id;
 	      	if(cadena.search("#")==0){
 	        	objeto=document.querySelector(id);
@@ -918,7 +1005,6 @@ g=(function(){
 		    var intervalo=tiempo/80;
 		    var element;
 		    element=elem;
-		    glog("element");
 		    glog(element);
 		    element.style.display = 'block';
 		    var timer = setInterval(function(){
@@ -947,52 +1033,23 @@ g=(function(){
 	 };
 	return{
 		//Describir funciones públicas
+		init: function(){
+			createScope();
+		},
 		getdisctId: function(id){
-			var cadena;
-			if(is.string(id)){
-				cadena=id;
-		      	if(cadena.search("#")==0){
-		        	objeto=document.querySelector(id);
-		      	}
-		      	else if(cadena.search(".")==0){
-					objeto=document.querySelector(id);
-				}
-				else{
-					return -1;
-				}
-				glog(objeto);
-				return objeto;
-			}
+			var objeto;
+			objeto=getdisctId(id);
+			return objeto;
 		},
 		getnameid: function(id){
-			var cadena;
-	          var idreal;
-	          var filareal;
-	          cadena=id;
-	          if(cadena.search("#")==0){
-	              idreal=id.replace("#","");
-	              idreal=idreal.replace(".","");
-	              filareal=idreal;
-	          }
-	          else if(cadena.search(".")==0){
-	              idreal=id.replace("#","");
-	              idreal=idreal.replace(".","");
-	              filareal=idreal;
-	          }
-	          else{
-	              return -1;
-	          }
-	          return  filareal;
+			var objeto;
+			objeto=getnameid(id);
+			return  objeto;
 		},
-		getelTag: function(tag){
+		getelTag: function(id){
 			var arrtags=[];
-			if(tag!=undefined){
-				arrtags=document.querySelectorAll(tag);
-				return arrtags;
-			}
-			else{
-				return -1;
-			}
+			arrtags=getelTag(id);
+			return  arrtags;
 		},
 		log: function(msg){
 			console.log(msg);
@@ -1003,6 +1060,12 @@ g=(function(){
 				array.map(callbackmap);
 			}
 	    },
+		propAll:function(prper){
+	      	//busca dentro del objeto y devuelve solo la primera acepcion
+			var obj;
+			obj=propAll(prper);
+			return obj;
+		},
 		create:function(domelement){
 			document.createElement(domelement);
 		},
@@ -1018,12 +1081,12 @@ g=(function(){
 			return btoa(string);
 	    },
 		docready: function(fn){
-		  if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading"){
-		    fn();
-		  }
-		  else{
-		    document.addEventListener('DOMContentLoaded', fn);
-		  }
+			if(document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading"){
+				fn();
+			}
+			else{
+		    	document.addEventListener('DOMContentLoaded', fn);
+		  	}
 		},
 		each:function(objeto,callbackeach){
 	      	var initial_array;
@@ -1138,11 +1201,9 @@ g=(function(){
 	      // bugfixed by: kirilloid
 	      //   example 1: utf8_encode('Kevin van Zonneveld');
 	      //   returns 1: 'Kevin van Zonneveld'
-	
 	      if (argString === null || typeof argString === 'undefined'){
 	        return '';
 	      }
-	
 	      var string = (argString + ''); // .replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 	      var utftext = '',
 	        start, end, stringl = 0;
@@ -1269,11 +1330,6 @@ g=(function(){
 	      URL="http://"+valselect;
 	      location.href=URL;
 	    },
-	    ajax: function(){
-	    	var sock;
-			sock=g.getxhr();
-			return sock;
-	    },
 		  parseHTML:function(str){
 			  var tmp = document.implementation.createHTMLDocument();
 			  tmp.body.innerHTML = str;
@@ -1300,7 +1356,7 @@ g=(function(){
 			          	domelement=getdisctId(domel);
 						domelement.style.display="block"; 
 					},
-				      css:function(estilo){
+					css:function(estilo){
 				        var domelement;
 				          if(!document.getElementById){
 				              return false;
@@ -1310,8 +1366,8 @@ g=(function(){
 				          }
 				          domelement=getdisctId(domel);
 				          domelement.style=estilo;
-				      },
-				      find:function(selector,callbackfind){
+					},
+					find:function(selector,callbackfind){
 						// Final found elements
 						var found_elements = [];
 						var i;
@@ -1320,7 +1376,7 @@ g=(function(){
 						for(i=0;i<outers.length;i++){
 							var elements_in_outer=outers[i].querySelectorAll(selector);
 							// document.querySelectorAll() returns an "array-like" collection of elements
-							// convert this "array-like" collection to an array
+						// convert this "array-like" collection to an array
 							elements_in_outer=Array.prototype.slice.call(elements_in_outer);
 							found_elements=found_elements.concat(elements_in_outer);
 						}
@@ -1352,11 +1408,12 @@ g=(function(){
 						wrap(objeto, g.create('div'));
 				      },
 				      prop:function(prper){
-				      	var obj;
-				      	var val;
-				      	obj=getdisctId(domel);
-				      	result=obj[0].getAttribute(prper);
-						return result;
+				      	//busca dentro del objeto y devuelve solo la primera acepcion
+						var obj;
+						obj=prop(domel,prper);
+						if(is.isObject(obj)){
+							return obj;
+						}
 				      },
 				      unwrap:function(docunw){
 				      	var objeto;
@@ -1659,11 +1716,10 @@ g=(function(){
 										children[i].style.top="0";
 						      		}
 						      	}
-						      	glog("---ELEMENTS INSIDE");
-						      	glog("---ELEMENTS INSIDE NUM " + numelems);
+						      	glog("---ELEMENTS INSIDE---");
+						      	glog("---NUM ELEMENTS" + numelems);
 						      	if(numelems>1){
 						      		domelems=getelTag(findelem);
-						      		glog(domelems);
 						      		domcycle=setInterval(fadingfunc,optfinal.interval);
 						      		function fadingfunc(){
 						      			intfadeOut(children[elemindex],optfinal.interval);
@@ -1674,7 +1730,7 @@ g=(function(){
 						      				elemindex++;
 						      			}
 						      			intfadeIn(children[elemindex],optfinal.interval);
-						      									      			glog("SLIDES");
+						      			glog("SLIDES");
 						      			glog("**************************");
 						      			glog("children " + elemindex);
 						      			glog(children[elemindex]);
@@ -1882,7 +1938,6 @@ g=(function(){
 			                var valor;
 			                var args;
 			                args=arguments;
-							glog(domel);
 			                if(args[0]==undefined){
 				                valor=valobj(domel);
 				                return valor;
@@ -2022,16 +2077,18 @@ g=(function(){
 				        	callbackfunc();
 				        }
 			      	},
-			      	bind:function(e){
+			      	bindData:function(e){
+
+			      	},
+			        on:function(e){
 						var control;
 						var idcontrol;
 						var event;
-						var callback;
+						var idcontrol;
 						idcontrol=domel;
 						event=arguments[0];
 						callback=arguments[1];;
 						control=getdisctId(idcontrol);
-						glog(control);
 			        	switch(event){
 			        		case 'error':
 			        			control.addEventListener('error',callback);
@@ -2095,77 +2152,6 @@ g=(function(){
 			        			break;
 			        		case 'keypress':
 								control.addEventListener('keypress',callback);
-			        			break;
-			        	}
-			      	},
-			        on:function(e){
-						var event;
-						var callback;
-						event=arguments[0];
-						callback=arguments[1];;
-			        	switch(event){
-			        		case 'error':
-			        			g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'load':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'submit':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'click':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'dblclick':
-								g.dom(domel).bind(event,callback);
-			        			break;
-							case 'mouseup':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'mousedown':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'mouseenter':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'mouseleave':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'mousemove':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'mouseover':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'mouseout':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'blur':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'change':
-								g.dom(domel).bind(event,callback);
-						        break;
-							case 'resize':
-								g.dom(domel).bind(event,callback);
-			        			break;
-							case 'unload':
-								g.dom(domel).bind(event,callback);
-			        			break;
-							case 'pageshow':
-								g.dom(domel).bind(event,callback);
-			        			break;
-							case 'popstate':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'keyup':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'keydown':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'keypress':
-								g.dom(domel).bind(event,callback);
 			        			break;
 			        	}
 			    	},
@@ -2234,20 +2220,11 @@ g=(function(){
 				}
 				return KeyCode;
 	        },
-	        blockNumber: function(e){
-	          //bloquear teclado a solo numeros
-	          teclap=g.getKey(e);
-	          teclan=String.fromCharCode(teclap);
-	          if(IsNumeric(teclan)==false){
-	            return "Solo está peritido escribir numeros";
-	          }
-	        },
 	        getChar: function(event){
 	        	var cadena;
 				//bloquear teclado a solo numeros
 				teclan=g.getKey(event);
 				cadena=String.fromCharCode(teclan);
-				glog("TECLA " + cadena);
 				return String.fromCharCode(teclan); 
 	        },
 	        blockChar: function(e){
@@ -2315,6 +2292,12 @@ g=(function(){
 				    var fileName=filectrl.files[0].name;
 				    var objres;
 				    objres={};
+					objres.__proto__={
+						data:'',
+						file:'',
+						status:'',
+						error:'',
+					};
 				    g.post(
 						{
 							data:btoa(result),
@@ -2331,12 +2314,12 @@ g=(function(){
 					);
 				};
 				reader.onerror=function(event){
-					g.log("Hubo un error de lectura de disco.");
+					glog("Hubo un error de lectura de disco.");
 				}
 			}
 			else{
 			    // browser doesn't supports File API
-			    g.log("browser doesn't supports File API");
+			    glog("browser doesn't supports File API");
 			}
 	      },
 	      post: function(){
@@ -2366,7 +2349,7 @@ g=(function(){
 	          arrayvar[i]=arguments[i];
 	        }
 			if(arguments.length<2){
-	      		g.log("Faltan Argumentos " + arguments.length);
+	      		glog("Faltan Argumentos " + arguments.length);
 	      	}
 	      	else{
 	      		// Obtener objeto AJAX;
@@ -2376,7 +2359,7 @@ g=(function(){
 	      		// Obtener objeto de variables;
 	      		variablesaux=JSON.stringify(arrayvar[0]);
 	      		variablesobj=JSON.parse(variablesaux);
-	      		g.log(variablesobj);
+	      		glog(variablesobj);
 	      		// Obtener string de protocolo
 	      		ajxProtocol="POST";
 	      		// Obtener string de dir archivo socket
@@ -2389,28 +2372,25 @@ g=(function(){
 						callback=arguments[2];
 					}
 					else{
-						g.log("El argumento Callback debe ser de tipo función");
+						glog("El argumento Callback debe ser de tipo función");
 					}
 	      		}
 	      		////////////////////////////////////////////////////
 	      		// EJECUTAR FUNCION Y CALLBACK//////////////////////
 		        sock.open(ajxProtocol,dirsocket,true);
 				function transferComplete(event){
-					glog("event***********************");
-					glog(event);
-					glog("event***********************");
 	                data=event.target.responseText;
-	                g.log("STATUS: " + event.target.readyState + " " + event.target.status + " " + event.target.statusText);
+	                glog("STATUS: " + event.target.readyState + " " + event.target.status + " " + event.target.statusText);
 	                if(callback!=undefined){
 	                	if(typeof callback==="function"){
 							callback(data);
 						}
 						else{
-							g.log("El parámetro Callback no es función o no existe!");
+							glog("El parámetro Callback no es función o no existe!");
 						}
 	                }
 	                else{
-						g.log("El parámetro Callback no existe!");
+						glog("El parámetro Callback no existe!");
 					}
 				}
 				
@@ -2449,7 +2429,7 @@ g=(function(){
 	          arrayvar[i]=arguments[i];
 	        }
 			if(arguments.length<2){
-	      		g.log("Faltan Argumentos " + arguments.length);
+	      		glog("Faltan Argumentos " + arguments.length);
 	      	}
 	      	else{
 	      		// Obtener objeto AJAX;
@@ -2466,28 +2446,25 @@ g=(function(){
 						callback=arguments[2];
 					}
 					else{
-						g.log("El argumento Callback debe ser de tipo función");
+						glog("El argumento Callback debe ser de tipo función");
 					}
 	      		}
 	      		////////////////////////////////////////////////////
 	      		// EJECUTAR FUNCION Y CALLBACK//////////////////////
 		        sock.open(ajxProtocol,dirsocket,true);
 		        function transferComplete(event){
-					glog("event***********************");
-					glog(event);
-					glog("event***********************");
 	                data=event.target.responseText;
-	                g.log("STATUS: " + event.target.readyState + " " + event.target.status + " " + event.target.statusText);
+	                glog("STATUS: " + event.target.readyState + " " + event.target.status + " " + event.target.statusText);
 	                if(callback!=undefined){
 	                	if(typeof callback==="function"){
 							callback(data);
 						}
 						else{
-							g.log("El parámetro Callback no es función o no existe!");
+							glog("El parámetro Callback no es función o no existe!");
 						}
 	                }
 	                else{
-						g.log("El parámetro Callback no existe!");
+						glog("El parámetro Callback no existe!");
 					}
 				}
 				
@@ -2923,20 +2900,832 @@ g.path.core.route.prototype = {
     }
 };
 
+g.__proto__.ajax=function(){
+	var sock;
+	sock=g.getxhr();
+	return sock;
+};
+g.__proto__.data=function(iddataset){
+  	var obj;
+  	var idfinal;
+  	obj=g.getelTag(iddataset);
+  	g.log(obj[0]);
+  	return{
+  		get:function(nomvar){
+  			var result;
+  			idfinal="data-" + nomvar;
+			result=g.dom(iddataset).prop(idfinal);
+			return result; 
+  		},
+  		set:function(nomvar,val){
+  			idfinal="data-" + nomvar;
+  			g.dom(iddataset).addAttrb(idfinal,val);
+  		},
+  		remove:function(nomvar){
+  			idfinal="data-" + nomvar;
+  			g.dom(iddataset).rmAttrb(idfinal);
+  		},
+	}
+}
+g.init();
 module.exports = g;
 
 /*** EXPORTS FROM exports-loader ***/
 module.exports = g;
 
 /***/ }),
-/* 12 */
+/* 14 */
 /***/ (function(module, exports) {
 
 !function(){for(var n=0,i=["webkit","moz"],e=0;e<i.length&&!window.requestAnimationFrame;++e)window.requestAnimationFrame=window[i[e]+"RequestAnimationFrame"],window.cancelAnimationFrame=window[i[e]+"CancelAnimationFrame"]||window[i[e]+"CancelRequestAnimationFrame"];window.requestAnimationFrame||(window.requestAnimationFrame=function(i){var e=(new Date).getTime(),a=Math.max(0,16-(e-n)),o=window.setTimeout(function(){i(e+a)},a);return n=e+a,o}),window.cancelAnimationFrame||(window.cancelAnimationFrame=function(n){clearTimeout(n)})}();
 //# sourceMappingURL=requestAnimationFrame.js.map
 
 /***/ }),
-/* 13 */
+/* 15 */
+/***/ (function(module, exports) {
+
+var DataBind=(function(dataBind){
+    "use strict";
+    dataBind.Binder = function (model, document) {
+        var doc = document || window.document;  //inject mock for testing
+        var scopeElement = doc.querySelector('[data-scope=' + model.scope + ']');
+        var currentValue = {};
+        var foreach = {};
+
+        model.addValueChangedListener(valueChangedHandler);
+
+        function valueChangedHandler(name) {
+            var foreachElements = scopeElement.querySelectorAll('[data-foreach$="in ' + name + '"]');
+            bindForeach(foreachElements, name);
+
+            bindElementsInForeach(foreachElements);
+
+            var valueElements = scopeElement.querySelectorAll('[data-bind="' + name + '"]');
+            bindValues(valueElements);
+
+            var classElements = scopeElement.querySelectorAll('[data-class="' + name + '"]');
+            bindClasses(classElements);
+
+            var computedClassElements = scopeElement.querySelectorAll('[data-class^="' + name + '("]');
+            bindClasses(computedClassElements);
+        }
+
+        var bindElementsInForeach = function (elements) {
+            for (var i = 0; i < elements.length; i++) {
+
+                var valueElements = elements[i].querySelectorAll('[data-bind]');
+                bindValues(valueElements);
+
+                var classElements = elements[i].querySelectorAll('[data-class]');
+                bindClasses(classElements);
+
+                var clickElements = elements[i].querySelectorAll('[data-click]');
+                bindClicks(clickElements);
+
+                var enterElements = scopeElement.querySelectorAll('[data-enter]');
+                bindEnters(enterElements);
+            }
+        };
+
+        var bindClasses = function (elements) {
+            for (var i = 0; i < elements.length; i++) {
+                bindClass(elements[i]);
+            }
+        };
+
+        var bindClass = function (element) {
+            var attrValue = element.getAttribute('data-class');
+
+            var oldValue = currentValue[attrValue];
+            if (oldValue) {
+                element.classList.remove(oldValue);
+            }
+
+            var newClass = model.get(attrValue);
+            currentValue[attrValue] = newClass;
+
+            if (newClass) {
+                element.classList.add(newClass);
+            }
+        };
+
+        function excludeNested(all, nested) {
+            var arr = [].slice.call(all);
+            for(var i = 0; i < arr.length; i++) {
+                for (var j = 0; j < nested.length; j++) {
+                    if (arr[i] === nested[j]) {
+                        arr.splice(i, 1);
+                    }
+                }
+            }
+
+            return arr;
+        }
+
+        var bind = function () {
+            var foreachElements = scopeElement.querySelectorAll('[data-foreach]');
+            var nestedForeachElements = scopeElement.querySelectorAll('[data-foreach] [data-foreach]');
+
+            var outerForeachElements = excludeNested(foreachElements, nestedForeachElements);
+
+            captureForeach(outerForeachElements);
+            bindForeach(outerForeachElements);
+
+            var valueElements = scopeElement.querySelectorAll('[data-bind]');
+            bindValues(valueElements);
+
+            var classElements = scopeElement.querySelectorAll('[data-class]');
+            bindClasses(classElements);
+
+            var clickElements = scopeElement.querySelectorAll('[data-click]');
+            bindClicks(clickElements);
+
+            var enterElements = scopeElement.querySelectorAll('[data-enter]');
+            bindEnters(enterElements);
+        };
+
+        var bindEnters = function (elements) {
+            for (var i = 0; i < elements.length; i++) {
+                bindEnter(elements[i]);
+            }
+        };
+
+        var bindEnter = function (element) {
+            var expression = element.getAttribute('data-enter');
+
+            element.onkeydown = function (event) {
+                if (event.which === 13) {
+                    model.invoke(expression);
+                }
+            };
+        };
+
+        var bindClicks = function (elements) {
+            for (var i = 0; i < elements.length; i++) {
+                bindClick(elements[i]);
+            }
+        };
+
+        var captureForeach = function (elements) {
+            for (var i = 0; i < elements.length; i++) {
+                var templateChildren = [];
+                for (var j = 0; j < elements[i].children.length; j++) {
+                    templateChildren.push(elements[i].children[j].cloneNode(true));
+                }
+
+                var forIn = elements[i].getAttribute('data-foreach');
+                var pieces = forIn.split(' in ');
+
+                foreach[forIn] = { template: templateChildren, items: pieces[1].trim(), item: pieces[0].trim() };
+            }
+        };
+
+        var bindForeach = function (elements) {
+            for (var i = 0; i < elements.length; i++) {
+                clearChildren(elements[i]);
+
+                var forIn = elements[i].getAttribute('data-foreach');
+                var foreachTemplate = foreach[forIn];
+
+                var value = model.get(foreachTemplate.items);
+
+                for (var j = 0; j < value.length(); j++) {
+                    for (var k = 0; k < foreachTemplate.template.length; k++) {
+                        var clone = foreachTemplate.template[k].cloneNode(true);
+                        elements[i].appendChild(clone);
+
+                        convertBinding(clone, 'data-bind', foreachTemplate, j);
+                        convertBinding(clone, 'data-class', foreachTemplate, j);
+                        convertBinding(clone, 'data-click', foreachTemplate, j);
+                        convertBinding(clone, 'data-foreach', foreachTemplate, j);
+                    }
+                }
+            }
+        };
+
+        var clearChildren = function (element) {
+            while (element.lastChild) {
+                element.removeChild(element.lastChild);
+            }
+        };
+
+        var convertBinding = function (element, attribute, template, index) {
+            var replace = function (match) {
+                return match.replace(template.item, template.items + '[' + index + ']')
+            };
+
+            if (element.hasAttribute(attribute)) {
+                var oldAttribute = element.getAttribute(attribute);
+                var newAttribute = oldAttribute
+                    .replace(new RegExp('^' + template.item + '(?=[.]|$)'), template.items + '[' + index + ']')     //lone identifiers
+                    .replace(new RegExp('[(,] *' + template.item + ' *(?=[,)])', 'g'), replace)    //method parameters
+                    .replace(new RegExp(' in ' + template.item + '$'), ' in ' + template.items + '[' + index + ']');
+
+                element.setAttribute(attribute, newAttribute);
+
+                if (attribute === 'data-foreach') {
+                    captureForeach([element]);
+                    bindForeach([element]);
+                }
+            }
+
+            for (var i = 0; i < element.children.length; i++) {
+                convertBinding(element.children[i], attribute, template, index);
+            }
+        };
+
+        var bindClick = function (element) {
+            var expression = element.getAttribute('data-click');
+
+            element.onclick = function () {
+                model.invoke(expression);
+            };
+        };
+
+        var bindValues = function (elements) {
+            for (var i = 0; i < elements.length; i++) {
+                bindValue(elements[i]);
+            }
+        };
+
+        var bindValue = function (element) {
+            var name = element.getAttribute('data-bind');
+
+            var modelValue = model.get(name);
+
+            if (modelValue === undefined) {
+                model.attr(name, "");
+            } else if (element.type === 'checkbox') {
+                element.checked = modelValue;
+                element.onclick = function () {
+                    model.attr(name, element.checked);
+                };
+            }
+            else if (element.type === 'radio') {
+                element.checked = modelValue === element.value;
+                element.onclick = function () {
+                    model.attr(name, element.value);
+                };
+            }
+            else if (element.tagName.toLowerCase() === 'select') {
+                element.value = modelValue;
+                element.onchange = function () {
+                    model.attr(name, element.value);
+                };
+            }
+            else if (element.type === 'text' || element.type === 'textarea') {
+                if (element.value !== modelValue) {
+                    element.value = modelValue;
+                }
+                element.oninput = function () {
+                    model.attr(name, element.value);
+                };
+            } else {
+                element.innerHTML = modelValue;
+            }
+        };
+
+        return {
+            bind: bind
+        };
+    };
+
+    return dataBind;
+}(DataBind || {}));
+
+var DataBind = (function (dataBind) {
+    "use strict";
+
+    dataBind.Model = function (scope) {
+        var attrs = {};
+        var dependsOn = {};
+        var valueChangedListeners = [];
+        var parser = new DataBind.Parser(fireValueChangedForAllDependencies, doLookup, updateValue);
+
+        function doLookup(name) {
+            return attrs[name];
+        }
+
+        function updateValue(name, value) {
+            attrs[name] = value;
+        }
+
+        var attr = function (name, value) {
+            parser.attr(name, value);
+        };
+
+        var get = function (expr) {
+            return parser.get(expr);
+        };
+
+        function fireValueChangedForAllDependencies(name) {
+            valueChangedListeners.forEach(function(listener) {
+                listener(name);
+            });
+
+            if (dependsOn.hasOwnProperty(name)) {
+                dependsOn[name].forEach(function (dependency) {
+                    fireValueChangedForAllDependencies(dependency);
+                });
+            }
+        }
+
+        var computed = function (name, func, explicitDependencies) {
+            if (explicitDependencies) {
+                explicitDependencies.forEach(function (dependency) {
+                    addDependency(name, dependency);
+                });
+            }
+
+            var regEx = /this\.get\(['"]([^'"]+)['"]\)/g;
+
+            var match = regEx.exec(func.toString());
+            while (match != null) {
+                addDependency(name, match[1]);
+                match = regEx.exec(func.toString());
+            }
+
+            attrs[name] = func;
+        };
+
+        var action = function (name, func) {
+            attrs[name] = func;
+        };
+
+        var addDependency = function (name, dependency) {
+            dependsOn[dependency] = dependsOn[dependency] || [];
+            dependsOn[dependency].push(name);
+        };
+
+        var addValueChangedListener = function(callback) {
+            valueChangedListeners.push(callback);
+        };
+
+        return {
+            attr: attr,
+            get: get,
+            computed: computed,
+            action: action,
+            scope: scope,
+            addValueChangedListener: addValueChangedListener,
+            invoke: function(actionExpr) { get(actionExpr); }
+        };
+    };
+
+    return dataBind;
+}(DataBind || {}));
+var DataBind = (function (dataBind) {
+    "use strict";
+
+    dataBind.Collection = function(name, arr, valueChangedCallback) {
+        var push = function(value) {
+            arr.push(value);
+            valueChangedCallback(name);
+        };
+
+        var pop = function() {
+            arr.pop();
+            valueChangedCallback(name);
+        };
+
+        var forEach = function(callback) {
+            arr.forEach(function(item) {
+                callback(item);
+            });
+            valueChangedCallback(name);
+        };
+
+        var remove = function(item) {
+            var index = arr.indexOf(item);
+
+            if (index >= 0) {
+                arr.splice(index, 1);
+                valueChangedCallback(name);
+
+                return true;
+            }
+
+            return false;
+        };
+
+        var clear = function() {
+            arr.length = 0;
+            valueChangedCallback(name);
+        };
+
+        return {
+            push: push,
+            pop: pop,
+            remove: remove,
+            value: arr,
+            length: function() { return arr.length; },
+            forEach: forEach,
+            clear: clear
+        };
+    };
+
+    return dataBind;
+}(DataBind || {}));
+
+
+var DataBind = (function (dataBind) {
+    "use strict";
+
+    dataBind.Parser = function(fireValueChangedForAllDependencies, lookupFunc, updateValueFunc) {
+
+        var checkWrapArray = function (name, object) {
+            return Array.isArray(object)
+                ? new DataBind.Collection(name, object, fireValueChangedForAllDependencies)
+                : object;
+        };
+
+        var getFunctionArgs = function(lexer) {
+            var args = [];
+
+            if (lexer.currentToken().token === 'LPAREN') {
+                lexer.consume();
+
+                var argList = '';
+                while(lexer.currentToken().token !== 'RPAREN') {
+                    argList += lexer.currentToken().text;
+                    lexer.consume();
+                }
+
+                if (argList) {
+                    argList.split(',').forEach(function(argText) {
+                        args.push(get(argText));
+                    });
+                }
+            }
+
+            return args;
+        };
+
+        var parseFunction = function(lexer) {
+            var functionName = lexer.currentToken().text;
+            lexer.consume();
+
+            var args = getFunctionArgs(lexer);
+
+            return lookupFunc(functionName).apply(this, args);
+        };
+
+        var parseProperty = function(lexer, id, object) {
+            lexer.consume('ID');
+
+            if (object) {
+                return object[lookupFunc(id)[lexer.currentToken().text]];
+            }
+
+            return lookupFunc(id)[lexer.currentToken().text];
+        };
+
+        var parseId = function(lexer, object) {
+            var id = lexer.currentToken().text;
+
+            lexer.consume();
+
+            if (lexer.currentToken().token === 'DOT') {
+                return parseProperty(lexer, id, object);
+            } else if (lexer.currentToken().token === 'LBRACK') {
+                lexer.consume();
+
+                var index = get(lexer.currentToken().text);
+
+                return lookupFunc(id)[index];
+            } else {
+                return checkWrapArray(id, lookupFunc(id));
+            }
+        };
+
+        var get = function(name) {
+            var lexer = new DataBind.Lexer(name);
+
+            var object = null;
+
+            do {
+                if (lexer.currentToken().token === 'NUMBER') {
+                    return parseInt(lexer.currentToken().text);
+                }
+                if (lexer.currentToken().token === 'LITERAL') {
+                    return lexer.currentToken().text.slice(1, -1);
+                }
+
+                if (lexer.currentToken().token === 'ID') {
+                    if (typeof lookupFunc(lexer.currentToken().text) === 'function') {
+                        object = parseFunction.call(this, lexer);
+                    } else {
+                        object = parseId(lexer, object);
+                    }
+                }
+
+                if (lexer.currentToken().token === 'DOT') {
+                    lexer.consume('ID');
+
+                    object = object[lexer.currentToken().text];
+                } else if (lexer.currentToken().token === 'LBRACK') {
+                    lexer.consume();
+
+                    object = object[get(lexer.currentToken().text)];
+                }
+
+                lexer.consume();
+            } while (lexer.hasNextToken());
+
+            return checkWrapArray(name, object);
+        };
+
+        var attr = function (name, value) {
+            var changedCollections = [];
+            var object = null;
+
+            var lexer = new DataBind.Lexer(name);
+
+            do {
+                var id;
+                if (lexer.currentToken().token === 'ID') {
+                    id = lexer.currentToken().text;
+
+                    if (!object)
+                        object = lookupFunc(id);
+
+                    if (object === undefined) {
+                        object = {};
+                        updateValueFunc(id, object);
+                    }
+
+                    if (!lexer.hasNextToken()) {
+                        updateValueFunc(id, value);
+                        fireValueChangedForAllDependencies(id);
+                    }
+
+                    lexer.consume();
+                }
+
+                if (lexer.currentToken().token === 'LBRACK') {
+                    changedCollections.push(id);
+                    lexer.consume();
+
+                    var index = get(lexer.currentToken().text);
+
+                    lexer.consume('RBRACK');
+
+                    if (lexer.hasNextToken()) {
+                        object = object[index];
+                    } else {
+                        object[index] = value;
+
+                        fireValueChangedForAllDependencies(name);
+                        fireValueChangedForAll(changedCollections);
+                    }
+                } else if (lexer.currentToken().token === 'DOT') {
+                    lexer.consume('ID');
+
+                    if (lexer.hasNextToken()) {
+                        object[lexer.currentToken().text] = object[lexer.currentToken().text] || {};
+                        object = object[lexer.currentToken().text];
+                    } else {
+                        object[lexer.currentToken().text] = value;
+                        fireValueChangedForAllDependencies(name);
+                        fireValueChangedForAll(changedCollections);
+                    }
+                }
+
+                lexer.consume();
+            } while (lexer.hasNextToken())
+        };
+
+        var fireValueChangedForAll = function (items) {
+            items.forEach(function (item) {
+                fireValueChangedForAllDependencies(item);
+            });
+        };
+
+        return {
+            get: get,
+            attr: attr
+        };
+    };
+
+    return dataBind;
+}(DataBind || {}));
+
+var DataBind = (function (dataBind) {
+    "use strict";
+
+    dataBind.Lexer = function(expr) {
+        var rules = {root: [
+            [/\[/, 'LBRACK'],
+            [/\]/, 'RBRACK'],
+            [/[(]/, 'LPAREN'],
+            [/[)]/, 'RPAREN'],
+            [/,/, 'COMMA'],
+            [/['][^']*[']/, 'LITERAL'],
+            [/["][^"]*["]/, 'LITERAL'],
+            [/[a-zA-Z][a-zA-Z0-9]*/, 'ID'],    //todo: allow more id characters
+            [/[0-9]+/, 'NUMBER'],
+            [/[.]/, 'DOT'],
+            [/\s+/, TokenJS.Ignore],  //ignore whitespace
+        ]};
+
+        var lexer = new TokenJS.Lexer(expr, rules, false);
+
+        var tokens = lexer.tokenize();
+
+        var i = 0;
+
+        var hasNextToken = function() {
+            return i < tokens.length - 1;
+        };
+
+        var currentToken = function() {
+            if (i < tokens.length)
+                return tokens[i];
+            else
+                return TokenJS.EndOfStream;
+        };
+
+        var consume = function(expected) {
+            i++;
+
+            if (expected && currentToken().token !== expected)
+                throw {
+                    toString: function() { return 'Syntax error: Expected token: ' + expected + ', actual: ' + currentToken().token }
+                };
+        };
+
+        return {
+            currentToken: currentToken,
+            consume: consume,
+            hasNextToken: hasNextToken
+        };
+    };
+
+    return dataBind;
+}(DataBind || {}));
+
+var TokenJS = TokenJS || {};
+
+TokenJS.Ignore = {
+    toString: function() {
+        return 'Ignored rule';
+    }
+};
+
+TokenJS.EndOfStream = {
+    toString: function() {
+        return "End of token stream";
+    }
+};
+
+TokenJS.SyntaxError = function(message) {
+    this.name = "SyntaxError";
+    this.message = message;
+};
+
+TokenJS.StateError = function(message) {
+    this.name = "StateError";
+    this.message = message;
+};
+
+/**
+ * @param input: text to lex
+ * @param rules: dictionary of lexing rules. Must contain a 'root' state.
+ * @param ignoreAllUnrecognized: if true, ignores unrecognized characters instead of throwing an error
+ */
+ TokenJS.Lexer = function(input, rules, ignoreUnrecognized){
+    var _rules = rules;
+    var _currentState;
+    var _input = input;
+    var _index = 0;
+    var _ignoreUnrecognized = ignoreUnrecognized;
+
+    var state = function(newState) {
+        if (!_rules.hasOwnProperty(newState)) {
+            throw new TokenJS.StateError("Missing state: '" + newState + "'.");
+        }
+        _currentState = newState;
+    };
+
+    state('root');
+
+    var getNextToken = function() {
+        if (_index >= _input.length) {
+            return TokenJS.EndOfStream;
+        }
+
+        var oldState = _currentState;
+
+        var allMatches = getAllMatches();
+
+        for (var i = 0; i < allMatches.length; i++) {
+            var bestMatch = allMatches[i];
+            if (typeof bestMatch.value === 'function') {
+                var returnValue = bestMatch.value.call(callbackContext, bestMatch.matchText);
+                if (returnValue === TokenJS.Ignore) {
+                    consume(bestMatch.matchText);
+                    return getNextToken();
+                } else if (hasValue(returnValue)) {
+                    consume(bestMatch.matchText);
+                    return {text: bestMatch.matchText, token: returnValue, index: bestMatch.index};
+                } else if (changedStateWithoutReturningToken(oldState)) {
+                    throwSyntaxError();
+                }
+            } else {
+                consume(bestMatch.matchText);
+                if (bestMatch.value === TokenJS.Ignore) {
+                    return getNextToken();
+                } else {
+                    return {text: bestMatch.matchText, token: bestMatch.value, index: bestMatch.index};
+                }
+            }
+        }
+
+        if (_ignoreUnrecognized) {
+            _index += 1;
+            return getNextToken();
+        } else {
+            throwSyntaxError();
+        }
+    };
+
+    var getAllMatches = function () {
+        var allMatches = [];
+
+        var currentRules = _rules[_currentState];
+        for (var i = 0; i < currentRules.length; i++) {
+            var regex = currentRules[i][0];
+
+            var match = regex.exec(_input.substring(_index));
+
+            if (match && match.index === 0) {
+                allMatches.push({matchText: match[0], value: currentRules[i][1], index: _index});
+            }
+        }
+        sortByLongestMatchDescending(allMatches);
+
+        return allMatches;
+    };
+
+    var sortByLongestMatchDescending = function(allMatches) {
+        allMatches.sort(function (a, b) {
+            if (a.matchText.length < b.matchText.length) {
+                return 1;
+            } else if (a.matchText.length > b.matchText.length) {
+                return -1;
+            }
+            return 0;
+        });
+    };
+
+    var changedStateWithoutReturningToken = function(oldState) {
+        return _currentState !== oldState;
+    };
+
+    var throwSyntaxError = function() {
+        throw new TokenJS.SyntaxError("Invalid character '" + _input[_index] + "' at index " + (_index + 1));
+    };
+
+    var consume = function(match) {
+        _index += match.length;
+    };
+
+    var reset = function() {
+        _index = 0;
+        _currentState = 'root';
+    };
+
+    var tokenize = function() {
+        reset();
+        var allTokens = [];
+        var token = getNextToken();
+        while (token !== TokenJS.EndOfStream) {
+            allTokens.push(token);
+            token = getNextToken();
+        }
+
+        return allTokens;
+    };
+
+    var hasValue = function(variable) {
+        return typeof variable !== 'undefined' && variable !== null;
+    };
+
+    var callbackContext = {
+        state: state
+    };
+
+    return {
+        getNextToken: getNextToken,
+        tokenize: tokenize,
+        state: state,
+        reset: reset
+    };
+};
+module.exports=DataBind;
+
+/***/ }),
+/* 16 */
 /***/ (function(module, exports) {
 
 
@@ -3284,7 +4073,7 @@ is.js may be freely distributed under the MIT Licence.
 
 
 /***/ }),
-/* 14 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!function(n,t){ true?!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(e){t(n.TinyAnimate=e)}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
@@ -3292,7 +4081,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!function(n,t){ 
 //# sourceMappingURL=TinyAnimate.js.map
 
 /***/ }),
-/* 15 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Patch IE9 and below
@@ -3316,11 +4105,11 @@ try {
  * Module Dependencies.
  */
 
-var Emitter = __webpack_require__(16);
-var query = __webpack_require__(17);
-var after = __webpack_require__(18);
-var has3d = __webpack_require__(22);
-var ease = __webpack_require__(24);
+var Emitter = __webpack_require__(19);
+var query = __webpack_require__(20);
+var after = __webpack_require__(21);
+var has3d = __webpack_require__(25);
+var ease = __webpack_require__(27);
 
 /**
  * CSS Translate
@@ -3896,7 +4685,7 @@ function fixUnits(val) {
 
 
 /***/ }),
-/* 16 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -4065,7 +4854,7 @@ Emitter.prototype.hasListeners = function(event){
 
 
 /***/ }),
-/* 17 */
+/* 20 */
 /***/ (function(module, exports) {
 
 function one(selector, el) {
@@ -4092,11 +4881,11 @@ exports.engine = function(obj){
 
 
 /***/ }),
-/* 18 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var hasTransitions = __webpack_require__(19);
-var emitter = __webpack_require__(20);
+var hasTransitions = __webpack_require__(22);
+var emitter = __webpack_require__(23);
 
 function afterTransition(el, callback) {
   if(hasTransitions(el)) {
@@ -4115,7 +4904,7 @@ afterTransition.once = function(el, callback) {
 module.exports = afterTransition;
 
 /***/ }),
-/* 19 */
+/* 22 */
 /***/ (function(module, exports) {
 
 /**
@@ -4168,14 +4957,14 @@ function hasTransitions(el){
 module.exports = hasTransitions;
 
 /***/ }),
-/* 20 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
  * Module Dependencies
  */
 
-var events = __webpack_require__(21);
+var events = __webpack_require__(24);
 
 // CSS events
 
@@ -4251,7 +5040,7 @@ CssEmitter.prototype.once = function(fn){
 
 
 /***/ }),
-/* 21 */
+/* 24 */
 /***/ (function(module, exports) {
 
 
@@ -4297,11 +5086,11 @@ exports.unbind = function(el, type, fn, capture){
 
 
 /***/ }),
-/* 22 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-var prop = __webpack_require__(23);
+var prop = __webpack_require__(26);
 
 // IE <=8 doesn't have `getComputedStyle`
 if (!prop || !window.getComputedStyle) {
@@ -4327,7 +5116,7 @@ if (!prop || !window.getComputedStyle) {
 
 
 /***/ }),
-/* 23 */
+/* 26 */
 /***/ (function(module, exports) {
 
 
@@ -4352,7 +5141,7 @@ for (var i = 0; i < styles.length; i++) {
 
 
 /***/ }),
-/* 24 */
+/* 27 */
 /***/ (function(module, exports) {
 
 
@@ -4394,7 +5183,7 @@ module.exports = {
 
 
 /***/ }),
-/* 25 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5199,7 +5988,7 @@ module.exports = {
 
 
 /***/ }),
-/* 26 */
+/* 29 */
 /***/ (function(module, exports) {
 
 

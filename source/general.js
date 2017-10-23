@@ -15,6 +15,7 @@
   GARANTÍAS DE COMERCIALIZACIÓN Y APTITUD PARA UN PROPÓSITO PARTICULAR.
 */
 require("./requestAnimationFrame.js");
+datab=require("./data-bind.lite.js");
 var is=require("./is.js");
 var TinyAnimate=require("./TinyAnimate.js");
 var move=require("move-js");
@@ -23,13 +24,12 @@ var watch = watchjs.watch;
 var unwatch = watchjs.unwatch;
 var callWatchers = watchjs.callWatchers;
 var hex_chr;
-var IDClass;
-var objGlobal;
 var cadena;
 var idreal;
 var objeto;
+var scopeg;
+var numapps=0;
 hex_chr="0123456789abcdef";
-IDClass=0;
 g=(function(){
 	function easeInOutQuad(t, b, c, d){
 	  t /= d / 2;
@@ -41,6 +41,47 @@ g=(function(){
 	    el.parentNode.insertBefore(wrapper, el);
 	    wrapper.appendChild(el);
 	};
+	function createScope(){
+		scopenom="generalapp";
+		g.dom("html").addAttrb("id","appdata"+numapps);
+		g.dom("html").addAttrb("name","appdata"+numapps);
+		g.dom("html").addAttrb("data-scope",scopenom);
+		var attrbdata=g.dom("html").getAttrb("data-scope");
+		glog("SCOPE ATTRB ");
+		glog(attrbdata[0]);
+		var model = new datab.Model(scopenom);
+		glog("databind******************");
+		glog("nombre del scope******************");
+		glog(model.scope + "********************");
+		glog("nombre del scope******************");
+		glog(model);
+		numapps++;
+	}
+	function prop(element,proper){
+		//busca dentro del objeto y devuelve solo la primera acepcion
+		var obj;
+		var val;
+		obj=getelTag(element);
+		if(is.isObject(obj)){
+		  	result=obj[0].getAttribute(proper);
+			return result;
+		}
+	}
+	function propAll(proper){
+		//busca dentro del objeto y devuelve solo la primera acepcion
+		var val='';
+		var array_tags=[];
+		var array_final=[];
+		var i=0;
+		array_tags=getelTag(proper);
+		glog(array_tags);
+		if(array_tags.length>0){
+			for(i=0;i<array_tags.length;i++){
+				array_final[i]=array_tags[i];
+			}
+			return array_final;
+		}
+	}
 	function getScreenCordinates(obj) {
         var p = {};
         p.x = obj.offsetLeft;
@@ -61,8 +102,8 @@ g=(function(){
 		console.log(msg);
 	};
 	function getdisctId(id){
-			var cadena;
-			if(typeof id==='string'){
+		var cadena;
+		if(typeof id==='string'){
 			cadena=id;
 	      	if(cadena.search("#")==0){
 	        	objeto=document.querySelector(id);
@@ -161,7 +202,6 @@ g=(function(){
 		    var intervalo=tiempo/80;
 		    var element;
 		    element=elem;
-		    glog("element");
 		    glog(element);
 		    element.style.display = 'block';
 		    var timer = setInterval(function(){
@@ -190,52 +230,23 @@ g=(function(){
 	 };
 	return{
 		//Describir funciones públicas
+		init: function(){
+			createScope();
+		},
 		getdisctId: function(id){
-			var cadena;
-			if(is.string(id)){
-				cadena=id;
-		      	if(cadena.search("#")==0){
-		        	objeto=document.querySelector(id);
-		      	}
-		      	else if(cadena.search(".")==0){
-					objeto=document.querySelector(id);
-				}
-				else{
-					return -1;
-				}
-				glog(objeto);
-				return objeto;
-			}
+			var objeto;
+			objeto=getdisctId(id);
+			return objeto;
 		},
 		getnameid: function(id){
-			var cadena;
-	          var idreal;
-	          var filareal;
-	          cadena=id;
-	          if(cadena.search("#")==0){
-	              idreal=id.replace("#","");
-	              idreal=idreal.replace(".","");
-	              filareal=idreal;
-	          }
-	          else if(cadena.search(".")==0){
-	              idreal=id.replace("#","");
-	              idreal=idreal.replace(".","");
-	              filareal=idreal;
-	          }
-	          else{
-	              return -1;
-	          }
-	          return  filareal;
+			var objeto;
+			objeto=getnameid(id);
+			return  objeto;
 		},
-		getelTag: function(tag){
+		getelTag: function(id){
 			var arrtags=[];
-			if(tag!=undefined){
-				arrtags=document.querySelectorAll(tag);
-				return arrtags;
-			}
-			else{
-				return -1;
-			}
+			arrtags=getelTag(id);
+			return  arrtags;
 		},
 		log: function(msg){
 			console.log(msg);
@@ -246,6 +257,12 @@ g=(function(){
 				array.map(callbackmap);
 			}
 	    },
+		propAll:function(prper){
+	      	//busca dentro del objeto y devuelve solo la primera acepcion
+			var obj;
+			obj=propAll(prper);
+			return obj;
+		},
 		create:function(domelement){
 			document.createElement(domelement);
 		},
@@ -261,12 +278,12 @@ g=(function(){
 			return btoa(string);
 	    },
 		docready: function(fn){
-		  if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading"){
-		    fn();
-		  }
-		  else{
-		    document.addEventListener('DOMContentLoaded', fn);
-		  }
+			if(document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading"){
+				fn();
+			}
+			else{
+		    	document.addEventListener('DOMContentLoaded', fn);
+		  	}
 		},
 		each:function(objeto,callbackeach){
 	      	var initial_array;
@@ -381,11 +398,9 @@ g=(function(){
 	      // bugfixed by: kirilloid
 	      //   example 1: utf8_encode('Kevin van Zonneveld');
 	      //   returns 1: 'Kevin van Zonneveld'
-	
 	      if (argString === null || typeof argString === 'undefined'){
 	        return '';
 	      }
-	
 	      var string = (argString + ''); // .replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 	      var utftext = '',
 	        start, end, stringl = 0;
@@ -512,11 +527,6 @@ g=(function(){
 	      URL="http://"+valselect;
 	      location.href=URL;
 	    },
-	    ajax: function(){
-	    	var sock;
-			sock=g.getxhr();
-			return sock;
-	    },
 		  parseHTML:function(str){
 			  var tmp = document.implementation.createHTMLDocument();
 			  tmp.body.innerHTML = str;
@@ -543,7 +553,7 @@ g=(function(){
 			          	domelement=getdisctId(domel);
 						domelement.style.display="block"; 
 					},
-				      css:function(estilo){
+					css:function(estilo){
 				        var domelement;
 				          if(!document.getElementById){
 				              return false;
@@ -553,8 +563,8 @@ g=(function(){
 				          }
 				          domelement=getdisctId(domel);
 				          domelement.style=estilo;
-				      },
-				      find:function(selector,callbackfind){
+					},
+					find:function(selector,callbackfind){
 						// Final found elements
 						var found_elements = [];
 						var i;
@@ -563,7 +573,7 @@ g=(function(){
 						for(i=0;i<outers.length;i++){
 							var elements_in_outer=outers[i].querySelectorAll(selector);
 							// document.querySelectorAll() returns an "array-like" collection of elements
-							// convert this "array-like" collection to an array
+						// convert this "array-like" collection to an array
 							elements_in_outer=Array.prototype.slice.call(elements_in_outer);
 							found_elements=found_elements.concat(elements_in_outer);
 						}
@@ -595,11 +605,12 @@ g=(function(){
 						wrap(objeto, g.create('div'));
 				      },
 				      prop:function(prper){
-				      	var obj;
-				      	var val;
-				      	obj=getdisctId(domel);
-				      	result=obj[0].getAttribute(prper);
-						return result;
+				      	//busca dentro del objeto y devuelve solo la primera acepcion
+						var obj;
+						obj=prop(domel,prper);
+						if(is.isObject(obj)){
+							return obj;
+						}
 				      },
 				      unwrap:function(docunw){
 				      	var objeto;
@@ -902,11 +913,10 @@ g=(function(){
 										children[i].style.top="0";
 						      		}
 						      	}
-						      	glog("---ELEMENTS INSIDE");
-						      	glog("---ELEMENTS INSIDE NUM " + numelems);
+						      	glog("---ELEMENTS INSIDE---");
+						      	glog("---NUM ELEMENTS" + numelems);
 						      	if(numelems>1){
 						      		domelems=getelTag(findelem);
-						      		glog(domelems);
 						      		domcycle=setInterval(fadingfunc,optfinal.interval);
 						      		function fadingfunc(){
 						      			intfadeOut(children[elemindex],optfinal.interval);
@@ -917,7 +927,7 @@ g=(function(){
 						      				elemindex++;
 						      			}
 						      			intfadeIn(children[elemindex],optfinal.interval);
-						      									      			glog("SLIDES");
+						      			glog("SLIDES");
 						      			glog("**************************");
 						      			glog("children " + elemindex);
 						      			glog(children[elemindex]);
@@ -1125,7 +1135,6 @@ g=(function(){
 			                var valor;
 			                var args;
 			                args=arguments;
-							glog(domel);
 			                if(args[0]==undefined){
 				                valor=valobj(domel);
 				                return valor;
@@ -1265,16 +1274,18 @@ g=(function(){
 				        	callbackfunc();
 				        }
 			      	},
-			      	bind:function(e){
+			      	bindData:function(e){
+
+			      	},
+			        on:function(e){
 						var control;
 						var idcontrol;
 						var event;
-						var callback;
+						var idcontrol;
 						idcontrol=domel;
 						event=arguments[0];
 						callback=arguments[1];;
 						control=getdisctId(idcontrol);
-						glog(control);
 			        	switch(event){
 			        		case 'error':
 			        			control.addEventListener('error',callback);
@@ -1338,77 +1349,6 @@ g=(function(){
 			        			break;
 			        		case 'keypress':
 								control.addEventListener('keypress',callback);
-			        			break;
-			        	}
-			      	},
-			        on:function(e){
-						var event;
-						var callback;
-						event=arguments[0];
-						callback=arguments[1];;
-			        	switch(event){
-			        		case 'error':
-			        			g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'load':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'submit':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'click':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'dblclick':
-								g.dom(domel).bind(event,callback);
-			        			break;
-							case 'mouseup':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'mousedown':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'mouseenter':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'mouseleave':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'mousemove':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'mouseover':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'mouseout':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'blur':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'change':
-								g.dom(domel).bind(event,callback);
-						        break;
-							case 'resize':
-								g.dom(domel).bind(event,callback);
-			        			break;
-							case 'unload':
-								g.dom(domel).bind(event,callback);
-			        			break;
-							case 'pageshow':
-								g.dom(domel).bind(event,callback);
-			        			break;
-							case 'popstate':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'keyup':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'keydown':
-								g.dom(domel).bind(event,callback);
-			        			break;
-			        		case 'keypress':
-								g.dom(domel).bind(event,callback);
 			        			break;
 			        	}
 			    	},
@@ -1477,20 +1417,11 @@ g=(function(){
 				}
 				return KeyCode;
 	        },
-	        blockNumber: function(e){
-	          //bloquear teclado a solo numeros
-	          teclap=g.getKey(e);
-	          teclan=String.fromCharCode(teclap);
-	          if(IsNumeric(teclan)==false){
-	            return "Solo está peritido escribir numeros";
-	          }
-	        },
 	        getChar: function(event){
 	        	var cadena;
 				//bloquear teclado a solo numeros
 				teclan=g.getKey(event);
 				cadena=String.fromCharCode(teclan);
-				glog("TECLA " + cadena);
 				return String.fromCharCode(teclan); 
 	        },
 	        blockChar: function(e){
@@ -1558,6 +1489,12 @@ g=(function(){
 				    var fileName=filectrl.files[0].name;
 				    var objres;
 				    objres={};
+					objres.__proto__={
+						data:'',
+						file:'',
+						status:'',
+						error:'',
+					};
 				    g.post(
 						{
 							data:btoa(result),
@@ -1574,12 +1511,12 @@ g=(function(){
 					);
 				};
 				reader.onerror=function(event){
-					g.log("Hubo un error de lectura de disco.");
+					glog("Hubo un error de lectura de disco.");
 				}
 			}
 			else{
 			    // browser doesn't supports File API
-			    g.log("browser doesn't supports File API");
+			    glog("browser doesn't supports File API");
 			}
 	      },
 	      post: function(){
@@ -1609,7 +1546,7 @@ g=(function(){
 	          arrayvar[i]=arguments[i];
 	        }
 			if(arguments.length<2){
-	      		g.log("Faltan Argumentos " + arguments.length);
+	      		glog("Faltan Argumentos " + arguments.length);
 	      	}
 	      	else{
 	      		// Obtener objeto AJAX;
@@ -1619,7 +1556,7 @@ g=(function(){
 	      		// Obtener objeto de variables;
 	      		variablesaux=JSON.stringify(arrayvar[0]);
 	      		variablesobj=JSON.parse(variablesaux);
-	      		g.log(variablesobj);
+	      		glog(variablesobj);
 	      		// Obtener string de protocolo
 	      		ajxProtocol="POST";
 	      		// Obtener string de dir archivo socket
@@ -1632,28 +1569,25 @@ g=(function(){
 						callback=arguments[2];
 					}
 					else{
-						g.log("El argumento Callback debe ser de tipo función");
+						glog("El argumento Callback debe ser de tipo función");
 					}
 	      		}
 	      		////////////////////////////////////////////////////
 	      		// EJECUTAR FUNCION Y CALLBACK//////////////////////
 		        sock.open(ajxProtocol,dirsocket,true);
 				function transferComplete(event){
-					glog("event***********************");
-					glog(event);
-					glog("event***********************");
 	                data=event.target.responseText;
-	                g.log("STATUS: " + event.target.readyState + " " + event.target.status + " " + event.target.statusText);
+	                glog("STATUS: " + event.target.readyState + " " + event.target.status + " " + event.target.statusText);
 	                if(callback!=undefined){
 	                	if(typeof callback==="function"){
 							callback(data);
 						}
 						else{
-							g.log("El parámetro Callback no es función o no existe!");
+							glog("El parámetro Callback no es función o no existe!");
 						}
 	                }
 	                else{
-						g.log("El parámetro Callback no existe!");
+						glog("El parámetro Callback no existe!");
 					}
 				}
 				
@@ -1692,7 +1626,7 @@ g=(function(){
 	          arrayvar[i]=arguments[i];
 	        }
 			if(arguments.length<2){
-	      		g.log("Faltan Argumentos " + arguments.length);
+	      		glog("Faltan Argumentos " + arguments.length);
 	      	}
 	      	else{
 	      		// Obtener objeto AJAX;
@@ -1709,28 +1643,25 @@ g=(function(){
 						callback=arguments[2];
 					}
 					else{
-						g.log("El argumento Callback debe ser de tipo función");
+						glog("El argumento Callback debe ser de tipo función");
 					}
 	      		}
 	      		////////////////////////////////////////////////////
 	      		// EJECUTAR FUNCION Y CALLBACK//////////////////////
 		        sock.open(ajxProtocol,dirsocket,true);
 		        function transferComplete(event){
-					glog("event***********************");
-					glog(event);
-					glog("event***********************");
 	                data=event.target.responseText;
-	                g.log("STATUS: " + event.target.readyState + " " + event.target.status + " " + event.target.statusText);
+	                glog("STATUS: " + event.target.readyState + " " + event.target.status + " " + event.target.statusText);
 	                if(callback!=undefined){
 	                	if(typeof callback==="function"){
 							callback(data);
 						}
 						else{
-							g.log("El parámetro Callback no es función o no existe!");
+							glog("El parámetro Callback no es función o no existe!");
 						}
 	                }
 	                else{
-						g.log("El parámetro Callback no existe!");
+						glog("El parámetro Callback no existe!");
 					}
 				}
 				
@@ -2166,4 +2097,32 @@ g.path.core.route.prototype = {
     }
 };
 
+g.__proto__.ajax=function(){
+	var sock;
+	sock=g.getxhr();
+	return sock;
+};
+g.__proto__.data=function(iddataset){
+  	var obj;
+  	var idfinal;
+  	obj=g.getelTag(iddataset);
+  	g.log(obj[0]);
+  	return{
+  		get:function(nomvar){
+  			var result;
+  			idfinal="data-" + nomvar;
+			result=g.dom(iddataset).prop(idfinal);
+			return result; 
+  		},
+  		set:function(nomvar,val){
+  			idfinal="data-" + nomvar;
+  			g.dom(iddataset).addAttrb(idfinal,val);
+  		},
+  		remove:function(nomvar){
+  			idfinal="data-" + nomvar;
+  			g.dom(iddataset).rmAttrb(idfinal);
+  		},
+	}
+}
+g.init();
 module.exports = g;

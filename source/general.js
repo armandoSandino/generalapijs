@@ -1418,14 +1418,10 @@ g=(function(){
 	        },
 	        getChar: function(event){
 	        	var cadena;
-				//bloquear teclado a solo numeros
-				teclan=g.getKey(event);
-				cadena=String.fromCharCode(teclan);
-<<<<<<< HEAD
-				return String.fromCharCode(teclan);
-=======
-				return String.fromCharCode(teclan);
->>>>>>> 735ab583b9914a85378eeaf103584be7bc6a10ea
+						//bloquear teclado a solo numeros
+						teclan=g.getKey(event);
+						cadena=String.fromCharCode(teclan);
+						return String.fromCharCode(cadena);
 	        },
 	        blockChar: function(e){
 	          //bloquear teclado a solo letras
@@ -2114,12 +2110,8 @@ g.__proto__.data=function(iddataset){
   		get:function(nomvar){
   			var result;
   			idfinal="data-" + nomvar;
-			result=g.dom(iddataset).prop(idfinal);
-<<<<<<< HEAD
-			return result;
-=======
-			return result;
->>>>>>> 735ab583b9914a85378eeaf103584be7bc6a10ea
+				result=g.dom(iddataset).prop(idfinal);
+				return result;
   		},
   		set:function(nomvar,val){
   			idfinal="data-" + nomvar;
@@ -2132,8 +2124,4 @@ g.__proto__.data=function(iddataset){
 	}
 }
 g.init();
-<<<<<<< HEAD
 module.exports = g;
-=======
-module.exports = g;
->>>>>>> 735ab583b9914a85378eeaf103584be7bc6a10ea

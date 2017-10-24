@@ -827,6 +827,7 @@ var watch = watchjs.watch;
 var unwatch = watchjs.unwatch;
 var callWatchers = watchjs.callWatchers;
 var hex_chr;
+var isreadybit=0;
 var cadena;
 var idreal;
 var objeto;
@@ -1085,7 +1086,7 @@ g=(function(){
 			}
 			else{
 		    	document.addEventListener('DOMContentLoaded', fn);
-		  	}
+			}
 		},
 		each:function(objeto,callbackeach){
 	      	var initial_array;
@@ -2924,6 +2925,14 @@ g.__proto__.data=function(iddataset){
   			idfinal="data-" + nomvar;
   			g.dom(iddataset).rmAttrb(idfinal);
   		},
+	}
+}
+g.__proto__.isReady=function(){
+	if(document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading"){
+		return 1;
+	}
+	else{
+		return 0;
 	}
 }
 g.init();

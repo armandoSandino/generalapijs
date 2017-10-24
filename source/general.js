@@ -74,10 +74,6 @@ g=(function(){
 		var array_final=[];
 		var i=0;
 		array_tags=getelTag(proper);
-<<<<<<< HEAD
-=======
-		glog(array_tags);
->>>>>>> 735ab583b9914a85378eeaf103584be7bc6a10ea
 		if(array_tags.length>0){
 			for(i=0;i<array_tags.length;i++){
 				array_final[i]=array_tags[i];
@@ -740,13 +736,13 @@ g=(function(){
 				      	var objeto;
 				      	var result;
 				      	var objeto=getdisctId(domel);
-					    var height=objeto.offsetHeight;
-					    var style=getComputedStyle(objeto);
+						    var height=objeto.offsetHeight;
+					    	var style=getComputedStyle(objeto);
 				      	const args = Array.from(arguments);
 				      	if(args[0]!=undefined){
 				      		if(args[0]==true){
-							  height+=parseInt(style.marginTop) + parseInt(style.marginBottom);
-							  return height;
+							  		height+=parseInt(style.marginTop) + parseInt(style.marginBottom);
+							  		return height;
 				      		}
 				      		else{
 				      			return objeto.offsetHeight;
@@ -878,8 +874,8 @@ g=(function(){
 							}
 						}
 					  },
-					  cycle:function(options){
-					  	var crusel;
+						cycle:function(options){
+							var crusel;
 					  	var optfinal;
 					  	var findelem;
 					  	var numelems=0;
@@ -1428,7 +1424,7 @@ g=(function(){
 <<<<<<< HEAD
 				return String.fromCharCode(teclan);
 =======
-				return String.fromCharCode(teclan); 
+				return String.fromCharCode(teclan);
 >>>>>>> 735ab583b9914a85378eeaf103584be7bc6a10ea
 	        },
 	        blockChar: function(e){
@@ -2122,7 +2118,7 @@ g.__proto__.data=function(iddataset){
 <<<<<<< HEAD
 			return result;
 =======
-			return result; 
+			return result;
 >>>>>>> 735ab583b9914a85378eeaf103584be7bc6a10ea
   		},
   		set:function(nomvar,val){

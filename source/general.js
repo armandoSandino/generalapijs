@@ -74,6 +74,10 @@ g=(function(){
 		var array_final=[];
 		var i=0;
 		array_tags=getelTag(proper);
+<<<<<<< HEAD
+=======
+		glog(array_tags);
+>>>>>>> 735ab583b9914a85378eeaf103584be7bc6a10ea
 		if(array_tags.length>0){
 			for(i=0;i<array_tags.length;i++){
 				array_final[i]=array_tags[i];
@@ -1421,7 +1425,11 @@ g=(function(){
 				//bloquear teclado a solo numeros
 				teclan=g.getKey(event);
 				cadena=String.fromCharCode(teclan);
+<<<<<<< HEAD
 				return String.fromCharCode(teclan);
+=======
+				return String.fromCharCode(teclan); 
+>>>>>>> 735ab583b9914a85378eeaf103584be7bc6a10ea
 	        },
 	        blockChar: function(e){
 	          //bloquear teclado a solo letras
@@ -2111,7 +2119,11 @@ g.__proto__.data=function(iddataset){
   			var result;
   			idfinal="data-" + nomvar;
 			result=g.dom(iddataset).prop(idfinal);
+<<<<<<< HEAD
 			return result;
+=======
+			return result; 
+>>>>>>> 735ab583b9914a85378eeaf103584be7bc6a10ea
   		},
   		set:function(nomvar,val){
   			idfinal="data-" + nomvar;
@@ -2124,4 +2136,8 @@ g.__proto__.data=function(iddataset){
 	}
 }
 g.init();
+<<<<<<< HEAD
 module.exports = g;
+=======
+module.exports = g;
+>>>>>>> 735ab583b9914a85378eeaf103584be7bc6a10ea

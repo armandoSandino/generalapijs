@@ -74,7 +74,6 @@ g=(function(){
 		var array_final=[];
 		var i=0;
 		array_tags=getelTag(proper);
-		glog(array_tags);
 		if(array_tags.length>0){
 			for(i=0;i<array_tags.length;i++){
 				array_final[i]=array_tags[i];
@@ -377,7 +376,7 @@ g=(function(){
 	            var tmpURL = window.location.href;
 	            var results = regex.exec( tmpURL );
 	            if(results==null){
-	                    return"";   
+	                    return"";
 	            }
 	            else{
 	                return results[1];
@@ -404,13 +403,13 @@ g=(function(){
 	      var string = (argString + ''); // .replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 	      var utftext = '',
 	        start, end, stringl = 0;
-	
+
 	      start = end = 0;
 	      stringl = string.length;
 	      for (var n = 0; n < stringl; n++){
 	        var c1 = string.charCodeAt(n);
 	        var enc = null;
-	
+
 	        if (c1 < 128){
 	          end++;
 	        } else if (c1 > 127 && c1 < 2048){
@@ -442,11 +441,11 @@ g=(function(){
 	          start = end = n + 1;
 	        }
 	      }
-	
+
 	      if (end > start){
 	        utftext += string.slice(start, stringl);
 	      }
-	
+
 	      return utftext;
 	    },
 	    utf8_decode: function(str_data){
@@ -462,7 +461,7 @@ g=(function(){
 	      // bugfixed by: kirilloid
 	      //   example 1: utf8_decode('Kevin van Zonneveld');
 	      //   returns 1: 'Kevin van Zonneveld'
-	
+
 	      var tmp_arr = [],
 	        i = 0,
 	        ac = 0,
@@ -470,9 +469,9 @@ g=(function(){
 	        c2 = 0,
 	        c3 = 0,
 	        c4 = 0;
-	
+
 	      str_data += '';
-	
+
 	      while (i < str_data.length){
 	        c1 = str_data.charCodeAt(i);
 	        if (c1 <= 191){
@@ -499,7 +498,7 @@ g=(function(){
 	          i += 4;
 	        }
 	      }
-	
+
 	      return tmp_arr.join('');
 	    },
 	    getURLComplete: function(){
@@ -551,7 +550,7 @@ g=(function(){
 							return false;
 						}
 			          	domelement=getdisctId(domel);
-						domelement.style.display="block"; 
+						domelement.style.display="block";
 					},
 					css:function(estilo){
 				        var domelement;
@@ -707,7 +706,7 @@ g=(function(){
 						  left: rect.left + document.body.scrollLeft
 						}
 						return{
-							
+
 						}
 				      },
 				      offsetParent:function(){
@@ -718,20 +717,20 @@ g=(function(){
 				      	objeto=getdisctId(domel);
 				      	result=objeto.offsetParent || objeto;
 						return{
-							
+
 						}
 				      },
 				      parent:function(){
 				      	var objeto;
 				      	objeto=getdisctId(domel);
-						return objeto.parentNode; 
+						return objeto.parentNode;
 				      },
 				      position:function(){
 				      	var objeto;
 				      	var result;
 				      	objeto=getdisctId(domel);
 				      	result={left: objeto.offsetLeft, top: objeto.offsetTop};
-						return result; 
+						return result;
 				      },
 				      outerHeight:function(){
 				      	var objeto;
@@ -753,7 +752,7 @@ g=(function(){
 				      		return objeto.offsetHeight;
 				      	}
 						return{
-							
+
 						}
 				      },
 					  outerWidth:function(){
@@ -776,7 +775,7 @@ g=(function(){
 				      		return objeto.offsetHeight;
 				      	}
 						return{
-							
+
 						}
 				      },
 				      tanimate: function(from, to, duration, update, easing, done){
@@ -797,61 +796,61 @@ g=(function(){
 									move(domel).x(x).end(callbackanim);
 								}
 								return{
-									
+
 								}
 							},
 							y:function(y){
 								move(domel).y(y).end(callbackanim);
 								return{
-									
+
 								}
 							},
 							add:function(attrib,value){
 								move(domel).add(attrib,value).end(callbackanim);
 								return{
-									
+
 								}
 							},
 							to:function(x,y){
 								move(domel).to(x,y).end(callbackanim);
 								return{
-									
+
 								}
 							},
 							rotate:function(deg){
 								move(domel).rotate(deg).end(callbackanim);
 								return{
-									
+
 								}
 							},
 							translate:function(x,y){
 								move(domel).translate(x,y).end(callbackanim);
 								return{
-									
+
 								}
 							},
 							scale:function(deg){
 								move(domel).scale(deg).end(callbackanim);
 								return{
-									
+
 								}
 							},
 							set:function(x,y){
 								move(domel).set(x,y).end(callbackanim);
 								return{
-									
+
 								}
 							},
 							duration:function(deg){
 								move(domel).duration(deg).end(callbackanim);
 								return{
-									
+
 								}
 							},
 							skew:function(x,y){
 								move(domel).skew(x,y).end(callbackanim);
 								return{
-									
+
 								}
 							},
 							then:function(){
@@ -980,7 +979,7 @@ g=(function(){
 				      	var childf;
 				      	obj=getdisctId(domel);
 						childf=obj.children;
-						return childf; 
+						return childf;
 				      },
 				      addClass:function(classele){
 				      	//write code below...
@@ -1033,7 +1032,7 @@ g=(function(){
 				      			for(i=0;i<obj.length;i++){
 				      				result[i]=obj[i].getAttribute(attr);
 				      			}
-				      			return result; 
+				      			return result;
 				      			break;
 				      		case 'class':
 				      			obj=getelTag(domel);
@@ -1219,7 +1218,7 @@ g=(function(){
 					    }
 					    function end(){
 					        window.scrollTo(0, start + distance);
-					
+
 					        if (typeof opt.callback==='function'){
 					        	opt.callback();
 					        }
@@ -1243,7 +1242,7 @@ g=(function(){
 					        	fila=getdisctId(domel);
 					        	fila.className="";
 					        	break;
-				        	
+
 				        }
 				    },
 					submit:function(callbackfunc){
@@ -1388,7 +1387,7 @@ g=(function(){
 					           }
 					        }
 					    }
-			
+
 					    xmlhttp.open("GET", modulourl, true);
 					    xmlhttp.send();
 				    },
@@ -1412,7 +1411,7 @@ g=(function(){
 						KeyCode=e.keyCode;
 					}
 					else{
-						KeyCode=e.charCode;	
+						KeyCode=e.charCode;
 					}
 				}
 				return KeyCode;
@@ -1422,7 +1421,7 @@ g=(function(){
 				//bloquear teclado a solo numeros
 				teclan=g.getKey(event);
 				cadena=String.fromCharCode(teclan);
-				return String.fromCharCode(teclan); 
+				return String.fromCharCode(teclan);
 	        },
 	        blockChar: function(e){
 	          //bloquear teclado a solo letras
@@ -1451,7 +1450,7 @@ g=(function(){
 			},
 			getLocal: function(varname){
 			    if (typeof(Storage)!=="undefined"){
-			        localStorage.getItem(varname); 
+			        localStorage.getItem(varname);
 			    }
 			},
 			type: function(objname){
@@ -1542,7 +1541,7 @@ g=(function(){
 	        variablesobj={};
 	        variablesaux={};
 	        //almacenar argumentos en el array 'arrayvar'
-	        for(i=0;i<arguments.length;i++){ 
+	        for(i=0;i<arguments.length;i++){
 	          arrayvar[i]=arguments[i];
 	        }
 			if(arguments.length<2){
@@ -1590,13 +1589,13 @@ g=(function(){
 						glog("El parámetro Callback no existe!");
 					}
 				}
-				
+
 				function transferFailed(event){
 					glog(event.target.error);
 				}
 	      		sock.setRequestHeader("Content-Type",headers);
 				sock.send(JSON.stringify(variablesobj));
-		        //////////////////////////////////////////////////// 
+		        ////////////////////////////////////////////////////
 			}
 	      },
 		  get: function(){
@@ -1622,7 +1621,7 @@ g=(function(){
 	        variablesobj={};
 	        variablesaux={};
 	        //almacenar argumentos en el array 'arrayvar'
-	        for(i=0;i<arguments.length;i++){ 
+	        for(i=0;i<arguments.length;i++){
 	          arrayvar[i]=arguments[i];
 	        }
 			if(arguments.length<2){
@@ -1664,12 +1663,12 @@ g=(function(){
 						glog("El parámetro Callback no existe!");
 					}
 				}
-				
+
 				function transferFailed(event){
 					glog(event.target.error);
 				}
 				sock.send(null);
-		        //////////////////////////////////////////////////// 
+		        ////////////////////////////////////////////////////
 			}
 	      },
 		webwork:function(nombre){
@@ -1706,7 +1705,7 @@ g=(function(){
 g.path=(function(){
 	//Submodulo g.path / Rewrite g.pathJS
 	function version(){
-		return "0.8.4"; 
+		return "0.8.4";
 	};
 	return{
 		//Write code below..
@@ -1749,7 +1748,7 @@ g.path=(function(){
 	        listen: function(fallback){
 	            g.path.history.supported = !!(window.history && window.history.pushState);
 	            g.path.history.fallback  = fallback;
-	
+
 	            if(g.path.history.supported){
 	                g.path.history.initial.popped = ('state' in window.history), g.path.history.initial.URL = location.href;
 	                window.onpopstate = g.path.history.popState;
@@ -1801,14 +1800,14 @@ g.path=(function(){
 	            g.path.routes.previous = g.path.routes.current;
 	            g.path.routes.current = passed_route;
 	            matched_route = g.path.match(passed_route, true);
-	
+
 	            if (g.path.routes.previous){
 	                previous_route = g.path.match(g.path.routes.previous);
 	                if (previous_route !== null && previous_route.do_exit !== null){
 	                    previous_route.do_exit();
 	                }
 	            }
-	
+
 	            if (matched_route !== null){
 	                matched_route.run();
 	                return true;
@@ -1821,13 +1820,13 @@ g.path=(function(){
 	    },
 	    listen:function(){
 	        var fn = function(){ g.path.dispatch(location.hash); }
-	
+
 	        if (location.hash === ""){
 	            if (g.path.routes.root !== null){
 	                location.hash = g.path.routes.root;
 	            }
 	        }
-	
+
 	        // The 'document.documentMode' checks below ensure that g.pathJS fires the right events
 	        // even in IE "Quirks Mode".
 	        if ("onhashchange" in window && (!document.documentMode || document.documentMode >= 8)){
@@ -1835,7 +1834,7 @@ g.path=(function(){
 	        } else {
 	            setInterval(fn, 50);
 	        }
-	
+
 	        if(location.hash !== ""){
 	            g.path.dispatch(location.hash);
 	        }
@@ -1883,7 +1882,7 @@ g.md5=(function(){
 		           } else {
 		                   return(lResult ^ lX8 ^ lY8);
 		           }
-		   };		
+		   };
 		   function F(x,y,z){ return(x & y) | ((~x) & z); }
 		   function G(x,y,z){ return(x & z) | (y & (~z)); }
 		   function H(x,y,z){ return(x ^ y ^ z); }
@@ -1892,7 +1891,7 @@ g.md5=(function(){
 		           a = AddUnsigned(a, AddUnsigned(AddUnsigned(F(b, c, d), x), ac));
 		           return AddUnsigned(RotateLeft(a, s), b);
 		   };
-		
+
 		   function GG(a,b,c,d,x,s,ac){
 		           a = AddUnsigned(a, AddUnsigned(AddUnsigned(G(b, c, d), x), ac));
 		           return AddUnsigned(RotateLeft(a, s), b);
@@ -1939,11 +1938,11 @@ g.md5=(function(){
 		   function Utf8Encode(string){
 		           string = string.replace(/\r\n/g,"\n");
 		           var utftext = "";
-		
+
 		           for (var n = 0; n < string.length; n++){
-		
+
 		                   var c = string.charCodeAt(n);
-		
+
 		                   if (c < 128){
 		                           utftext += String.fromCharCode(c);
 		                   }
@@ -1956,9 +1955,9 @@ g.md5=(function(){
 		                           utftext += String.fromCharCode(((c >> 6) & 63) | 128);
 		                           utftext += String.fromCharCode((c & 63) | 128);
 		                   }
-		
+
 		           }
-		
+
 		           return utftext;
 			};
 			return{
@@ -2112,7 +2111,7 @@ g.__proto__.data=function(iddataset){
   			var result;
   			idfinal="data-" + nomvar;
 			result=g.dom(iddataset).prop(idfinal);
-			return result; 
+			return result;
   		},
   		set:function(nomvar,val){
   			idfinal="data-" + nomvar;

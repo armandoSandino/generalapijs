@@ -833,6 +833,8 @@ var idreal;
 var objeto;
 var scopeg;
 var numapps=0;
+var workers={};
+var numworkers=0;
 hex_chr="0123456789abcdef";
 g=(function(){
 	function easeInOutQuad(t, b, c, d){
@@ -2475,24 +2477,42 @@ g=(function(){
 		        ////////////////////////////////////////////////////
 			}
 	      },
-		webwork:function(nombre){
+		webwork:function(nombreid){
 			//Submodulo WebWorkers
 			return{
+				set:function(filename){
+	        var workerSck;
+	        var workerName;
+					if(workerSck==undefined){
+						if(filename!=''){
+		            // Code Below.....
+								workers[numworkers]={'nombre':nombreid,'inst':(workerSck = new Worker(filename))};
+								numworkers++;
+						}
+					}
+					else{
+						glog("El WebWorker API no está soportado por el navegador.");
+					}
+				},
 				get:function(){
-			        var workerSck;
-			        var workerName;
-			        if(nombre!=''){
-						workerName=getdisctId(nombre);
-						if(typeof(Worker)!=="undefined"){
-				            // Some code.....
-				            workerSck = new Worker(workerName.id);
-				            return workerSck;
+					var retobject;
+					var objectfinal;
+					retobject={};
+					objectfinal={};
+					for(w in workers){
+						if(workers[w].inst!=undefined){
+							if(workers[w].nombre==nombreid){
+								retobject.worker=workers[w].inst;
+								retobject.id=workers[w].nombre;
+								break;
+							}
 						}
-						else{
-							// Sorry! No Web Worker support..
-							return -1;
-						}
-			        }
+					}
+					return retobject;
+				},
+				send:function(message){
+					var w=g.webwork(nombreid).get();
+					w.worker.postMessage(message);
 				}
 			}
 		},
@@ -2899,7 +2919,6 @@ g.path.core.route.prototype = {
         }
     }
 };
-
 g.__proto__.ajax=function(){
 	var sock;
 	sock=g.getxhr();
@@ -2909,17 +2928,21 @@ g.__proto__.data=function(iddataset){
   	var obj;
   	var idfinal;
   	obj=g.getelTag(iddataset);
-  	g.log(obj[0]);
   	return{
   		get:function(nomvar){
   			var result;
-  			idfinal="data-" + nomvar;
+				idfinal="data-" + nomvar;
 				result=g.dom(iddataset).prop(idfinal);
 				return result;
   		},
   		set:function(nomvar,val){
-  			idfinal="data-" + nomvar;
-  			g.dom(iddataset).addAttrb(idfinal,val);
+				if(obj.dataset==undefined){
+	  			idfinal="data-" + nomvar;
+	  			g.dom(iddataset).addAttrb(idfinal,val);
+				}
+				else{
+					Object.defineProperty(obj.dataset, nomvar, "data-variable");
+				}
   		},
   		remove:function(nomvar){
   			idfinal="data-" + nomvar;
@@ -2933,6 +2956,19 @@ g.__proto__.isReady=function(){
 	}
 	else{
 		return 0;
+	}
+}
+g.__proto__.isEmpty=function(string){
+	if(typeof string==='string'){
+		if(string.replace(/\s/g,"")==""){
+			return;
+		}
+		else{
+			return -2;
+		}
+	}
+	else{
+		return -1;
 	}
 }
 g.init();

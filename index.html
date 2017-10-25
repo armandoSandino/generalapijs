@@ -49,6 +49,7 @@
 				var bitvisible;
 				var cadena;
 				var elementos=[];
+				var webworker={};
 				h=[
 					{'nombre':'arturo'},
 					{'nombre':'pedro'},
@@ -169,6 +170,10 @@
 				g.log("*****Bit Verif isReady*****");
 				g.log(g.isReady());
 				g.log("*****Bit Verif isReady*****");
+				g.log("*****WebWorker 1*****");
+				g.webwork('worker1').set("./source/worker1.js");
+				g.webwork('worker1').send("Hola");
+				g.log("*****WebWorker 1*****");
 			});
 		</script>
 	</body>

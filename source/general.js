@@ -1707,6 +1707,32 @@ g=(function(){
 					}
 					return retobject;
 				},
+				terminate:function(){
+					var workeri;
+					for(w in workers){
+						if(workers[w].inst!=undefined){
+							if(workers[w].nombre==nombreid){
+								workeri=workers[w].inst;
+								break;
+							}
+						}
+					}
+					workeri.terminate();
+					return 0;
+				},
+				close:function(){
+					var workeri;
+					for(w in workers){
+						if(workers[w].inst!=undefined){
+							if(workers[w].nombre==nombreid){
+								workeri=workers[w].inst;
+								break;
+							}
+						}
+					}
+					workeri.close();
+					return 0;
+				},
 				send:function(message){
 					var w=g.webwork(nombreid).get();
 					w.worker.postMessage(message);

@@ -835,6 +835,8 @@ var scopeg;
 var numapps=0;
 var workers={};
 var numworkers=0;
+var sockets={};
+var numsockets=0;
 hex_chr="0123456789abcdef";
 g=(function(){
 	function easeInOutQuad(t, b, c, d){
@@ -2510,9 +2512,107 @@ g=(function(){
 					}
 					return retobject;
 				},
+				terminate:function(){
+					var workeri;
+					for(w in workers){
+						if(workers[w].inst!=undefined){
+							if(workers[w].nombre==nombreid){
+								workeri=workers[w].inst;
+								break;
+							}
+						}
+					}
+					workeri.terminate();
+					return 0;
+				},
+				close:function(){
+					var workeri;
+					for(w in workers){
+						if(workers[w].inst!=undefined){
+							if(workers[w].nombre==nombreid){
+								workeri=workers[w].inst;
+								break;
+							}
+						}
+					}
+					workeri.close();
+					return 0;
+				},
 				send:function(message){
 					var w=g.webwork(nombreid).get();
 					w.worker.postMessage(message);
+				}
+			}
+		},
+		websock:function(nombreid){
+			function printonerror(event){
+				glog("ERROR...");
+				glog(event);
+			};
+			function printonopen(event){
+				glog("Conexion abierta...");
+				glog(event);
+			};
+			function printonmsg(event){
+				glog("Enviando mensaje...");
+				glog(event.data);
+			};
+			//Submodulo WebSockets
+			return{
+				set:function(urldir){
+	        var socketUnt;
+	        var workerName;
+					if(socketUnt==undefined){
+						if(urldir!=''){
+		            // Code Below.....
+								socketUnt=new WebSocket(urldir);
+								socketUnt.addEventListener('error',printonerror);
+								socketUnt.addEventListener('open',printonopen);
+								socketUnt.addEventListener('message',printonmsg);
+								sockets[numsockets]={'nombre':nombreid,'inst':socketUnt};
+								numsockets++;
+						}
+					}
+					else{
+						glog("El WebSocket API no está soportado por el navegador.");
+					}
+				},
+				get:function(){
+					var retobject;
+					var objectfinal;
+					retobject={};
+					objectfinal={};
+					for(w in sockets){
+						if(sockets[w].inst!=undefined){
+							if(sockets[w].nombre==nombreid){
+								glog(sockets[w]);
+								retobject.socket=sockets[w].inst;
+								retobject.id=sockets[w].nombre;
+								break;
+							}
+						}
+					}
+					return retobject;
+				},
+				close:function(){
+					var socketi;
+					for(w in sockets){
+						if(sockets[w].inst!=undefined){
+							if(sockets[w].nombre==nombreid){
+								socketi=sockets[w].inst;
+								break;
+							}
+						}
+					}
+					socketi.close();
+					return 0;
+				},
+				send:function(message){
+					var w=g.websock(nombreid).get();
+					w.socket.send(message);
+					glog("************SOCKET RESPONSE*************");
+					glog(message);
+					glog("************SOCKET RESPONSE*************");
 				}
 			}
 		},

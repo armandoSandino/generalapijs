@@ -7,6 +7,9 @@
 		<input type="button" name="btnfile" id="btnfile" value="CARGAR" />
 		<input name="databind" id="databind" value="hola" />
 		<input name="dataresp" id="dataresp" value="" />
+		Mensaje a enviar mediante WebSocket
+		<input type="text" name="mensaje" id="mensaje" />
+		<input type="button" name="btnwebsock" id="btnwebsock" value="enviar mensaje" />
 		<div id="response" style="height: 1000px;opacity:0;">
 
 		</div>
@@ -156,6 +159,10 @@
 						//////////////////////////////////////////////////
 					});
 				});
+				g.dom("#btnwebsock").click(function(){
+					g.log("Mensaje a enviar " + g.dom("#mensaje").val());
+					g.websock('socket1').send(g.dom("#mensaje").val());
+				});
 				g.post(
 					{
 						varu:"arturo",
@@ -173,7 +180,10 @@
 				g.log("*****WebWorker 1*****");
 				g.webwork('worker1').set("./source/worker1.js");
 				g.webwork('worker1').send("Hola");
-				g.log("*****WebWorker 1*****");
+				g.log("*****WebSocket 1*****");
+				g.log("*****WebSocket 1*****");
+				g.websock('socket1').set("ws://localhost:5001");
+				g.log("*****WebSocket 1*****");
 			});
 		</script>
 	</body>

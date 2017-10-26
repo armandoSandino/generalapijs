@@ -1742,15 +1742,31 @@ g=(function(){
 			}
 		},
 		websock:function(nombreid){
-			//Submodulo WebWorkers
+			function printonerror(event){
+				glog("ERROR...");
+				glog(event);
+			};
+			function printonopen(event){
+				glog("Conexion abierta...");
+				glog(event);
+			};
+			function printonmsg(event){
+				glog("Enviando mensaje...");
+				glog(event.data);
+			};
+			//Submodulo WebSockets
 			return{
 				set:function(urldir){
 	        var socketUnt;
 	        var workerName;
 					if(socketUnt==undefined){
-						if(filename!=''){
+						if(urldir!=''){
 		            // Code Below.....
-								sockets[numsockets]={'nombre':nombreid,'inst':(socketUnt = new WebSockect(urldir))};
+								socketUnt=new WebSocket(urldir);
+								socketUnt.addEventListener('error',printonerror);
+								socketUnt.addEventListener('open',printonopen);
+								socketUnt.addEventListener('message',printonmsg);
+								sockets[numsockets]={'nombre':nombreid,'inst':socketUnt};
 								numsockets++;
 						}
 					}
@@ -1766,6 +1782,7 @@ g=(function(){
 					for(w in sockets){
 						if(sockets[w].inst!=undefined){
 							if(sockets[w].nombre==nombreid){
+								glog(sockets[w]);
 								retobject.socket=sockets[w].inst;
 								retobject.id=sockets[w].nombre;
 								break;
@@ -1790,6 +1807,9 @@ g=(function(){
 				send:function(message){
 					var w=g.websock(nombreid).get();
 					w.socket.send(message);
+					glog("************SOCKET RESPONSE*************");
+					glog(message);
+					glog("************SOCKET RESPONSE*************");
 				}
 			}
 		},

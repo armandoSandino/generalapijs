@@ -4,13 +4,16 @@
 	</head>
 	<body>
 		<input type="file" name="holaf" id="holaf" />
-		<input type="button" name="btnfile" id="btnfile" value="CARGAR" />
-		<input name="databind" id="databind" value="hola" />
-		<input name="dataresp" id="dataresp" value="" />
-		Mensaje a enviar mediante WebSocket
+		<input type="button" name="btnfile" id="btnfile" value="CARGAR" /><br>
+		<input name="databind" id="databind" value="hola" /><br>
+		<input name="dataresp" id="dataresp" value="" /><br>
+		Mensaje a enviar mediante WebSocket<br>
 		<input type="text" name="mensaje" id="mensaje" />
-		<input type="button" name="btnwebsock" id="btnwebsock" value="enviar mensaje" />
-		<div id="response" style="height: 1000px;opacity:0;">
+		<input type="button" name="btnwebsock" id="btnwebsock" value="enviar mensaje" /><br>
+		<div id="responsechat" style="height: 1000px;opacity:1;">
+
+		</div>
+		<div id="response" style="height: 1000px;opacity:1;">
 
 		</div>
 		<a href="#adiosp">Ir a AdiosP</a>
@@ -68,7 +71,7 @@
 				//buscar sin ID pero sabiendo la etiqueta
 				g.log(g.dom("html").prop("data-scope"));
 				//buscar con ID, sabiendo el atributo
-				g.log(g.data("#appdata0").get("scope"));
+				g.log(g.ds("#appdata0").get("scope"));
 				//buscar solo el atributo
 				elementos=g.propAll(".abc");
 				g.log("**************ELEMENTOS************");
@@ -161,7 +164,9 @@
 				});
 				g.dom("#btnwebsock").click(function(){
 					g.log("Mensaje a enviar " + g.dom("#mensaje").val());
-					g.websock('socket1').send(g.dom("#mensaje").val());
+					g.websock('socket1').reply(g.dom("#mensaje").val(),function(){
+						g.dom("#responsechat").append(g.dom("#mensaje").val());
+					});
 				});
 				g.post(
 					{

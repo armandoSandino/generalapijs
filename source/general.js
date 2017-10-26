@@ -946,31 +946,33 @@ g=(function(){
 						      	glog("---ELEMENTS INSIDE");
 					  		}
 					  	}
-						return;
+								return;
 				      },
 				      after:function(htmlstr){
 				      	//write code below...
 				      	var obj;
 				      	obj=getdisctId(domel);
-						obj.insertAdjacentHTML('afterend', htmlstr);
+								obj.insertAdjacentHTML('afterend', htmlstr);
 				      },
 				      before:function(htmlstr){
 				      	//write code below...
 				      	var obj;
 				      	obj=getdisctId(domel);
-						obj.insertAdjacentHTML('beforebegin', htmlstr);
+								obj.insertAdjacentHTML('beforebegin', htmlstr);
 				      },
-				      append:function(elem){
+				      append:function(html){
 				      	//write code below...
 				      	var obj;
-				      	obj=getdisctId(domel);
-						parent.insertBefore(elem, obj.firstChild);
+				      	var elChild = document.createElement('div');
+								obj=getdisctId(domel);
+								elChild.innerHTML=html;
+								obj.appendChild(elChild);
 				      },
 				      prepend:function(html){
 				      	//write code below...
 				      	var obj;
 				      	obj=getdisctId(domel);
-						obj.insertAdjacentHTML('afterend', html);
+								obj.insertAdjacentHTML('afterend', html);
 				      },
 				      clone:function(){
 				      	//write code below...
@@ -1748,7 +1750,6 @@ g=(function(){
 			};
 			function printonopen(event){
 				glog("Conexion abierta...");
-				glog(event.data);
 			};
 			function printonmsg(event){
 				glog("Enviando mensaje...");
@@ -1803,6 +1804,11 @@ g=(function(){
 					}
 					socketi.close();
 					return 0;
+				},
+				reply:function(message,callbackmsg){
+					var w=g.websock(nombreid).get();
+					w.socket.addEventListener('message',callbackmsg);
+					callbackmsg();
 				},
 				send:function(message){
 					var w=g.websock(nombreid).get();
@@ -2221,7 +2227,7 @@ g.__proto__.ajax=function(){
 	sock=g.getxhr();
 	return sock;
 };
-g.__proto__.data=function(iddataset){
+g.__proto__.ds=function(iddataset){
   	var obj;
   	var idfinal;
   	obj=g.getelTag(iddataset);

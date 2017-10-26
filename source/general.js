@@ -1744,11 +1744,11 @@ g=(function(){
 		websock:function(nombreid){
 			function printonerror(event){
 				glog("ERROR...");
-				glog(event);
+				glog(event.data);
 			};
 			function printonopen(event){
 				glog("Conexion abierta...");
-				glog(event);
+				glog(event.data);
 			};
 			function printonmsg(event){
 				glog("Enviando mensaje...");

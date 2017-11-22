@@ -127,6 +127,18 @@
 					// interval:"1500",
 					// infinite:true
 				// });
+				// g.dom("#homeelements").cycle({
+					// search:"div",
+					// fx:"slideLeft",
+					// interval:"1500",
+					// infinite:true
+				// });
+				// g.dom("#homeelements").cycle({
+					// search:"div",
+					// fx:"slideRight",
+					// interval:"1500",
+					// infinite:true
+				// });
 				g.dom("#holap").cursor('pointer');
 				g.dom("#holap").fadeIn(5000);
 				g.dom("#holap").click(function(){
@@ -155,8 +167,11 @@
 						//tratar variable para convertir string en JSON
 						//Imprimir variable///////////////////////////////
 						g.log("*******************data.file*******************");
+						g.log("DATA");
 						g.log(data);
+						g.log("DATA FILE NAME");
 						g.log(data.file);
+						g.log("DATA FILE STATUS");
 						g.log(data.status);
 						g.log("*******************data.file*******************");
 						//////////////////////////////////////////////////
@@ -179,16 +194,16 @@
 						g.log(data);
 					}
 				);
-				g.log("*****Bit Verif isReady*****");
-				g.log(g.isReady());
-				g.log("*****Bit Verif isReady*****");
-				g.log("*****WebWorker 1*****");
-				g.webwork('worker1').set("./source/worker1.js");
-				g.webwork('worker1').send("Hola");
-				g.log("*****WebSocket 1*****");
-				g.log("*****WebSocket 1*****");
-				g.websock('socket1').set("ws://localhost:5001");
-				g.log("*****WebSocket 1*****");
+				// g.log("*****Bit Verif isReady*****");
+				// g.log(g.isReady());
+				// g.log("*****Bit Verif isReady*****");
+				// g.log("*****WebWorker 1*****");
+				// g.webwork('worker1').set("./source/worker1.js");
+				// g.webwork('worker1').send("Hola");
+				// g.log("*****WebSocket 1*****");
+				// g.log("*****WebSocket 1*****");
+				// g.websock('socket1').set("ws://localhost:5001");
+				// g.log("*****WebSocket 1*****");
 			});
 		</script>
 	</body>

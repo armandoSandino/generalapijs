@@ -61,7 +61,7 @@ g=(function(){
 		glog("nombre del scope******************");
 		glog(model);
 		numapps++;
-	}
+	};
 	function prop(element,proper){
 		//busca dentro del objeto y devuelve solo la primera acepcion
 		var obj;
@@ -71,7 +71,7 @@ g=(function(){
 		  	result=obj[0].getAttribute(proper);
 			return result;
 		}
-	}
+	};
 	function propAll(proper){
 		//busca dentro del objeto y devuelve solo la primera acepcion
 		var val='';
@@ -85,7 +85,7 @@ g=(function(){
 			}
 			return array_final;
 		}
-	}
+	};
 	function getScreenCordinates(obj) {
         var p = {};
         p.x = obj.offsetLeft;
@@ -197,10 +197,10 @@ g=(function(){
 			obj.value=value;
         }
         return 0;
-   };
-    function version(){
-    	return "0.0.1";
-    };
+	};
+	function version(){
+		return "0.0.1";
+  };
 	function intfadeIn(elem,tiempo){
 			var op = 0.1;  // initial opacity
 		    var intervalo=tiempo/80;
@@ -1485,8 +1485,8 @@ g=(function(){
 	      	var resp;
 	      	objnombrefile={};
 	      	//Validación si hay los elementos para realizar la carga asíncrona de archivos
-	      	if(window.File && window.FileList && window.Blob && window.FileReader && window.FormData){
-			    reader=new FileReader();
+	     if(window.File && window.FileList && window.Blob && window.FileReader && window.FormData){
+				reader=new FileReader();
 				filectrl=getdisctId(fileid); //Files[0] = 1st file
 				file=filectrl.files[0];
 				reader.readAsBinaryString(file);
@@ -1495,12 +1495,12 @@ g=(function(){
 				    var fileName=filectrl.files[0].name;
 				    var objres;
 				    objres={};
-					objres.__proto__={
-						data:'',
-						file:'',
-						status:'',
-						error:'',
-					};
+						objres.__proto__={
+							data:'',
+							file:'',
+							status:'',
+							error:'',
+						};
 				    g.post(
 						{
 							data:btoa(result),
@@ -1517,8 +1517,8 @@ g=(function(){
 					);
 				};
 				reader.onerror=function(event){
-					glog("Hubo un error de lectura de disco.");
-				}
+					glog("Hubo un error de lectura de disco." + event.target.error);
+				};
 			}
 			else{
 			    // browser doesn't supports File API
